@@ -96,6 +96,8 @@ func _make_pads() -> void:
 			add_child(pad)
 			_pads[key] = pad
 			var area := Area3D.new()
+			area.collision_layer = 2        # pads own a layer so clicks prefer them
+			area.collision_mask = 0
 			var col := CollisionShape3D.new()
 			var sb := BoxShape3D.new()
 			sb.size = Vector3(0.155, 0.02, 0.2)

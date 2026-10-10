@@ -140,7 +140,7 @@ func hand_play(card: Node3D, dest: Vector3, dest_rot: Vector3) -> void:
 	_busy = true
 	set_curl(0.7)
 	card.global_position = global_position + Vector3(0, -0.01, -0.06)
-	card.rotation = Vector3(0, 0, 0)
+	# keep the card's concealed rotation for the carry — no face leak
 	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "global_position",
 		dest + Vector3(0, 0.05, 0.03), 0.5)

@@ -261,27 +261,37 @@ func _process(delta: float) -> void:
 		if _shot_frames == 0:
 			_save_shot()
 
-func _ray_hit() -> Dictionary:
+func _ray_hit(mask := 3) -> Dictionary:
 	var mp := get_viewport().get_mouse_position()
 	var from := _cam.project_ray_origin(mp)
 	var to := from + _cam.project_ray_normal(mp) * 6.0
 	var q := PhysicsRayQueryParameters3D.create(from, to)
 	q.collide_with_areas = true
+	q.collision_mask = mask
 	return get_world_3d().direct_space_state.intersect_ray(q)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
-		var hit := _ray_hit()
-		var col = hit.get("collider") if not hit.is_empty() else null
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			_battle.click(col)
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			_battle.right_click(col)
-	elif event is InputEventKey and event.pressed and not event.echo:
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_SPACE:
 			_battle.end_turn()
 		elif event.keycode == KEY_R:
 			_battle.restart()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		var col
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			# pads live on layer 2 and are checked first so card bodies
+			# can't swallow clicks aimed at a lane pad
+			var pad_hit := _ray_hit(2)
+			if not pad_hit.is_empty():
+				col = pad_hit.get("collider")
+			else:
+				col = _ray_hit(1).get("collider")
+			_battle.click(col)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			col = _ray_hit(1).get("collider")
+			_battle.right_click(col)
 
 func _save_shot() -> void:
 	await RenderingServer.frame_post_draw
