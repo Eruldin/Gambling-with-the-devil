@@ -1,0 +1,13 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgid "GAME_TITLE"
+msgstr "GAMBLING WITH THE DEVIL"
+
+msgid "BLINDS_LBL"
+msgstr "Blinds"
+
+msgid "HINT_CARD"
+msgstr "Hover a card to inspect"

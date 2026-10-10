@@ -1,0 +1,364 @@
+extends Node3D
+## Gambling with the Devil — prototype: candlelit 3D table scene.
+## Assembles the felt board, candles, props, cards and pawns from scanned assets.
+
+const PH := "res://assets_external/env-table/polyhaven/"
+const PAWN := "res://assets_external/pawn-models/polyhaven/"
+const PART := "res://assets_external/anim-vfx/kenney/particle-pack/PNG (Transparent)/"
+const CARDS := "res://assets_external/card-art/kenney/boardgame-pack/PNG/Cards/"
+const FONT_CINZEL := "res://assets_external/ui-fonts/Cinzel/Cinzel_0.ttf"
+
+const CandleFlame := preload("res://scripts/candle_flame.gd")
+const Sway := preload("res://scripts/sway.gd")
+const GameCard := preload("res://scripts/game_card.gd")
+
+var _cam: Camera3D
+var _t := 0.0
+var _cards: Array = []
+var _area_to_card := {}
+var _hovered = null
+var _shot_frames := -1
+
+# ---------------------------------------------------------------- assembly
+
+func _ready() -> void:
+	_environment()
+	_room()
+	var table := _place(PH + "WoodenTable_02/WoodenTable_02_1k.gltf", "table", Vector3.ZERO, 0.56)
+	var top := _world_aabb(table).end.y
+	_felt(top)
+	_floor_props()
+	_table_props(top)
+	_candles(top)
+	_chandelier(top)
+	_board(top)
+	_pawns(top)
+	_hand_and_enemy_cards(top)
+	_chip_stacks(top)
+	_camera(top)
+	_hud()
+	if OS.get_environment("GWD_SHOT") == "1":
+		_shot_frames = 150
+
+func _environment() -> void:
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.008, 0.004, 0.003)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.11, 0.07, 0.05)
+	env.ambient_light_energy = 0.6
+	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	var we := WorldEnvironment.new()
+	we.environment = env
+	add_child(we)
+
+func _room() -> void:
+	var floor_mi := MeshInstance3D.new()
+	var fp := PlaneMesh.new()
+	fp.size = Vector2(9, 9)
+	floor_mi.mesh = fp
+	var fm := StandardMaterial3D.new()
+	fm.albedo_color = Color(0.05, 0.032, 0.024)
+	fm.roughness = 1.0
+	floor_mi.material_override = fm
+	add_child(floor_mi)
+
+	var wall := MeshInstance3D.new()
+	var wp := PlaneMesh.new()
+	wp.size = Vector2(9, 4)
+	wall.mesh = wp
+	wall.position = Vector3(0, 2, -1.9)
+	var wm := StandardMaterial3D.new()
+	wm.albedo_color = Color(0.035, 0.022, 0.02)
+	wm.roughness = 1.0
+	wall.material_override = wm
+	add_child(wall)
+
+func _felt(top: float) -> void:
+	var felt := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.95, 0.012, 0.5)
+	felt.mesh = bm
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.045, 0.075, 0.05)
+	m.roughness = 0.95
+	felt.material_override = m
+	felt.position = Vector3(0, top + 0.006, 0)
+	add_child(felt)
+
+func _floor_props() -> void:
+	_place(PH + "ArmChair_01/ArmChair_01_1k.gltf", "chair_player", Vector3(0, 0, 1.05), 0.85, PI)
+	_place(PH + "ArmChair_01/ArmChair_01_1k.gltf", "chair_devil", Vector3(0, 0, -1.15), 0.85)
+	_place(PH + "wooden_bookshelf_worn/wooden_bookshelf_worn_1k.gltf", "shelf", Vector3(-1.05, 0, -0.85), 1.55, 0.35)
+	_place(PH + "GothicCabinet_01/GothicCabinet_01_1k.gltf", "cabinet", Vector3(0.95, 0, -0.9), 1.35, -0.3)
+	_place(PH + "gothic_statue/gothic_statue_1k.gltf", "statue", Vector3(-1.25, 0, -1.0), 1.0, 0.45)
+	_place(PH + "vintage_grandfather_clock_01/vintage_grandfather_clock_01_1k.gltf", "clock", Vector3(0.72, 0, -1.25), 1.55)
+	_place(PH + "treasure_chest/treasure_chest_1k.gltf", "chest", Vector3(0.82, 0, 0.72), 0.32, -0.6)
+	_place(PH + "wooden_crate_01/wooden_crate_01_1k.gltf", "crate", Vector3(-0.88, 0, 0.45), 0.36, 0.3)
+	_place(PH + "wooden_lantern_01/wooden_lantern_01_1k.gltf", "lantern", Vector3(0.98, 0, 0.4), 0.28)
+
+func _table_props(top: float) -> void:
+	_place(PH + "book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf", "books", Vector3(0.52, top, -0.12), 0.09, 0.35)
+	_place(PH + "jug_01/jug_01_1k.gltf", "jug", Vector3(-0.55, top, -0.1), 0.14)
+	_place(PH + "wooden_bowl_01/wooden_bowl_01_1k.gltf", "bowl", Vector3(-0.5, top, 0.15), 0.07)
+	_place(PH + "wine_bottles_01/wine_bottles_01_1k.gltf", "bottles", Vector3(0.6, top, 0.1), 0.16)
+	_place(PH + "ornate_medieval_dagger/ornate_medieval_dagger_1k.gltf", "dagger", Vector3(-0.18, top, -0.33), 0.05, 0.9)
+
+func _flame_frames() -> Array[Texture2D]:
+	var out: Array[Texture2D] = []
+	for i in range(1, 7):
+		out.append(load(PART + "flame_0%d.png" % i))
+	return out
+
+func _candles(top: float) -> void:
+	var frames := _flame_frames()
+	var smoke: Texture2D = load(PART + "smoke_03.png")
+	var spots := [
+		Vector3(-0.42, top, -0.2), Vector3(0.42, top, -0.2), Vector3(-0.3, top, 0.32),
+		Vector3(0.28, top, 0.3),
+	]
+	var i := 0
+	for pos in spots:
+		var model := "wooden_candlestick/wooden_candlestick_1k.gltf" if i == 3 \
+			else "brass_candleholders/brass_candleholders_1k.gltf"
+		var holder := _place(PH + model,
+			"candle%d" % i, pos, 0.13)
+		var htop := _world_aabb(holder).end.y
+		var flame := CandleFlame.new()
+		flame.position = Vector3(pos.x, htop + 0.002, pos.z)
+		add_child(flame)
+		flame.setup(frames, smoke, i * 3.7)
+		i += 1
+	# one shadow-casting hero light
+	var hero := OmniLight3D.new()
+	hero.position = Vector3(0, top + 0.42, -0.05)
+	hero.light_color = Color(1.0, 0.62, 0.3)
+	hero.light_energy = 0.7
+	hero.omni_range = 2.2
+	hero.omni_attenuation = 1.5
+	hero.shadow_enabled = true
+	add_child(hero)
+
+func _chandelier(top: float) -> void:
+	var ch := _place(PH + "lantern_chandelier_01/lantern_chandelier_01_1k.gltf",
+		"chandelier", Vector3(0, top + 0.85, -0.05), 0.4)
+	var sw := Sway.new()
+	sw.amplitude = 0.03
+	sw.speed = 0.06
+	ch.add_child(sw)
+	var glow := OmniLight3D.new()
+	glow.position = Vector3(0, top + 1.0, -0.05)
+	glow.light_color = Color(1.0, 0.6, 0.28)
+	glow.light_energy = 0.55
+	glow.omni_range = 1.6
+	add_child(glow)
+
+func _board(top: float) -> void:
+	# two rows of five lane pads on the felt
+	var pad_mat := StandardMaterial3D.new()
+	pad_mat.albedo_color = Color(0.075, 0.12, 0.08)
+	pad_mat.roughness = 0.9
+	var pad_mat2 := StandardMaterial3D.new()
+	pad_mat2.albedo_color = Color(0.09, 0.1, 0.09)
+	pad_mat2.roughness = 0.9
+	for side in 2:
+		for lane in range(5):
+			var pad := MeshInstance3D.new()
+			var bm := BoxMesh.new()
+			bm.size = Vector3(0.155, 0.003, 0.2)
+			pad.mesh = bm
+			pad.material_override = pad_mat if side == 0 else pad_mat2
+			pad.position = Vector3(-0.33 + lane * 0.165, top + 0.014,
+				-0.115 + side * 0.23)
+			add_child(pad)
+
+func _pawn_piece(node_name: String, pos: Vector3, target_h: float) -> void:
+	var set_inst: Node3D = load(PAWN + "chess_set/chess_set_1k.gltf").instantiate()
+	var piece: Node3D = set_inst.find_child(node_name, true, false)
+	if piece == null:
+		push_warning("pawn piece not found: " + node_name)
+		return
+	piece = piece.duplicate()
+	piece.transform = Transform3D(Basis(), Vector3.ZERO)
+	set_inst.free()
+	_place_node(piece, node_name + "_inst", pos, target_h, randf() * TAU)
+
+func _pawns(top: float) -> void:
+	var y := top + 0.016
+	_pawn_piece("piece_pawn_black_01", Vector3(-0.165, y, -0.115), 0.075)
+	_pawn_piece("piece_knight_black_01", Vector3(0.165, y, -0.115), 0.08)
+	_pawn_piece("piece_king_black", Vector3(0, y, -0.115), 0.095)
+	_pawn_piece("piece_pawn_white_01", Vector3(-0.082, y, 0.115), 0.075)
+	_pawn_piece("piece_bishop_white_01", Vector3(0.082, y, 0.115), 0.08)
+
+func _chip_stack(pos: Vector3, chips: int, tint: Color) -> void:
+	for i in range(chips):
+		var c := MeshInstance3D.new()
+		var cy := CylinderMesh.new()
+		cy.top_radius = 0.024
+		cy.bottom_radius = 0.024
+		cy.height = 0.0038
+		cy.radial_segments = 32
+		c.mesh = cy
+		var m := StandardMaterial3D.new()
+		m.albedo_color = tint
+		m.roughness = 0.35
+		m.metallic = 0.35
+		c.material_override = m
+		c.position = pos + Vector3(0, i * 0.004, 0)
+		add_child(c)
+
+func _chip_stacks(top: float) -> void:
+	_chip_stack(Vector3(-0.38, top + 0.014, 0.22), 7, Color(0.25, 0.05, 0.05))
+	_chip_stack(Vector3(0.34, top + 0.014, -0.24), 4, Color(0.08, 0.08, 0.09))
+
+func _deal(card: Node3D, to_pos: Vector3, to_rot: Vector3, delay: float) -> void:
+	card.position = Vector3(0.44, to_pos.y + 0.001, -0.14)  # deck spot
+	card.rotation = Vector3(PI, 0, 0)
+	card.scale = Vector3.ONE
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(delay)
+	tw.tween_property(card, "position", to_pos, 0.45)
+	tw.parallel().tween_property(card, "rotation", to_rot, 0.45)
+	card.set_base(to_pos, to_rot)
+
+func _hand_and_enemy_cards(top: float) -> void:
+	var y := top + 0.016
+	var back: Texture2D = load(CARDS + "cardBack_red4.png")
+	var faces := ["cardClubs5.png", "cardHearts8.png", "cardSpadesA.png",
+		"cardDiamondsK.png", "cardClubsJ.png"]
+	# player hand: 5 cards fanned at front edge, tilted toward camera
+	for i in range(5):
+		var card := GameCard.new()
+		add_child(card)
+		card.setup(load(CARDS + faces[i]), back)
+		var x := -0.14 + i * 0.07
+		var pos := Vector3(x, y + 0.12, 0.42)
+		var rot := Vector3(1.12, 0, (i - 2) * -0.07)
+		_area_to_card[card.get_area()] = card
+		card.set_idle_phase(i * 1.3)
+		_cards.append(card)
+		_deal(card, pos, rot, 0.35 + i * 0.16)
+	# enemy: 2 face-down cards on its row
+	for i in range(2):
+		var card := GameCard.new()
+		add_child(card)
+		card.setup(back, back)
+		var pos := Vector3(-0.05 + i * 0.1, y + 0.002, -0.115)
+		var rot := Vector3(PI, 0, 0)
+		_cards.append(card)
+		_deal(card, pos, rot, 0.5 + i * 0.2)
+
+func _camera(top: float) -> void:
+	_cam = Camera3D.new()
+	_cam.fov = 50.0
+	add_child(_cam)
+	_cam.position = Vector3(0, top + 0.56, 0.86)
+	_cam.look_at(Vector3(0, top - 0.14, -0.1), Vector3.UP)
+	# dim warm fill from the player's side so card faces and felt read
+	var fill := SpotLight3D.new()
+	fill.position = Vector3(0, top + 0.75, 1.15)
+	add_child(fill)
+	fill.look_at(Vector3(0, top, -0.05), Vector3.UP)
+	fill.light_color = Color(1.0, 0.68, 0.4)
+	fill.light_energy = 0.55
+	fill.spot_angle = 42.0
+	fill.spot_attenuation = 1.4
+	fill.shadow_enabled = true
+
+func _hud() -> void:
+	var layer := CanvasLayer.new()
+	add_child(layer)
+	var font: Font = load(FONT_CINZEL)
+	var title := Label.new()
+	title.text = tr("GAME_TITLE") + "   ·   " + tr("BLINDS_LBL") + " 1 / 2 / 3 / 5 / 8 / 13"
+	title.add_theme_font_override("font", font)
+	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_color_override("font_color", Color(0.78, 0.42, 0.22))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 18
+	layer.add_child(title)
+	var hint := Label.new()
+	hint.text = tr("HINT_CARD")
+	hint.add_theme_font_size_override("font_size", 15)
+	hint.add_theme_color_override("font_color", Color(0.5, 0.4, 0.3))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.offset_top = -34
+	layer.add_child(hint)
+
+# ---------------------------------------------------------------- runtime
+
+func _process(delta: float) -> void:
+	_t += delta
+	# camera slow sway
+	_cam.position.x = 0.06 * sin(_t * 0.11)
+	_cam.position.y += (1.1 + 0.02 * sin(_t * 0.23) - _cam.position.y) * delta
+	_cam.look_at(Vector3(0, 0.45, -0.1), Vector3.UP)
+	_update_hover()
+	if _shot_frames >= 0:
+		_shot_frames -= 1
+		if _shot_frames == 0:
+			_save_shot()
+
+func _update_hover() -> void:
+	if _area_to_card.is_empty():
+		return
+	var vp := get_viewport()
+	var mp := vp.get_mouse_position()
+	var from := _cam.project_ray_origin(mp)
+	var to := from + _cam.project_ray_normal(mp) * 6.0
+	var q := PhysicsRayQueryParameters3D.create(from, to)
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	var card = _area_to_card.get(hit.get("collider")) if not hit.is_empty() else null
+	if card != _hovered:
+		if _hovered != null:
+			_hovered.set_hovered(false)
+		_hovered = card
+		if _hovered != null:
+			_hovered.set_hovered(true)
+
+func _save_shot() -> void:
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	var path := "C:/Users/Administrator/gwd_shot.png"
+	var err := img.save_png(path)
+	print("[probe] saved ", path, " err=", err)
+	get_tree().quit()
+
+# ---------------------------------------------------------------- helpers
+
+func _world_aabb(n: Node) -> AABB:
+	var out := AABB()
+	var first := true
+	var stack: Array = [n]
+	while not stack.is_empty():
+		var c: Node = stack.pop_back()
+		if c is MeshInstance3D:
+			var a: AABB = c.global_transform * c.get_aabb()
+			out = a if first else out.merge(a)
+			first = false
+		for ch in c.get_children():
+			stack.push_back(ch)
+	return out
+
+func _place(scene_path: String, node_name: String, pos: Vector3,
+		target_h: float, rot_y := 0.0) -> Node3D:
+	var inst: Node3D = load(scene_path).instantiate()
+	return _place_node(inst, node_name, pos, target_h, rot_y)
+
+func _place_node(inst: Node3D, node_name: String, pos: Vector3,
+		target_h: float, rot_y: float) -> Node3D:
+	var wrap := Node3D.new()
+	wrap.name = node_name
+	wrap.position = pos
+	wrap.rotation.y = rot_y
+	add_child(wrap)
+	wrap.add_child(inst)
+	var ab := _world_aabb(inst)
+	var s: float = target_h / maxf(ab.size.y, 0.0001)
+	inst.scale = Vector3.ONE * s
+	var c := (ab.position + ab.end) * 0.5
+	inst.position = Vector3(-c.x * s, -ab.position.y * s, -c.z * s)
+	return wrap

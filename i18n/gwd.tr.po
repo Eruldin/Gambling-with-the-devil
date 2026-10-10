@@ -1,0 +1,13 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: tr\n"
+
+msgid "GAME_TITLE"
+msgstr "ŞEYTAN'LA KUMAR"
+
+msgid "BLINDS_LBL"
+msgstr "Perdeler"
+
+msgid "HINT_CARD"
+msgstr "İncelemek için kartın üzerine gel"
