@@ -40,3 +40,6 @@ Assets are referenced in place from `assets_external/` (glTF loads natively; God
 - Card faces → ViewportTexture pipeline (localized text + foil shader)
 - Pawn archetype set → swap to occult silhouettes; dissolve-on-sacrifice shader
 - Renderer: flip to `forward_plus` on target hardware for bloom/SSAO
+
+## Battle slice (proto/battle-loop)
+Round loop per the design doc: both sides ante the current Blind (1/2/3/5/8/13 chips), then place cards **concealed** (face-down) on their lane row; SPACE / REVEAL flips everything, cards stand as units, and each lane strikes the lane opposite — unit-vs-unit damage first, chip damage on open lanes. Blood (2/round) gates placement cost; right-clicking a hand card sacrifices it for `sacrifice_value` blood. Scripts: `battle.gd` (state machine, enemy AI, HUD), `card_def.gd` (card anatomy + 10-card starter deck), `game_card.gd` (select/glow, place/reveal/lunge/flash/die/burn). `GWD_AUTO=1` auto-plays a scripted round for headless probes.

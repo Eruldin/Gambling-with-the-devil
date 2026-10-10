@@ -5,19 +5,18 @@ extends Node3D
 const PH := "res://assets_external/env-table/polyhaven/"
 const PAWN := "res://assets_external/pawn-models/polyhaven/"
 const PART := "res://assets_external/anim-vfx/kenney/particle-pack/PNG (Transparent)/"
-const CARDS := "res://assets_external/card-art/kenney/boardgame-pack/PNG/Cards/"
 const FONT_CINZEL := "res://assets_external/ui-fonts/Cinzel/Cinzel_0.ttf"
 
 const CandleFlame := preload("res://scripts/candle_flame.gd")
 const Sway := preload("res://scripts/sway.gd")
-const GameCard := preload("res://scripts/game_card.gd")
+const Battle := preload("res://scripts/battle.gd")
 
 var _cam: Camera3D
 var _t := 0.0
-var _cards: Array = []
-var _area_to_card := {}
-var _hovered = null
 var _shot_frames := -1
+var _battle: Node3D
+var _hud_layer: CanvasLayer
+var _hud_font: Font
 
 # ---------------------------------------------------------------- assembly
 
@@ -31,14 +30,14 @@ func _ready() -> void:
 	_table_props(top)
 	_candles(top)
 	_chandelier(top)
-	_board(top)
-	_pawns(top)
-	_hand_and_enemy_cards(top)
 	_chip_stacks(top)
 	_camera(top)
 	_hud()
+	_battle = Battle.new()
+	add_child(_battle)
+	_battle.setup(top, _cam, _hud_layer, _hud_font)
 	if OS.get_environment("GWD_SHOT") == "1":
-		_shot_frames = 150
+		_shot_frames = 800 if OS.get_environment("GWD_AUTO") == "1" else 150
 
 func _environment() -> void:
 	var env := Environment.new()
@@ -153,44 +152,6 @@ func _chandelier(top: float) -> void:
 	glow.omni_range = 1.6
 	add_child(glow)
 
-func _board(top: float) -> void:
-	# two rows of five lane pads on the felt
-	var pad_mat := StandardMaterial3D.new()
-	pad_mat.albedo_color = Color(0.075, 0.12, 0.08)
-	pad_mat.roughness = 0.9
-	var pad_mat2 := StandardMaterial3D.new()
-	pad_mat2.albedo_color = Color(0.09, 0.1, 0.09)
-	pad_mat2.roughness = 0.9
-	for side in 2:
-		for lane in range(5):
-			var pad := MeshInstance3D.new()
-			var bm := BoxMesh.new()
-			bm.size = Vector3(0.155, 0.003, 0.2)
-			pad.mesh = bm
-			pad.material_override = pad_mat if side == 0 else pad_mat2
-			pad.position = Vector3(-0.33 + lane * 0.165, top + 0.014,
-				-0.115 + side * 0.23)
-			add_child(pad)
-
-func _pawn_piece(node_name: String, pos: Vector3, target_h: float) -> void:
-	var set_inst: Node3D = load(PAWN + "chess_set/chess_set_1k.gltf").instantiate()
-	var piece: Node3D = set_inst.find_child(node_name, true, false)
-	if piece == null:
-		push_warning("pawn piece not found: " + node_name)
-		return
-	piece = piece.duplicate()
-	piece.transform = Transform3D(Basis(), Vector3.ZERO)
-	set_inst.free()
-	_place_node(piece, node_name + "_inst", pos, target_h, randf() * TAU)
-
-func _pawns(top: float) -> void:
-	var y := top + 0.016
-	_pawn_piece("piece_pawn_black_01", Vector3(-0.165, y, -0.115), 0.075)
-	_pawn_piece("piece_knight_black_01", Vector3(0.165, y, -0.115), 0.08)
-	_pawn_piece("piece_king_black", Vector3(0, y, -0.115), 0.095)
-	_pawn_piece("piece_pawn_white_01", Vector3(-0.082, y, 0.115), 0.075)
-	_pawn_piece("piece_bishop_white_01", Vector3(0.082, y, 0.115), 0.08)
-
 func _chip_stack(pos: Vector3, chips: int, tint: Color) -> void:
 	for i in range(chips):
 		var c := MeshInstance3D.new()
@@ -212,43 +173,6 @@ func _chip_stacks(top: float) -> void:
 	_chip_stack(Vector3(-0.38, top + 0.014, 0.22), 7, Color(0.25, 0.05, 0.05))
 	_chip_stack(Vector3(0.34, top + 0.014, -0.24), 4, Color(0.08, 0.08, 0.09))
 
-func _deal(card: Node3D, to_pos: Vector3, to_rot: Vector3, delay: float) -> void:
-	card.position = Vector3(0.44, to_pos.y + 0.001, -0.14)  # deck spot
-	card.rotation = Vector3(PI, 0, 0)
-	card.scale = Vector3.ONE
-	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(delay)
-	tw.tween_property(card, "position", to_pos, 0.45)
-	tw.parallel().tween_property(card, "rotation", to_rot, 0.45)
-	card.set_base(to_pos, to_rot)
-
-func _hand_and_enemy_cards(top: float) -> void:
-	var y := top + 0.016
-	var back: Texture2D = load(CARDS + "cardBack_red4.png")
-	var faces := ["cardClubs5.png", "cardHearts8.png", "cardSpadesA.png",
-		"cardDiamondsK.png", "cardClubsJ.png"]
-	# player hand: 5 cards fanned at front edge, tilted toward camera
-	for i in range(5):
-		var card := GameCard.new()
-		add_child(card)
-		card.setup(load(CARDS + faces[i]), back)
-		var x := -0.14 + i * 0.07
-		var pos := Vector3(x, y + 0.12, 0.42)
-		var rot := Vector3(1.12, 0, (i - 2) * -0.07)
-		_area_to_card[card.get_area()] = card
-		card.set_idle_phase(i * 1.3)
-		_cards.append(card)
-		_deal(card, pos, rot, 0.35 + i * 0.16)
-	# enemy: 2 face-down cards on its row
-	for i in range(2):
-		var card := GameCard.new()
-		add_child(card)
-		card.setup(back, back)
-		var pos := Vector3(-0.05 + i * 0.1, y + 0.002, -0.115)
-		var rot := Vector3(PI, 0, 0)
-		_cards.append(card)
-		_deal(card, pos, rot, 0.5 + i * 0.2)
-
 func _camera(top: float) -> void:
 	_cam = Camera3D.new()
 	_cam.fov = 50.0
@@ -267,26 +191,18 @@ func _camera(top: float) -> void:
 	fill.shadow_enabled = true
 
 func _hud() -> void:
-	var layer := CanvasLayer.new()
-	add_child(layer)
-	var font: Font = load(FONT_CINZEL)
+	_hud_layer = CanvasLayer.new()
+	add_child(_hud_layer)
+	_hud_font = load(FONT_CINZEL)
 	var title := Label.new()
 	title.text = tr("GAME_TITLE") + "   ·   " + tr("BLINDS_LBL") + " 1 / 2 / 3 / 5 / 8 / 13"
-	title.add_theme_font_override("font", font)
+	title.add_theme_font_override("font", _hud_font)
 	title.add_theme_font_size_override("font_size", 26)
 	title.add_theme_color_override("font_color", Color(0.78, 0.42, 0.22))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	title.offset_top = 18
-	layer.add_child(title)
-	var hint := Label.new()
-	hint.text = tr("HINT_CARD")
-	hint.add_theme_font_size_override("font_size", 15)
-	hint.add_theme_color_override("font_color", Color(0.5, 0.4, 0.3))
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	hint.offset_top = -34
-	layer.add_child(hint)
+	_hud_layer.add_child(title)
 
 # ---------------------------------------------------------------- runtime
 
@@ -296,29 +212,33 @@ func _process(delta: float) -> void:
 	_cam.position.x = 0.06 * sin(_t * 0.11)
 	_cam.position.y += (1.1 + 0.02 * sin(_t * 0.23) - _cam.position.y) * delta
 	_cam.look_at(Vector3(0, 0.45, -0.1), Vector3.UP)
-	_update_hover()
+	_battle.hover_target(_ray_hit().get("collider"))
 	if _shot_frames >= 0:
 		_shot_frames -= 1
 		if _shot_frames == 0:
 			_save_shot()
 
-func _update_hover() -> void:
-	if _area_to_card.is_empty():
-		return
-	var vp := get_viewport()
-	var mp := vp.get_mouse_position()
+func _ray_hit() -> Dictionary:
+	var mp := get_viewport().get_mouse_position()
 	var from := _cam.project_ray_origin(mp)
 	var to := from + _cam.project_ray_normal(mp) * 6.0
 	var q := PhysicsRayQueryParameters3D.create(from, to)
 	q.collide_with_areas = true
-	var hit := get_world_3d().direct_space_state.intersect_ray(q)
-	var card = _area_to_card.get(hit.get("collider")) if not hit.is_empty() else null
-	if card != _hovered:
-		if _hovered != null:
-			_hovered.set_hovered(false)
-		_hovered = card
-		if _hovered != null:
-			_hovered.set_hovered(true)
+	return get_world_3d().direct_space_state.intersect_ray(q)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		var hit := _ray_hit()
+		var col = hit.get("collider") if not hit.is_empty() else null
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_battle.click(col)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			_battle.right_click(col)
+	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_SPACE:
+			_battle.end_turn()
+		elif event.keycode == KEY_R:
+			_battle.restart()
 
 func _save_shot() -> void:
 	await RenderingServer.frame_post_draw
