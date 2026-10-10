@@ -40,3 +40,6 @@ Asetler `assets_external/` içinden doğrudan referanslanıyor (glTF yerel yükl
 - Kart yüzleri → ViewportTexture hattı (yerelleşmiş metin + foil shader)
 - Piyon arketip seti → okült siluetler; kurban-dissolve shader
 - Render: hedef donanımda bloom/SSAO için `forward_plus`'a geçiş
+
+## Savaş dilimi (proto/battle-loop)
+Tasarım döngüsü: iki taraf da Perde öder (1/2/3/5/8/13 çip), kartları **gizli** (kapalı) şeritlerine koyar; SPACE / AÇ hepsini çevirir, kartlar birim gibi dikilir ve her şerit karşısındakine vurur — önce birime, boş şeritte çipe hasar. Kan (tur başı 2) yerleştirme bedelidir; sağ tık kartı `kurban değeri` kadar kan için feda eder. Dosyalar: `battle.gd` (durum makinesi, düşman AI, HUD), `card_def.gd` (kart anatomisi + 10 kartlık başlangıç destesi), `game_card.gd` (seçim/parlama, yerleştirme/açma/hamle/flaş/ölüm/yanma). `GWD_AUTO=1` headless doğrulama için bir tur oynatır.

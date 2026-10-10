@@ -11,3 +11,85 @@ msgstr "Blinds"
 
 msgid "HINT_CARD"
 msgstr "Hover a card to inspect"
+
+msgid "ROUND"
+msgstr "Round"
+
+msgid "BLIND"
+msgstr "Blind"
+
+msgid "BLOOD"
+msgstr "blood"
+
+msgid "CARDS_LEFT"
+msgstr "deck"
+
+msgid "CHIPS_YOU"
+msgstr "YOU"
+
+msgid "CHIPS_DEVIL"
+msgstr "DEVIL"
+
+msgid "HINT_PLACE"
+msgstr "Place cards concealed on your row — right-click sacrifices for blood — SPACE reveals"
+
+msgid "HINT_PAD"
+msgstr "Pick a lane pad on your row"
+
+msgid "HINT_NOBLOOD"
+msgstr "Not enough blood — sacrifice a card (right-click)"
+
+msgid "HINT_PLACE_MORE"
+msgstr "Place more or press SPACE to reveal"
+
+msgid "SACRIFICED"
+msgstr "Sacrificed:"
+
+msgid "PHASE_RESOLVING"
+msgstr "The table decides..."
+
+msgid "BTN_REVEAL"
+msgstr "REVEAL ▸"
+
+msgid "GAME_OVER"
+msgstr "The hand is played"
+
+msgid "YOU_WIN"
+msgstr "YOU OWN THE TABLE"
+
+msgid "DEVIL_WINS"
+msgstr "THE DEVIL COLLECTS"
+
+msgid "RESTART"
+msgstr "(R — deal again)"
+
+# --- cards ---------------------------------------------------------------
+msgid "CARD_CUTPURSE"
+msgstr "Cutpurse"
+
+msgid "CARD_DUELIST"
+msgstr "Duelist"
+
+msgid "CARD_REAPER"
+msgstr "Reaper"
+
+msgid "CARD_WARDEN"
+msgstr "Warden"
+
+msgid "CARD_VOTARY"
+msgstr "Votary"
+
+msgid "CARD_MARTYR"
+msgstr "Martyr"
+
+msgid "CARD_ACOLYTE"
+msgstr "Acolyte"
+
+msgid "CARD_USURER"
+msgstr "Usurer"
+
+msgid "CARD_SPY"
+msgstr "Spy"
+
+msgid "CARD_SEER"
+msgstr "Seer"

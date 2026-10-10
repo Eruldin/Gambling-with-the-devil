@@ -11,3 +11,85 @@ msgstr "Perdeler"
 
 msgid "HINT_CARD"
 msgstr "İncelemek için kartın üzerine gel"
+
+msgid "ROUND"
+msgstr "Tur"
+
+msgid "BLIND"
+msgstr "Perde"
+
+msgid "BLOOD"
+msgstr "kan"
+
+msgid "CARDS_LEFT"
+msgstr "deste"
+
+msgid "CHIPS_YOU"
+msgstr "SEN"
+
+msgid "CHIPS_DEVIL"
+msgstr "ŞEYTAN"
+
+msgid "HINT_PLACE"
+msgstr "Kartları sıraya gizli koy — sağ tık kan için kurban eder — SPACE açar"
+
+msgid "HINT_PAD"
+msgstr "Kendi sıradan bir şerit seç"
+
+msgid "HINT_NOBLOOD"
+msgstr "Kan yetmez — kart kurban et (sağ tık)"
+
+msgid "HINT_PLACE_MORE"
+msgstr "Devam et ya da SPACE ile aç"
+
+msgid "SACRIFICED"
+msgstr "Kurban:"
+
+msgid "PHASE_RESOLVING"
+msgstr "Masa karar veriyor..."
+
+msgid "BTN_REVEAL"
+msgstr "AÇ ▸"
+
+msgid "GAME_OVER"
+msgstr "El oynandı"
+
+msgid "YOU_WIN"
+msgstr "MASA SENİN"
+
+msgid "DEVIL_WINS"
+msgstr "ŞEYTAN ALIR"
+
+msgid "RESTART"
+msgstr "(R — yeniden dağıt)"
+
+# --- kartlar -------------------------------------------------------------
+msgid "CARD_CUTPURSE"
+msgstr "Yankesici"
+
+msgid "CARD_DUELIST"
+msgstr "Düellocu"
+
+msgid "CARD_REAPER"
+msgstr "Azrail"
+
+msgid "CARD_WARDEN"
+msgstr "Muhafız"
+
+msgid "CARD_VOTARY"
+msgstr "Adaklı"
+
+msgid "CARD_MARTYR"
+msgstr "Şehit"
+
+msgid "CARD_ACOLYTE"
+msgstr "Yardımcı"
+
+msgid "CARD_USURER"
+msgstr "Tefeci"
+
+msgid "CARD_SPY"
+msgstr "Casus"
+
+msgid "CARD_SEER"
+msgstr "Kahin"
