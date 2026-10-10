@@ -115,7 +115,7 @@ func _make_hud() -> void:
 	_l_tool.offset_top = -60
 	_l_tool.offset_bottom = -36
 	_l_hint = _mk_label(Vector2(0, 0), 15, Color(0.5, 0.4, 0.3))
-	_l_hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	_l_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_l_hint.offset_top = -34
 	_l_hint.offset_bottom = -10
 	_l_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -192,6 +192,9 @@ func _reflow_hand() -> void:
 func hover_target(collider) -> void:
 	var card = _area_to_card.get(collider)
 	var pad = _pad_areas.get(collider)
+	if _phase != Phase.PLACE:
+		card = null
+		pad = null
 	if card != _hovered_card:
 		if _hovered_card != null:
 			_hovered_card.set_hovered(false)
@@ -372,8 +375,7 @@ func _check_over() -> bool:
 	return true
 
 func restart() -> void:
-	if _phase == Phase.OVER:
-		get_tree().reload_current_scene()
+	get_tree().reload_current_scene()
 
 # ---------------------------------------------------------------- hud bits
 
