@@ -310,6 +310,7 @@ func _update_hover() -> void:
 	var from := _cam.project_ray_origin(mp)
 	var to := from + _cam.project_ray_normal(mp) * 6.0
 	var q := PhysicsRayQueryParameters3D.create(from, to)
+	q.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	var card = _area_to_card.get(hit.get("collider")) if not hit.is_empty() else null
 	if card != _hovered:
@@ -356,9 +357,24 @@ func _place_node(inst: Node3D, node_name: String, pos: Vector3,
 	wrap.rotation.y = rot_y
 	add_child(wrap)
 	wrap.add_child(inst)
-	var ab := _world_aabb(inst)
+	var ab := _local_aabb(inst)
 	var s: float = target_h / maxf(ab.size.y, 0.0001)
 	inst.scale = Vector3.ONE * s
 	var c := (ab.position + ab.end) * 0.5
 	inst.position = Vector3(-c.x * s, -ab.position.y * s, -c.z * s)
 	return wrap
+
+func _local_aabb(root: Node3D) -> AABB:
+	var inv := root.global_transform.affine_inverse()
+	var out := AABB()
+	var first := true
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var c: Node = stack.pop_back()
+		if c is MeshInstance3D:
+			var a: AABB = (inv * c.global_transform) * c.get_aabb()
+			out = a if first else out.merge(a)
+			first = false
+		for ch in c.get_children():
+			stack.push_back(ch)
+	return out
