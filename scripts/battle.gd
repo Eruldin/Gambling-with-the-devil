@@ -46,14 +46,19 @@ var _l_hint: Label
 var _l_tool: Label
 var _l_over: Label
 var _font: Font
+var _devil = null
+var _phand = null
 
 # ---------------------------------------------------------------- setup
 
-func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font) -> void:
+func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
+		devil = null, phand = null) -> void:
 	_top = top
 	_cam = cam
 	_layer = layer
 	_font = font
+	_devil = devil
+	_phand = phand
 	_back_tex = load(CARDS_DIR + "cardBack_red4.png")
 	_autoplay = OS.get_environment("GWD_AUTO") == "1"
 	_make_pads()
@@ -256,7 +261,16 @@ func _try_place(lane: int) -> void:
 	card.lane = lane
 	card.hp = card.def.health
 	_board_p[lane] = card
-	card.place_on_pad(_pads["p" + str(lane)].position, false)
+	var dest: Vector3 = _pads["p" + str(lane)].position + Vector3(0, 0.002, 0)
+	var rot := Vector3(PI, 0, PI * randf() * 0.06)
+	card.placed = true
+	card.set_face_down(true)
+	if _phand != null and not _autoplay:
+		card.set_base(dest, rot)
+		await _phand.pick_and_place(card, dest, rot)
+		card.scale = Vector3.ONE * 0.72
+	else:
+		card.place_on_pad(_pads["p" + str(lane)].position, false)
 	_reflow_hand()
 	_update_chips()
 	_hint(tr("HINT_PLACE_MORE"))
@@ -267,7 +281,11 @@ func _sacrifice_card(card) -> void:
 	if card == _selected:
 		_select(null)
 	_blood += card.def.sacrifice_value
-	card.burn()
+	if _phand != null and not _autoplay:
+		var away := Vector3(0.55, _top - 0.35, 0.75)
+		await _phand.grab_and_pull(card, away, card.burn)
+	else:
+		card.burn()
 	_reflow_hand()
 	_update_chips()
 	_hint("%s +%d %s" % [tr("SACRIFICED"), card.def.sacrifice_value, tr("BLOOD")])
@@ -279,7 +297,7 @@ func end_turn() -> void:
 		return
 	_phase = Phase.BUSY
 	_select(null)
-	_enemy_place()
+	await _enemy_place()
 	_l_phase.text = tr("PHASE_RESOLVING")
 	_hint("")
 	_run_resolution()
@@ -306,7 +324,16 @@ func _enemy_place() -> void:
 		card.hp = d.health
 		_board_e[lane] = card
 		_area_to_card[card.get_area()] = card
-		card.place_on_pad(_pads["e" + str(lane)].position, true)
+		var dest: Vector3 = _pads["e" + str(lane)].position + Vector3(0, 0.002, 0)
+		var rot := Vector3(PI, 0, PI * randf() * 0.06)
+		if _devil != null and not _autoplay:
+			card.placed = true
+			card.set_face_down(true)
+			card.scale = Vector3.ONE * 0.72
+			card.set_base(dest, rot)
+			await _devil.play_card(card, dest, rot)
+		else:
+			card.place_on_pad(_pads["e" + str(lane)].position, true)
 
 func _run_resolution() -> void:
 	await get_tree().create_timer(0.5).timeout
@@ -332,6 +359,8 @@ func _run_resolution() -> void:
 			else:
 				_chips_devil -= p.def.attack
 				_pulse(_l_chips)
+				if _devil != null:
+					_devil.eyes_flare(0.7)
 			await get_tree().create_timer(0.42).timeout
 		if e != null and not e.face_down and e.def != null and e.hp > 0 \
 			and e.def.attack > 0:
@@ -342,6 +371,8 @@ func _run_resolution() -> void:
 			else:
 				_chips_you -= e.def.attack
 				_pulse(_l_chips)
+				if _devil != null:
+					_devil.lean_in(0.3)
 			await get_tree().create_timer(0.42).timeout
 	_update_chips()
 	await get_tree().create_timer(0.4).timeout
@@ -369,6 +400,12 @@ func _check_over() -> bool:
 		return false
 	_phase = Phase.OVER
 	var won := _chips_devil <= 0 and _chips_you > 0
+	if _devil != null:
+		if won:
+			_devil.eyes_flare(0.3)
+		else:
+			_devil.eyes_flare(2.0)
+			_devil.lean_in(0.55, 0.9)
 	_l_over.text = tr("YOU_WIN") if won else tr("DEVIL_WINS")
 	_l_over.text += "\n" + tr("RESTART")
 	_l_phase.text = tr("GAME_OVER")
@@ -414,6 +451,6 @@ func _autoplay_run() -> void:
 
 func end_turn_autoplay() -> void:
 	_phase = Phase.BUSY
-	_enemy_place()
+	await _enemy_place()
 	_l_phase.text = tr("PHASE_RESOLVING")
 	_run_resolution()
