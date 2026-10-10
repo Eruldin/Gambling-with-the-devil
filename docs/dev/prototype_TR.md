@@ -43,3 +43,8 @@ Asetler `assets_external/` içinden doğrudan referanslanıyor (glTF yerel yükl
 
 ## Savaş dilimi (proto/battle-loop)
 Tasarım döngüsü: iki taraf da Perde öder (1/2/3/5/8/13 çip), kartları **gizli** (kapalı) şeritlerine koyar; SPACE / AÇ hepsini çevirir, kartlar birim gibi dikilir ve her şerit karşısındakine vurur — önce birime, boş şeritte çipe hasar. Kan (tur başı 2) yerleştirme bedelidir; sağ tık kartı `kurban değeri` kadar kan için feda eder. Dosyalar: `battle.gd` (durum makinesi, düşman AI, HUD), `card_def.gd` (kart anatomisi + 10 kartlık başlangıç destesi), `game_card.gd` (seçim/parlama, yerleştirme/açma/hamle/flaş/ölüm/yanma). `GWD_AUTO=1` headless doğrulama için bir tur oynatır.
+
+## Inscryption geçişi (feat/inscryption-look)
+- `devil.gd`: prosedürel rakip — uzak sandalyede neredeyse siyah siluet: kambur gövde, boyun, uzun boynuzlu kafatası, parlayan gözler (flicker + hasarda/zaferde flare), çuha kenarında pençeli eller; nefes alma, kafa seğirmeleri, parmak tıkırdatma; `play_card()` sağ pençeyle gizli kartı şeride kayar; `lean_in()` vuruşta/sonda.
+- `hand_rig.gd`: ortak eklemli el (avut + başparmak + 4 çift-boğum parmak). Oyuncu eldiveni: `pick_and_place()` kartı şeride taşır, `grab_and_pull()` kurban kartı karanlığa çekip yakar.
+- Işık: neredeyse siyah oda (ambient 0.22), fog, çuha üstünde dar omni havuzu, ACES + kontrast, köşe kararması (CanvasItem shader), iblis yüzüne soluk kırmızı alt-ışık; kamera iblisin kafası üst kadrajda kalacak şekilde yukarı çevrildi.

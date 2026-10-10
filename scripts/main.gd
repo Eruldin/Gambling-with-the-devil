@@ -10,6 +10,8 @@ const FONT_CINZEL := "res://assets_external/ui-fonts/Cinzel/Cinzel_0.ttf"
 const CandleFlame := preload("res://scripts/candle_flame.gd")
 const Sway := preload("res://scripts/sway.gd")
 const Battle := preload("res://scripts/battle.gd")
+const Devil := preload("res://scripts/devil.gd")
+const HandRig := preload("res://scripts/hand_rig.gd")
 
 var _cam: Camera3D
 var _t := 0.0
@@ -17,6 +19,8 @@ var _shot_frames := -1
 var _battle: Node3D
 var _hud_layer: CanvasLayer
 var _hud_font: Font
+var _devil: Node3D
+var _hand: Node3D
 
 # ---------------------------------------------------------------- assembly
 
@@ -32,21 +36,40 @@ func _ready() -> void:
 	_chandelier(top)
 	_chip_stacks(top)
 	_camera(top)
+	_devil = Devil.new()
+	add_child(_devil)
+	_devil.build(top)
+	_hand = HandRig.new()
+	add_child(_hand)
+	_hand.setup(Color(0.085, 0.055, 0.04), false)
+	_hand.rotation = Vector3(-0.3, -0.4, 0.15)
+	_hand.home_pos(Vector3(0.42, top - 0.13, 0.62))
 	_hud()
+	_vignette()
 	_battle = Battle.new()
 	add_child(_battle)
-	_battle.setup(top, _cam, _hud_layer, _hud_font)
+	_battle.setup(top, _cam, _hud_layer, _hud_font, _devil, _hand)
 	if OS.get_environment("GWD_SHOT") == "1":
 		_shot_frames = 800 if OS.get_environment("GWD_AUTO") == "1" else 150
 
 func _environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.008, 0.004, 0.003)
+	env.background_color = Color(0.004, 0.002, 0.002)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.11, 0.07, 0.05)
-	env.ambient_light_energy = 0.6
+	env.ambient_light_color = Color(0.05, 0.032, 0.024)
+	env.ambient_light_energy = 0.22
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.adjustment_enabled = true
+	env.adjustment_brightness = 0.9
+	env.adjustment_contrast = 1.25
+	env.adjustment_saturation = 0.85
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.05, 0.025, 0.012)
+	env.fog_density = 0.34
+	env.fog_height = 0.4
+	env.fog_height_density = 0.12
+	env.fog_sky_affect = 0.0
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -87,7 +110,7 @@ func _felt(top: float) -> void:
 
 func _floor_props() -> void:
 	_place(PH + "ArmChair_01/ArmChair_01_1k.gltf", "chair_player", Vector3(0, 0, 1.05), 0.85, PI)
-	_place(PH + "ArmChair_01/ArmChair_01_1k.gltf", "chair_devil", Vector3(0, 0, -1.15), 0.85)
+	_place(PH + "ArmChair_01/ArmChair_01_1k.gltf", "chair_devil", Vector3(0, 0, -1.38), 0.85)
 	_place(PH + "wooden_bookshelf_worn/wooden_bookshelf_worn_1k.gltf", "shelf", Vector3(-1.05, 0, -0.85), 1.55, 0.35)
 	_place(PH + "GothicCabinet_01/GothicCabinet_01_1k.gltf", "cabinet", Vector3(0.95, 0, -0.9), 1.35, -0.3)
 	_place(PH + "gothic_statue/gothic_statue_1k.gltf", "statue", Vector3(-1.25, 0, -1.0), 1.0, 0.45)
@@ -128,13 +151,13 @@ func _candles(top: float) -> void:
 		add_child(flame)
 		flame.setup(frames, smoke, i * 3.7)
 		i += 1
-	# one shadow-casting hero light
+	# one shadow-casting hero light: tight warm pool over the felt
 	var hero := OmniLight3D.new()
-	hero.position = Vector3(0, top + 0.42, -0.05)
-	hero.light_color = Color(1.0, 0.62, 0.3)
-	hero.light_energy = 0.7
-	hero.omni_range = 2.2
-	hero.omni_attenuation = 1.5
+	hero.position = Vector3(0, top + 0.38, -0.02)
+	hero.light_color = Color(1.0, 0.58, 0.26)
+	hero.light_energy = 1.05
+	hero.omni_range = 1.6
+	hero.omni_attenuation = 2.4
 	hero.shadow_enabled = true
 	add_child(hero)
 
@@ -147,9 +170,9 @@ func _chandelier(top: float) -> void:
 	ch.add_child(sw)
 	var glow := OmniLight3D.new()
 	glow.position = Vector3(0, top + 1.0, -0.05)
-	glow.light_color = Color(1.0, 0.6, 0.28)
-	glow.light_energy = 0.55
-	glow.omni_range = 1.6
+	glow.light_color = Color(1.0, 0.55, 0.24)
+	glow.light_energy = 0.28
+	glow.omni_range = 1.4
 	add_child(glow)
 
 func _chip_stack(pos: Vector3, chips: int, tint: Color) -> void:
@@ -175,19 +198,19 @@ func _chip_stacks(top: float) -> void:
 
 func _camera(top: float) -> void:
 	_cam = Camera3D.new()
-	_cam.fov = 50.0
+	_cam.fov = 46.0
 	add_child(_cam)
-	_cam.position = Vector3(0, top + 0.56, 0.86)
-	_cam.look_at(Vector3(0, top - 0.14, -0.1), Vector3.UP)
+	_cam.position = Vector3(0, top + 0.52, 0.85)
+	_cam.look_at(Vector3(0, top + 0.06, -0.5), Vector3.UP)
 	# dim warm fill from the player's side so card faces and felt read
 	var fill := SpotLight3D.new()
-	fill.position = Vector3(0, top + 0.75, 1.15)
+	fill.position = Vector3(0, top + 0.7, 1.2)
 	add_child(fill)
 	fill.look_at(Vector3(0, top, -0.05), Vector3.UP)
-	fill.light_color = Color(1.0, 0.68, 0.4)
-	fill.light_energy = 0.55
-	fill.spot_angle = 42.0
-	fill.spot_attenuation = 1.4
+	fill.light_color = Color(1.0, 0.62, 0.36)
+	fill.light_energy = 0.38
+	fill.spot_angle = 40.0
+	fill.spot_attenuation = 1.5
 	fill.shadow_enabled = true
 
 func _hud() -> void:
@@ -200,9 +223,29 @@ func _hud() -> void:
 	title.add_theme_font_size_override("font_size", 26)
 	title.add_theme_color_override("font_color", Color(0.78, 0.42, 0.22))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	title.offset_top = 18
+	title.offset_top = 14
+	title.offset_bottom = 58
 	_hud_layer.add_child(title)
+
+func _vignette() -> void:
+	var r := ColorRect.new()
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sm := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = "shader_type canvas_item;" \
+		+ "uniform float inner : hint_range(0.0,1.5) = 0.42;" \
+		+ "uniform float outer : hint_range(0.0,2.0) = 1.18;" \
+		+ "uniform float strength : hint_range(0.0,1.0) = 0.82;" \
+		+ "void fragment(){" \
+		+ " float d = distance(UV, vec2(0.5, 0.44)) * 1.7;" \
+		+ " COLOR = vec4(0.0, 0.0, 0.0, smoothstep(inner, outer, d) * strength);" \
+		+ "}"
+	sm.shader = sh
+	r.material = sm
+	_hud_layer.add_child(r)
 
 # ---------------------------------------------------------------- runtime
 
@@ -211,34 +254,44 @@ func _process(delta: float) -> void:
 	# camera slow sway
 	_cam.position.x = 0.06 * sin(_t * 0.11)
 	_cam.position.y += (1.1 + 0.02 * sin(_t * 0.23) - _cam.position.y) * delta
-	_cam.look_at(Vector3(0, 0.45, -0.1), Vector3.UP)
+	_cam.look_at(Vector3(0, 0.62, -0.5), Vector3.UP)
 	_battle.hover_target(_ray_hit().get("collider"))
 	if _shot_frames >= 0:
 		_shot_frames -= 1
 		if _shot_frames == 0:
 			_save_shot()
 
-func _ray_hit() -> Dictionary:
+func _ray_hit(mask := 3) -> Dictionary:
 	var mp := get_viewport().get_mouse_position()
 	var from := _cam.project_ray_origin(mp)
 	var to := from + _cam.project_ray_normal(mp) * 6.0
 	var q := PhysicsRayQueryParameters3D.create(from, to)
 	q.collide_with_areas = true
+	q.collision_mask = mask
 	return get_world_3d().direct_space_state.intersect_ray(q)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
-		var hit := _ray_hit()
-		var col = hit.get("collider") if not hit.is_empty() else null
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			_battle.click(col)
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			_battle.right_click(col)
-	elif event is InputEventKey and event.pressed and not event.echo:
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_SPACE:
 			_battle.end_turn()
 		elif event.keycode == KEY_R:
 			_battle.restart()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		var col
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			# pads live on layer 2 and are checked first so card bodies
+			# can't swallow clicks aimed at a lane pad
+			var pad_hit := _ray_hit(2)
+			if not pad_hit.is_empty():
+				col = pad_hit.get("collider")
+			else:
+				col = _ray_hit(1).get("collider")
+			_battle.click(col)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			col = _ray_hit(1).get("collider")
+			_battle.right_click(col)
 
 func _save_shot() -> void:
 	await RenderingServer.frame_post_draw

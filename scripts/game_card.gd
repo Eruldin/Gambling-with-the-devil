@@ -48,7 +48,7 @@ func setup(front_tex: Texture2D, back_tex: Texture2D) -> void:
 	_front.rotation.x = -PI / 2.0
 	add_child(_front)
 
-	_back = _face_quad(back_tex)
+	_back = _face_quad(back_tex, 0.4)
 	_back.position = Vector3(0, -CARD_T * 0.51 - 0.0002, 0)
 	_back.rotation.x = PI / 2.0
 	add_child(_back)
@@ -61,12 +61,16 @@ func setup(front_tex: Texture2D, back_tex: Texture2D) -> void:
 	_area.add_child(col)
 	add_child(_area)
 
-func _face_quad(tex: Texture2D) -> MeshInstance3D:
+func _face_quad(tex: Texture2D, glow := 0.0) -> MeshInstance3D:
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
 	m.albedo_texture = tex
 	m.roughness = 0.55
 	m.metallic = 0.0
+	if glow > 0.0:
+		m.emission_enabled = true
+		m.emission_texture = tex
+		m.emission_energy_multiplier = glow
 	var mi := MeshInstance3D.new()
 	var q := QuadMesh.new()
 	q.size = Vector2(CARD_W, CARD_H)

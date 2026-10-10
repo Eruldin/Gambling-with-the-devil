@@ -43,3 +43,8 @@ Assets are referenced in place from `assets_external/` (glTF loads natively; God
 
 ## Battle slice (proto/battle-loop)
 Round loop per the design doc: both sides ante the current Blind (1/2/3/5/8/13 chips), then place cards **concealed** (face-down) on their lane row; SPACE / REVEAL flips everything, cards stand as units, and each lane strikes the lane opposite — unit-vs-unit damage first, chip damage on open lanes. Blood (2/round) gates placement cost; right-clicking a hand card sacrifices it for `sacrifice_value` blood. Scripts: `battle.gd` (state machine, enemy AI, HUD), `card_def.gd` (card anatomy + 10-card starter deck), `game_card.gd` (select/glow, place/reveal/lunge/flash/die/burn). `GWD_AUTO=1` auto-plays a scripted round for headless probes.
+
+## Inscryption pass (feat/inscryption-look)
+- `devil.gd`: procedural opponent — near-black silhouette in the far chair: hunched torso, neck, elongated horned skull, glowing unshaded eyes (flicker + flare on player damage / victory), clawed hand-rigs resting on the felt; idle breathing, head-twitch snaps, finger-drumming; `play_card()` slides enemy concealed cards onto lanes with the right claw; `lean_in()` on hits/game over.
+- `hand_rig.gd`: shared articulated hand (palm + thumb + 4 two-segment fingers, curl pose). Player glove version: `pick_and_place()` carries cards to lane pads, `grab_and_pull()` drags sacrificed cards into the dark before they burn.
+- Lighting: near-black room (ambient 0.22), fog, tight omni pool over the felt, ACES + contrast, screen-space vignette (CanvasItem shader), faint red uplight on the Devil's face; camera raised and tilted so the Devil's head holds the top of frame.
