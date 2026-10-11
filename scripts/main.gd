@@ -489,6 +489,8 @@ func _input(event: InputEvent) -> void:
 			_battle.raise()
 		elif event.keycode == KEY_C:
 			_battle.arm_call()
+		elif event.keycode == KEY_M:
+			_battle.mulligan()
 		elif event.keycode == KEY_Y:
 			_battle.wager_accept()
 		elif event.keycode == KEY_N:

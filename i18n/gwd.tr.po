@@ -138,3 +138,12 @@ msgstr "Gerçek. Hakikati 2 çipe satın aldın."
 
 msgid "CARD_BLUFF"
 msgstr "Sahte"
+
+msgid "HINT_PLACE_R1"
+msgstr "Kartları gizli koy — sağ tık kurban — B yükseltme — M yeni el — SPACE aç"
+
+msgid "MULLIGAN"
+msgstr "Azrail kağıtları geri alıp yeniden dağıttı — yeni bir el."
+
+msgid "HINT_NOMULL"
+msgstr "Bu savaşta yeni el hakkın kalmadı"
