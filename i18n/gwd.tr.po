@@ -279,3 +279,12 @@ msgstr "İmzalı bir geçiş — +5 ruh, küçük bir lütuf."
 
 msgid "PRIESTESS_DEVIL"
 msgstr "Rahibesi yazı-tura atıyor — kasa ya toplar ya kanar."
+
+msgid "EMBERS_LBL"
+msgstr "Kor"
+
+msgid "EMBER_SPENT"
+msgstr "On beş kor, destesindeki bir sahte kartı yakıyor."
+
+msgid "HINT_EMBER"
+msgstr "— ya da E: 15 kor onun bir sahte kartını yakar."
