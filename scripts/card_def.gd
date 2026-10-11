@@ -35,6 +35,11 @@ static func make_trick(p_id: String, p_suit: String, p_cost: int,
 	c.kind = "trick"
 	return c
 
+static func make_effigy(p_id: String, p_face: String) -> RefCounted:
+	var c := make(p_id, "pentacles", 0, 0, 1, 0, p_face)
+	c.kind = "effigy"
+	return c
+
 ## A counterfeit card the Devil palms into his deck (§2.3): looks like
 ## a real stake face-down, but it's a lie — Call the Bluff burns it and
 ## costs him 2 chips.
