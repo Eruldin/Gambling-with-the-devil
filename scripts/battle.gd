@@ -219,6 +219,15 @@ func _start_round() -> void:
 	_chips_you -= ante
 	_chips_devil -= ante
 	_pot += ante * 2
+	# venom stacks tick — wounded cards rot a little each round
+	for side in [_board_p, _board_e]:
+		for lane in range(LANES):
+			var c = side.get(lane)
+			if c != null and c.venom > 0 and not c.face_down:
+				c.hp -= c.venom
+				c.flash()
+				_burst(c.position + Vector3(0, 0.03, 0),
+					Color(0.35, 0.6, 0.15), 10, 0.01, 0.4)
 	_blood = BLOOD_PER_ROUND
 	_raise_used = 0
 	_placed_this = 0
@@ -385,6 +394,11 @@ func _try_place(lane: int) -> void:
 		card.scale = Vector3.ONE * 0.72
 	else:
 		card.place_on_pad(_pads["p" + str(lane)].position, false)
+	if "tithe" in card.def.sigils:
+		_chips_you += 2
+		_pulse(_l_chips)
+		_burst(card.position + Vector3(0, 0.03, 0),
+			Color(1.0, 0.7, 0.25), 12, 0.01, 0.4)
 	_reflow_hand()
 	_update_chips()
 	_hint(tr("HINT_PLACE_MORE"))
@@ -552,6 +566,7 @@ func _run_resolution() -> void:
 		var e = _board_e.get(lane)
 		if p != null and p.face_down:
 			p.reveal()
+			_on_reveal(p, e)
 			_burst(p.position + Vector3(0, 0.03, 0),
 				Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
 		if e != null and e.face_down:
@@ -566,10 +581,20 @@ func _run_resolution() -> void:
 	for lane in range(LANES):
 		var p = _board_p.get(lane)
 		var e = _board_e.get(lane)
-		if p != null and not p.face_down and p.def.attack > 0:
+		if p != null and not p.face_down and p.def.attack > 0 			and p.hp > 0:
 			p.lunge(_pads["e" + str(lane)].position)
 			if e != null and not e.face_down:
-				e.hp -= p.def.attack
+				var atk: float = float(p.def.attack) + (3.0 					if "executioner" in p.def.sigils 					and e.hp < float(e.def.health) else 0.0)
+				var hp_before: float = e.hp
+				e.hp -= atk
+				if "pierce" in p.def.sigils and e.hp <= 0:
+					var over: float = atk - hp_before
+					if over > 0.0:
+						_chips_devil -= int(over)
+						_pot += int(over)
+						_pulse(_l_pot)
+				if "venom" in p.def.sigils and e.hp > 0:
+					e.venom = mini(e.venom + 1, 3)
 				if e.hp <= 0:
 					_bump("respect", 0.4)   # a clean kill earns a nod
 				e.flash()
@@ -597,7 +622,17 @@ func _run_resolution() -> void:
 			and e.def.attack > 0:
 			e.lunge(_pads["p" + str(lane)].position)
 			if p != null and not p.face_down:
-				p.hp -= e.def.attack
+				var eatk: float = float(e.def.attack) + (3.0 					if "executioner" in e.def.sigils 					and p.hp < float(p.def.health) else 0.0)
+				var php_before: float = p.hp
+				p.hp -= eatk
+				if "pierce" in e.def.sigils and p.hp <= 0:
+					var eover: float = eatk - php_before
+					if eover > 0.0:
+						_chips_you -= int(eover)
+						_pot += int(eover)
+						_pulse(_l_pot)
+				if "venom" in e.def.sigils and p.hp > 0:
+					p.venom = mini(p.venom + 1, 3)
 				p.flash()
 				_burst(p.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
@@ -652,12 +687,31 @@ func _cleanup_dead() -> void:
 		if p != null and p.hp <= 0:
 			_board_p.erase(lane)
 			_area_to_card.erase(p.get_area())
-			_dead_p.append(p.def)
+			var e_killer = _board_e.get(lane)
+			if "haunt" in p.def.sigils and e_killer != null:
+				e_killer.def.attack = maxi(0, e_killer.def.attack - 1)
+				_burst(e_killer.position + Vector3(0, 0.03, 0),
+					Color(0.4, 0.1, 0.5), 12, 0.01, 0.5)
+			if "revival" in p.def.sigils and not p.revived:
+				p.revived = true
+				_dead_to_hand(p.def)
+			elif "brood" in p.def.sigils:
+				_dead_p.append(p.def)
+				_spawn_grub(lane, true)
+			else:
+				_dead_p.append(p.def)
 			p.die()
 		var e = _board_e.get(lane)
 		if e != null and e.hp <= 0:
 			_board_e.erase(lane)
 			_area_to_card.erase(e.get_area())
+			var p_killer = _board_p.get(lane)
+			if "haunt" in e.def.sigils and p_killer != null:
+				p_killer.def.attack = maxi(0, p_killer.def.attack - 1)
+				_burst(p_killer.position + Vector3(0, 0.03, 0),
+					Color(0.4, 0.1, 0.5), 12, 0.01, 0.5)
+			elif "brood" in e.def.sigils:
+				_spawn_grub(lane, false)
 			e.die()
 
 func _check_over() -> bool:
@@ -1037,6 +1091,50 @@ func _resolve_razor(target) -> void:
 	_burn_trick(card)
 	_bump("respect", 0.15)
 	_sfx.play(Sfx.SLIDE, -8.0)
+
+## seal hooks that fire when a card flips face-up
+func _on_reveal(card, opposing) -> void:
+	var sig: Array = card.def.sigils
+	if "loan_shark" in sig:
+		_chips_you += 2
+		_debt += 1
+		_pulse(_l_chips)
+	if "mimic" in sig and opposing != null and opposing.def != null:
+		for sg in opposing.def.sigils:
+			if not sig.has(sg):
+				sig.append(sg)
+	if "swap" in sig:
+		var empty: Array = []
+		for l in range(LANES):
+			if not _board_p.has(l):
+				empty.append(l)
+		if empty.size() > 0:
+			_repos_armed = card
+			_do_repos(empty[randi() % empty.size()])
+
+func _spawn_grub(lane: int, mine: bool) -> void:
+	var d: CardDef = CardDef.make("grub", "chalices", 0, 0, 1, 0,
+		"res://assets_external/card-art/gwd/face_imp.png")
+	var card := GameCard.new()
+	card.def = d
+	add_child(card)
+	card.setup(load(d.face_file), _back_tex)
+	card.lane = lane
+	card.hp = d.health
+	card.placed = true
+	card.scale = Vector3.ONE * 0.72
+	_area_to_card[card.get_area()] = card
+	var dest: Vector3 = _repos_dest(lane) if mine 		else _pads["e" + str(lane)].position + Vector3(0, 0.002, 0)
+	if mine:
+		_board_p[lane] = card
+	else:
+		_board_e[lane] = card
+	card.position = dest + Vector3(0, 0.05, 0)
+	card.set_base(dest, Vector3(PI, 0, 0))
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(card, "position", dest, 0.35)
+	_burst(dest + Vector3(0, 0.03, 0), Color(0.3, 0.5, 0.2),
+		12, 0.01, 0.4)
 
 func _autoplay_run() -> void:
 	await get_tree().create_timer(1.2).timeout
