@@ -744,6 +744,20 @@ func _call_bluff(card) -> void:
 	_update_chips()
 	_check_over()
 
+var _tell_t := 0.0
+func _process(delta: float) -> void:
+	_tell_t += delta
+	# §2.3 tells: a concealed card betrays its weight — real violence can't
+	# stop trembling; a palmed bluff lies unnaturally still.
+	for e in _board_e.values():
+		if e.face_down and e.def != null:
+			var restless: float = 0.0012 * float(e.def.attack)
+			var shiver: float = pow(maxf(0.0,
+				sin(_tell_t * 1.6 + e.lane * 2.1)), 8.0)
+			e.position = e._base_pos + Vector3(
+				restless * shiver * sin(_tell_t * 43.0 + e.lane * 7.0), 0,
+				restless * shiver * cos(_tell_t * 37.0))
+
 func mulligan() -> void:
 	# §2.3 opening redeal: once per battle, only before the first card lands
 	if _mulligan_used or _round > 1 or _placed_this > 0 or _phase != Phase.PLACE:
