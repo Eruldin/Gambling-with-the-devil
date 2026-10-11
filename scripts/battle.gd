@@ -87,7 +87,8 @@ var _event_cards: Array = []
 # §18 Descent — run state survives the scene reload between tables:
 # debt follows you, luck keeps its tilt, carried souls ride in extra.
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
-	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0}
+	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
+	"psyche": {}, "taunted": []}
 
 # ---------------------------------------------------------------- setup
 
@@ -123,6 +124,12 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# souls won at the last door ride in on top of the fresh pile.
 	_debt = _run["debt"]
 	_luck = _run["luck"]
+	# he remembers — the five axes carry across tables at 70% strength,
+	# and a taunt he already said stays said for the whole run
+	for axis in _psyche:
+		_psyche[axis] = float(_run["psyche"].get(axis, 0.0)) * 0.7
+	for t in _run["taunted"]:
+		_taunted[t] = true
 	_chips_you += _run["purse"]
 	_run["purse"] = 0
 	# his soul pile fattens a few chips per door passed — deeper tables,
@@ -837,6 +844,8 @@ func _finish_over(won: bool) -> void:
 		_run["embers"] += _pot   # §2.4: the pot converts to embers
 		_run["debt"] = _debt
 		_run["luck"] = _luck
+		_run["psyche"] = _psyche.duplicate()
+		_run["taunted"] = _taunted.keys()
 		_l_over.text = tr("YOU_WIN") + "\n" + str(_pot) + " " \
 			+ tr("EMBERS_WON")
 		_l_phase.text = tr("GAME_OVER")
@@ -861,6 +870,8 @@ func _reset_run() -> void:
 	for k in _run:
 		_run[k] = false if k == "wager_used" else 0
 	_run["luck"] = 0.0
+	_run["psyche"] = {}
+	_run["taunted"] = []
 
 # ------------------------------------------------------------ descent (§18)
 
