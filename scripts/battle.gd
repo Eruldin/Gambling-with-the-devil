@@ -46,6 +46,7 @@ var _wager_offered := false
 var _wager_pending := false
 var _bluff_used := false       # Call the Bluff — once per battle
 var _call_armed := false
+var _mulligan_used := false    # opening redeal — once per battle
 # Azrail psychology (§18.2) — five axes the game feeds; his table manners
 # and his AI both read these.
 var _psyche := {"cruelty": 0.0, "curiosity": 0.0, "anger": 0.0,
@@ -214,7 +215,7 @@ func _start_round() -> void:
 			_devil._sfx_ref = _sfx
 	_draw_hand()
 	_l_phase.text = "%s %d  ·  %s %d" % [tr("ROUND"), _round, tr("BLIND"), ante]
-	_hint(tr("HINT_PLACE"))
+	_hint(tr("HINT_PLACE_R1") if _round == 1 else tr("HINT_PLACE"))
 	_update_chips()
 	_sfx.play(Sfx.SHUFFLE, -8.0)
 	_check_over()
@@ -742,6 +743,25 @@ func _call_bluff(card) -> void:
 	_pulse(_l_pot)
 	_update_chips()
 	_check_over()
+
+func mulligan() -> void:
+	# §2.3 opening redeal: once per battle, only before the first card lands
+	if _mulligan_used or _round > 1 or _placed_this > 0 or _phase != Phase.PLACE:
+		_hint(tr("HINT_NOMULL"))
+		return
+	_mulligan_used = true
+	var n := _hand.size()
+	for card in _hand:
+		_deck.append(card.def)
+		_area_to_card.erase(card.get_area())
+		card.queue_free()
+	_hand.clear()
+	_deck.shuffle()
+	for i in range(n):
+		_draw_hand()
+	_bump("boredom", 0.15)   # hesitation bores him
+	_hint(tr("MULLIGAN"))
+	_sfx.play(Sfx.SHUFFLE, -4.0)
 
 func restart() -> void:
 	# one-shot frame signal — a deferred call on the tree gets queued

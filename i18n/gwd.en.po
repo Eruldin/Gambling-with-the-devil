@@ -138,3 +138,12 @@ msgstr "Real. You bought the truth for 2 chips."
 
 msgid "CARD_BLUFF"
 msgstr "Palmed"
+
+msgid "HINT_PLACE_R1"
+msgstr "Place cards concealed — right-click sacrifices — B raises — M mulligan — SPACE reveals"
+
+msgid "MULLIGAN"
+msgstr "Azrail takes the cards back and redeals — a fresh hand."
+
+msgid "HINT_NOMULL"
+msgstr "No mulligan left in this battle"
