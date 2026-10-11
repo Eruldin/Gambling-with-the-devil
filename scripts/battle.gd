@@ -44,6 +44,8 @@ var _raise_used := 0
 var _placed_this := 0
 var _wager_offered := false
 var _wager_pending := false
+var _bluff_used := false       # Call the Bluff — once per battle
+var _call_armed := false
 # Azrail psychology (§18.2) — five axes the game feeds; his table manners
 # and his AI both read these.
 var _psyche := {"cruelty": 0.0, "curiosity": 0.0, "anger": 0.0,
@@ -85,6 +87,9 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_make_hud()
 	_deck = CardDef.starter_deck()
 	_edeck = CardDef.starter_deck()
+	# Azrail palms two counterfeits into his deck — Call the Bluff prey
+	_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
+	_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
 	_deck.shuffle()
 	_edeck.shuffle()
 	for i in range(5):
@@ -278,6 +283,13 @@ func click(collider) -> void:
 	if _phase != Phase.PLACE or _autoplay:
 		return
 	var card = _area_to_card.get(collider)
+	if _call_armed:
+		if card != null and card.placed and card.face_down \
+			and _board_e.values().has(card):
+			_call_bluff(card)
+		else:
+			_hint(tr("HINT_CALL"))
+		return
 	var pad = _pad_areas.get(collider)
 	if card != null and _hand.has(card):
 		_select(card if card != _selected else null)
@@ -693,6 +705,43 @@ func wager_decline() -> void:
 	_wager_pending = false
 	_wager_offered = true
 	_finish_over(false)
+
+## Call the Bluff (§2.3): once per battle, arm with C then click one of
+## his concealed cards. Costs 2 chips into the pot. A counterfeit burns
+## and he pays 2; a real card just stands revealed — you bought truth.
+func arm_call() -> void:
+	if _phase != Phase.PLACE or _bluff_used:
+		_hint(tr("HINT_NOCALL"))
+		return
+	_call_armed = not _call_armed
+	_hint(tr("HINT_CALL") if _call_armed else tr("HINT_PLACE"))
+
+func _call_bluff(card) -> void:
+	_call_armed = false
+	_bluff_used = true
+	_chips_you -= 2
+	_pot += 2
+	if card.def.is_bluff:
+		_chips_devil -= 2
+		_bump("anger", 0.6)          # caught palming a fake — he hates it
+		_board_e.erase(card.lane)
+		_area_to_card.erase(card.get_area())
+		card.burn()
+		_hint(tr("CALL_BLUFF"))
+		if _devil != null:
+			_devil.eyes_flare(1.0)
+			_devil.strike_pose(0.0, true)
+	else:
+		card.reveal_enemy()
+		_bump("curiosity", 0.5)
+		_hint(tr("CALL_REAL"))
+		if _devil != null:
+			_devil.watch(card.position, 1.4)
+	_sfx.play(Sfx.CHIP_HANDLE, -8.0)
+	_pulse(_l_chips)
+	_pulse(_l_pot)
+	_update_chips()
+	_check_over()
 
 func restart() -> void:
 	# one-shot frame signal — a deferred call on the tree gets queued

@@ -11,6 +11,7 @@ var health := 1
 var sigils: Array[String] = []
 var sacrifice_value := 1
 var face_file := ""         # res:// path to the card face art
+var is_bluff := false       # §2.3: a counterfeit — destroyed when Called
 
 static func make(p_id: String, p_suit: String, p_cost: int, p_atk: int,
 		p_hp: int, p_sac: int, p_face: String) -> RefCounted:
@@ -23,6 +24,15 @@ static func make(p_id: String, p_suit: String, p_cost: int, p_atk: int,
 	c.health = p_hp
 	c.sacrifice_value = p_sac
 	c.face_file = p_face
+	return c
+
+## A counterfeit card the Devil palms into his deck (§2.3): looks like
+## a real stake face-down, but it's a lie — Call the Bluff burns it and
+## costs him 2 chips.
+static func bluff_card() -> RefCounted:
+	var c := make("bluff", "eyes", 0, 0, 1, 0,
+		"res://assets_external/card-art/gwd/face_imp.png")
+	c.is_bluff = true
 	return c
 
 static func starter_deck() -> Array:
