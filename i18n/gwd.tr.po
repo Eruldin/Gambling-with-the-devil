@@ -372,3 +372,42 @@ msgstr "Eritecek bir şey yok — bunun yerine keseni ısıtıyor (+3 ruh)."
 
 msgid "CARD_FUSED_ABOMINATION"
 msgstr "Kaynaşmış Ucube"
+
+msgid "CARD_EVENT_TAXIDERMIST"
+msgstr "Tahnitçi"
+
+msgid "CARD_EVENT_TAXIDERMIST_DESC"
+msgstr "en yeni ganimetine yedek bir mühür diker"
+
+msgid "EV_TAXI"
+msgstr "İğne iplik — en yeni ruhun bir mühürle uyanıyor:"
+
+msgid "EV_TAXI_FULL"
+msgstr "Zaten dolu — ziyaret için ödeme yapıyor (+3 ruh)."
+
+msgid "EV_TAXI_EMPTY"
+msgstr "Masada doldurulacak bir şey yok (+3 ruh)."
+
+msgid "SIGIL_VENOM"
+msgstr "Zehir"
+
+msgid "SIGIL_HAUNT"
+msgstr "Musallat"
+
+msgid "SIGIL_MIMIC"
+msgstr "Taklit"
+
+msgid "SIGIL_PIERCE"
+msgstr "Deliş"
+
+msgid "SIGIL_REVIVAL"
+msgstr "Diriliş"
+
+msgid "SIGIL_EXECUTIONER"
+msgstr "Cellat"
+
+msgid "SIGIL_BROOD"
+msgstr "Yavru"
+
+msgid "SIGIL_TITHE"
+msgstr "Öşür"

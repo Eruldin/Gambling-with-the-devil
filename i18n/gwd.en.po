@@ -372,3 +372,42 @@ msgstr "Nothing to melt — it warms your purse instead (+3 souls)."
 
 msgid "CARD_FUSED_ABOMINATION"
 msgstr "Fused Abomination"
+
+msgid "CARD_EVENT_TAXIDERMIST"
+msgstr "The Taxidermist"
+
+msgid "CARD_EVENT_TAXIDERMIST_DESC"
+msgstr "stitches a spare seal onto your newest spoil"
+
+msgid "EV_TAXI"
+msgstr "Needle and thread — your newest soul wakes with a seal:"
+
+msgid "EV_TAXI_FULL"
+msgstr "Already stuffed — he pays you for the visit (+3 souls)."
+
+msgid "EV_TAXI_EMPTY"
+msgstr "Nothing on your table worth stuffing (+3 souls)."
+
+msgid "SIGIL_VENOM"
+msgstr "Venom"
+
+msgid "SIGIL_HAUNT"
+msgstr "Haunt"
+
+msgid "SIGIL_MIMIC"
+msgstr "Mimic"
+
+msgid "SIGIL_PIERCE"
+msgstr "Pierce"
+
+msgid "SIGIL_REVIVAL"
+msgstr "Revival"
+
+msgid "SIGIL_EXECUTIONER"
+msgstr "Executioner"
+
+msgid "SIGIL_BROOD"
+msgstr "Brood"
+
+msgid "SIGIL_TITHE"
+msgstr "Tithe"
