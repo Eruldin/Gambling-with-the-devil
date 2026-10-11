@@ -519,6 +519,8 @@ func _input(event: InputEvent) -> void:
 			_battle.use_trump(1)
 		elif event.keycode == KEY_3:
 			_battle.use_trump(2)
+		elif event.keycode == KEY_E:
+			_battle.spend_embers()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:

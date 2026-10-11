@@ -15,6 +15,7 @@ const BLOOD_PER_ROUND := 2
 const HAND_MAX := 6
 const RAISE_MAX := 5           # §2.3: stake 1–5 extra chips once per turn
 const TAUNT_AT := 2.5          # psyche axis level that makes Azrail speak
+const EMBER_CLEANSE := 15      # embers to burn one of his counterfeits
 
 enum Phase { PLACE, BUSY, OVER, EVENT }
 
@@ -86,7 +87,7 @@ var _event_cards: Array = []
 # §18 Descent — run state survives the scene reload between tables:
 # debt follows you, luck keeps its tilt, carried souls ride in extra.
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
-	"won": 0, "embers": 0, "wager_used": false}
+	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0}
 
 # ---------------------------------------------------------------- setup
 
@@ -124,7 +125,37 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_luck = _run["luck"]
 	_chips_you += _run["purse"]
 	_run["purse"] = 0
+	# his soul pile fattens a few chips per door passed — deeper tables,
+	# deeper pockets (§18 stakes)
+	_chips_devil += mini(_run["depth"] * 3, 15)
 	_wager_offered = _run["wager_used"]
+	# embers spent at the last door burn his counterfeits out of the deck
+	for i in range(_run["cleanse"]):
+		for j in range(_edeck.size()):
+			if _edeck[j].is_bluff:
+				_edeck.remove_at(j)
+				break
+	# §18 ambush: from the third door down he's already seated pawns
+	# face-down — deeper tables start rigged against you
+	var ambush := mini(maxi(_run["depth"] - 2, 0), 3)
+	for i in range(ambush):
+		var free_l: Array = []
+		for l in range(LANES):
+			if not _board_e.has(l):
+				free_l.append(l)
+		if free_l.is_empty() or _edeck.is_empty():
+			break
+		var lane: int = free_l[randi() % free_l.size()]
+		var d: CardDef = _edeck.pop_back()
+		var ac := GameCard.new()
+		ac.def = d
+		add_child(ac)
+		ac.setup(load(d.face_file), _back_tex)
+		ac.lane = lane
+		ac.hp = d.health
+		_board_e[lane] = ac
+		_area_to_card[ac.get_area()] = ac
+		ac.place_on_pad(_pads["e" + str(lane)].position, true)
 	for i in range(5):
 		_draw_hand()
 	_start_round()
@@ -810,7 +841,8 @@ func _finish_over(won: bool) -> void:
 			+ tr("EMBERS_WON")
 		_l_phase.text = tr("GAME_OVER")
 		_sfx.play(Sfx.WIN, -4.0)
-		_hint(tr("HINT_EVENT"))
+		_hint(tr("HINT_EVENT") + (" " + tr("HINT_EMBER")
+			if _run["embers"] >= EMBER_CLEANSE else ""))
 		_spawn_event_cards()
 		if _autoplay:
 			await get_tree().create_timer(1.6).timeout
@@ -896,6 +928,16 @@ func _resolve_event(card) -> void:
 	if _devil != null:
 		_devil.watch(card.position, 1.2)
 	_descend()
+
+## At the door, embers buy a cleaner deck — 15 burns one counterfeit
+## he would have palmed into the next hand (§18: the house can be cheated).
+func spend_embers() -> void:
+	if _phase != Phase.EVENT or _run["embers"] < EMBER_CLEANSE:
+		return
+	_run["embers"] -= EMBER_CLEANSE
+	_run["cleanse"] += 1
+	_hint(tr("EMBER_SPENT"))
+	_update_chips()
 
 func _descend() -> void:
 	_run["depth"] += 1
@@ -1102,6 +1144,8 @@ func _update_chips() -> void:
 	if _debt > 0:
 		_l_blood.text += "   ·   %s %d" % [tr("DEBT_LBL"), _debt]
 	_l_pot.text = "%s %d" % [tr("POT"), _pot]
+	if _run["embers"] > 0:
+		_l_pot.text += "  ·  %s %d" % [tr("EMBERS_LBL"), _run["embers"]]
 	for i in range(_pot_pile.size()):
 		_pot_pile[i].visible = i < mini(_pot, _pot_pile.size())
 

@@ -279,3 +279,12 @@ msgstr "A signed passage — +5 souls, a small blessing."
 
 msgid "PRIESTESS_DEVIL"
 msgstr "His Priestess flips — the House collects, or bleeds."
+
+msgid "EMBERS_LBL"
+msgstr "Embers"
+
+msgid "EMBER_SPENT"
+msgstr "Fifteen embers burn one of his counterfeits out of the next deck."
+
+msgid "HINT_EMBER"
+msgstr "— or press E: 15 embers burn one of his counterfeits."
