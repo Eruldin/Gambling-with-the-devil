@@ -438,3 +438,12 @@ msgid "SIN_RULE_5"
 msgstr "Wrath sharpens his whole line — and seats one pawn deeper."
 msgid "SIN_RULE_6"
 msgstr "Sloth plays one card a turn — but sits on a fat pile."
+
+msgid "CARD_EVENT_CONFESSOR"
+msgstr "The Confessional"
+
+msgid "CARD_EVENT_CONFESSOR_DESC"
+msgstr "kneel — three souls of debt forgiven, but he reads you deeper"
+
+msgid "EV_CONFESS"
+msgstr "Absolved — three souls lighter, and he knows you better than before."
