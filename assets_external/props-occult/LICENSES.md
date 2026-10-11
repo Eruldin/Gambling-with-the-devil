@@ -14,3 +14,5 @@
 - Source: poly.pizza — "Cat" by Quaternius (model qKICY6xla2)
 - License: CC0 (public domain) — no attribution required
 - The house cat prowling the room edges (cat_walker.gd)
+
+| cat_real.glb | Grab3D | CC0 1.0 | https://grab3d.com/models/animals/cat/ | Realistic tabby cat (light tier, 1K textures); room-crossing house cat |

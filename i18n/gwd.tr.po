@@ -123,3 +123,18 @@ msgstr "Azrail hafifçe başını eğdi. Saygıdeğer bir rakipsin."
 
 msgid "AZRAIL_BOREDOM"
 msgstr "Azrail masaya vurdu. \"Oyalanıyorsun — sıkıldım. Perdeler sıkılmaz.\""
+
+msgid "HINT_CALL"
+msgstr "Blöf Çağır — kapalı kartlarından birine tıkla (2 çip)"
+
+msgid "HINT_NOCALL"
+msgstr "Bu savaşta Blöf Çağırma hakkın kalmadı"
+
+msgid "CALL_BLUFF"
+msgstr "YALAN — sahte kart yandı. Azrail 2 çip ödedi."
+
+msgid "CALL_REAL"
+msgstr "Gerçek. Hakikati 2 çipe satın aldın."
+
+msgid "CARD_BLUFF"
+msgstr "Sahte"

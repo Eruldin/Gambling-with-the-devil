@@ -123,3 +123,18 @@ msgstr "Azrail inclines his head a degree. A worthy opponent."
 
 msgid "AZRAIL_BOREDOM"
 msgstr "Azrail taps the felt. \"You stall — I grow bored. The blinds do not.\""
+
+msgid "HINT_CALL"
+msgstr "Call the Bluff — click one of his concealed cards (2 chips)"
+
+msgid "HINT_NOCALL"
+msgstr "No Call left this battle"
+
+msgid "CALL_BLUFF"
+msgstr "A LIE — the counterfeit burns. Azrail pays 2 chips."
+
+msgid "CALL_REAL"
+msgstr "Real. You bought the truth for 2 chips."
+
+msgid "CARD_BLUFF"
+msgstr "Palmed"

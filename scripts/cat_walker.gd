@@ -1,8 +1,8 @@
 extends Node3D
-## The house cat: crosses the dark edge of the room every so often.
-## CC0 Quaternius cat, stained near-black — a silhouette, not a pet.
+## The house cat: crosses the lit edge of the room every so often.
+## CC0 Grab3D tabby — real fur textures, tinted down into the dark.
 
-const CAT := "res://assets_external/props-occult/cat.glb"
+const CAT := "res://assets_external/props-occult/cat_real.glb"
 
 var _model: Node3D
 var _next := 12.0 + randf() * 18.0 if \
@@ -12,36 +12,27 @@ var _t := 0.0
 var _ap: AnimationPlayer
 var _walk_clip := ""
 var _idle_clip := ""
+var _top := 0.85
 
-func build() -> void:
+func build(top: float = 0.85) -> void:
+	_top = top
 	_model = load(CAT).instantiate()
-	# real-cat shoulder height — the raw Quaternius model reads as a
-	# monster on the far floor; ~0.5× brings it to believable scale
-	_model.scale = Vector3.ONE * 0.5
+	# Grab3D tabby is authored at real-world size — slight shrink keeps
+	# it a house cat, not a lynx, against the table's scale
+	_model.scale = Vector3.ONE * 0.55
 	add_child(_model)
-	# near-black but readable — pure black vanished against the floor
-	var dm := StandardMaterial3D.new()
-	dm.albedo_color = Color(0.08, 0.06, 0.05)
-	dm.roughness = 0.9
+	# keep the model's own fur textures — tint the albedo multiplier only,
+	# so it settles into the room's dark without flattening
 	for mi: MeshInstance3D in _model.find_children(
 			"*", "MeshInstance3D", true, false):
-		mi.material_override = dm
-	# a pair of faint amber eyes — created ONCE (was stacking per crossing)
-	for side in [-1.0, 1.0]:
-		var e := MeshInstance3D.new()
-		var es := SphereMesh.new()
-		es.radius = 0.005
-		es.height = 0.01
-		e.mesh = es
-		var em := StandardMaterial3D.new()
-		em.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-		em.emission_enabled = true
-		em.emission = Color(1.0, 0.75, 0.2)
-		em.emission_energy_multiplier = 2.2
-		e.material_override = em
-		_model.add_child(e)
-		e.position = Vector3(0.015 * side, 0.115, 0.09)
-	# Quaternius cat ships real clips — walk while crossing, idle at rest
+		for si in range(mi.get_surface_override_material_count()):
+			var src := mi.get_surface_override_material(si)
+			if src is StandardMaterial3D:
+				var dup: StandardMaterial3D = src.duplicate()
+				dup.albedo_color *= Color(0.5, 0.42, 0.36)
+				dup.roughness = minf(dup.roughness + 0.15, 1.0)
+				mi.set_surface_override_material(si, dup)
+	# real clips if the rigged model has any; the static tabby just sways
 	var aps := _model.find_children("*", "AnimationPlayer", true, false)
 	if not aps.is_empty():
 		_ap = aps[0]
@@ -60,46 +51,71 @@ func build() -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
-	if _walking:
+	if not _segs.is_empty():
+		var seg: Dictionary = _segs[0]
+		if seg["type"] == "pause":
+			_model.rotation.z = 0.0
+			seg["dur"] = float(seg["dur"]) - delta
+			if seg["dur"] <= 0.0:
+				_segs.pop_front()
+				if not _segs.is_empty() and _segs[0]["type"] == "move":
+					_face(_segs[0]["to"])
+		else:
+			# no rig — sell the stride with a tiny body roll instead of gliding
+			_model.rotation.z = 0.035 * sin(_t * 7.0)
+			var to: Vector3 = seg["to"]
+			var d := to - _model.position
+			var step := float(seg["speed"]) * delta
+			if d.length() <= step:
+				_model.position = to
+				_segs.pop_front()
+				if _segs.is_empty():
+					_gone()
+				elif _segs[0]["type"] == "pause":
+					_face(Vector3(0, 0, 0.1))
+					if _ap != null and not _idle_clip.is_empty():
+						_ap.play(_idle_clip)
+			else:
+				_model.position += d.normalized() * step
 		return
+	_model.rotation.z = 0.0
 	_next -= delta
 	if _next <= 0.0:
 		_next = 45.0 + randf() * 50.0
 		_cross()
+
+var _segs: Array[Dictionary] = []
 
 func _cross() -> void:
 	_walking = true
 	visible = true
 	if _ap != null and not _walk_clip.is_empty():
 		_ap.play(_walk_clip)
-	# the right-edge route reads best (moon-pale floor at the cabinet);
-	# the deep route disappears behind the devil's chair — keep it rare
-	var behind := randf() < 0.35 and OS.get_environment("GWD_CATNOW") != "1"
-	var y := 0.0
-	# z=-0.45 is the lit floor band between the table's far lip and
-	# Azrail's chair — the only strip the camera actually sees
-	var z := -0.75 if behind else -0.45
-	var from := Vector3(-1.7, y, z - (0.2 if behind else 0.0))
-	var to := Vector3(1.7, y, z + (0.15 if behind else 0.1))
-	if randf() < 0.5:
-		var tmp := from; from = to; to = tmp
+	# the floor is invisible from this camera — so the cat does the thing
+	# a real cat does: it stalks the table's far lip in the candlelight,
+	# between you and Azrail, then drops back into the dark. Rarely it
+	# takes the long way behind his chair and is swallowed whole.
+	var behind := randf() < 0.3 and OS.get_environment("GWD_CATNOW") != "1"
+	var from: Vector3
+	var to: Vector3
+	if behind:
+		from = Vector3(-1.7, 0.0, -0.75)
+		to = Vector3(1.7, 0.0, -0.6)
+		if randf() < 0.5:
+			var tmp := from; from = to; to = tmp
+	else:
+		from = Vector3(-0.62, _top, -0.22)
+		to = Vector3(0.62, _top, -0.22)
+		if randf() < 0.5:
+			var tmp := from; from = to; to = tmp
 	_model.position = from
 	_face(to)
 	var speed := 0.65   # a real cat's crossing pace — a slow prowl
-	# at 0.35 m/s read as something much bigger stalking the room
-	# tween the MODEL's local position — the wrapper stays at origin
-	# (tweening the wrapper dragged the cat a whole route-length off-path
-	# and left it crossing behind furniture where nobody could see it)
 	var midp := from.lerp(to, randf_range(0.35, 0.6))
-	var tw := create_tween().set_trans(Tween.TRANS_SINE)
-	tw.tween_property(_model, "position", midp, from.distance_to(midp) / speed)
+	_segs = [{"type": "move", "to": midp, "speed": speed}]
 	if randf() < 0.4:
-		tw.tween_callback(_look_table)
-		tw.tween_interval(1.4 + randf() * 1.4)
-		tw.tween_callback(_face.bind(to))
-		tw.tween_interval(0.3)
-	tw.tween_property(_model, "position", to, midp.distance_to(to) / speed)
-	tw.tween_callback(_gone)
+		_segs.append({"type": "pause", "dur": 1.4 + randf() * 1.4})
+	_segs.append({"type": "move", "to": to, "speed": speed})
 
 func _face(to: Vector3) -> void:
 	var d := to - _model.global_position

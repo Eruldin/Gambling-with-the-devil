@@ -79,7 +79,7 @@ func _ready() -> void:
 	# living room layer: the cat prowls the edges, moth/storm/gust/fog live here
 	var cat := CatWalker.new()
 	add_child(cat)
-	cat.build()
+	cat.build(top)
 	var amb := Ambience.new()
 	add_child(amb)
 	amb.setup(_flames, _hero, top)
@@ -487,6 +487,8 @@ func _input(event: InputEvent) -> void:
 			_battle.restart()
 		elif event.keycode == KEY_B:
 			_battle.raise()
+		elif event.keycode == KEY_C:
+			_battle.arm_call()
 		elif event.keycode == KEY_Y:
 			_battle.wager_accept()
 		elif event.keycode == KEY_N:
