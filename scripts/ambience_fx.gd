@@ -24,17 +24,17 @@ func setup(flames: Array, hero: OmniLight3D, table_y: float) -> void:
 	_hero = hero
 	_sfx = SFX_C.new()
 	_sfx.setup(self)
-	# moth — a speck of brown paper wings orbiting the candle pool
+	# moth — a faint speck of dusty wings orbiting the candle pool
 	_moth = MeshInstance3D.new()
 	var mq := QuadMesh.new()
-	mq.size = Vector2(0.034, 0.022)
+	mq.size = Vector2(0.014, 0.009)
 	_moth.mesh = mq
 	var mm := StandardMaterial3D.new()
 	mm.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	mm.albedo_color = Color(0.9, 0.75, 0.5)
+	mm.albedo_color = Color(0.45, 0.36, 0.24)
 	mm.emission_enabled = true
-	mm.emission = Color(0.9, 0.7, 0.4)
-	mm.emission_energy_multiplier = 1.6
+	mm.emission = Color(0.5, 0.38, 0.2)
+	mm.emission_energy_multiplier = 0.55
 	mm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	_moth.material_override = mm
 	add_child(_moth)
