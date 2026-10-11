@@ -31,8 +31,10 @@ var _area_to_card := {}    # Area3D -> GameCard (hand + board)
 var _hand: Array = []
 var _deck: Array = []
 var _edeck: Array = []
-var _board_p := {}         # lane -> GameCard
-var _board_e := {}         # lane -> GameCard
+var _board_p := {}         # front rank: lane -> GameCard (strikes)
+var _board_e := {}         # front rank: lane -> GameCard
+var _board_pb := {}        # back rank: protected support, never strikes
+var _board_eb := {}        # his support rank
 
 var _phase := Phase.PLACE
 var _round := 1
@@ -106,6 +108,25 @@ var _sin_ante := 0        # Greed's extra tithe per hand
 var _hand_cap := HAND_MAX # Lust trims how much you may hold
 var _glut_drain := false  # Gluttony feeds on the pot each round
 var _sloth_table := false # Sloth slows his plays to one
+
+# ------------------------------------------------- row helpers (§2.2)
+## Front rank strikes and answers; the back rank is protected support —
+## it never strikes and only takes damage when its lane's front slot is
+## empty or the attacker carries the Reach seal.
+func _prow(row: int) -> Dictionary:
+	return _board_p if row == 0 else _board_pb
+
+func _erow(row: int) -> Dictionary:
+	return _board_e if row == 0 else _board_eb
+
+func _all_p() -> Array:
+	return _board_p.values() + _board_pb.values()
+
+func _all_e() -> Array:
+	return _board_e.values() + _board_eb.values()
+
+func _pad_key(letter: String, lane: int, row: int) -> String:
+	return letter + str(lane) + ("b" if row == 1 else "")
 
 # ---------------------------------------------------------------- setup
 
@@ -239,7 +260,7 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	for i in range(ambush):
 		var free_l: Array = []
 		for l in range(LANES):
-			if not _board_e.has(l):
+			if not _board_e.has(l) or not _board_eb.has(l):
 				free_l.append(l)
 		if free_l.is_empty() or _edeck.is_empty():
 			break
@@ -251,9 +272,11 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 		ac.setup(load(d.face_file), _back_tex)
 		ac.lane = lane
 		ac.hp = d.health
-		_board_e[lane] = ac
+		var arow := 0 if not _board_e.has(lane) else 1
+		ac.row = arow
+		_erow(arow)[lane] = ac
 		_area_to_card[ac.get_area()] = ac
-		ac.place_on_pad(_pads["e" + str(lane)].position, true)
+		ac.place_on_pad(_pads[_pad_key("e", lane, arow)].position, true)
 	for i in range(5):
 		_draw_hand()
 	_start_round()
@@ -272,26 +295,31 @@ func _make_pads() -> void:
 	mat_e.roughness = 0.95
 	for side in 2:
 		for lane in range(LANES):
-			var key := ("e" if side == 0 else "p") + str(lane)
-			var pad := MeshInstance3D.new()
-			var bm := BoxMesh.new()
-			bm.size = Vector3(0.155, 0.003, 0.2)
-			pad.mesh = bm
-			pad.material_override = (mat_e if side == 0 else mat_p).duplicate()
-			pad.position = Vector3(-0.33 + lane * 0.165, _top + 0.014,
-				-0.115 + side * 0.23)
-			add_child(pad)
-			_pads[key] = pad
-			var area := Area3D.new()
-			area.collision_layer = 2        # pads own a layer so clicks prefer them
-			area.collision_mask = 0
-			var col := CollisionShape3D.new()
-			var sb := BoxShape3D.new()
-			sb.size = Vector3(0.175, 0.02, 0.22)
-			col.shape = sb
-			area.add_child(col)
-			pad.add_child(area)
-			_pad_areas[area] = {"enemy": side == 0, "lane": lane}
+			for row in 2:
+				var key := ("e" if side == 0 else "p") + str(lane) \
+					+ ("b" if row == 1 else "")
+				var pad := MeshInstance3D.new()
+				var bm := BoxMesh.new()
+				bm.size = Vector3(0.155, 0.003, 0.2 if row == 0 else 0.16)
+				pad.mesh = bm
+				pad.material_override = (mat_e if side == 0 else mat_p).duplicate()
+				# front rank mid-felt; support rank behind it (§2.2)
+				var pz: float = -0.115 + side * 0.23 if row == 0 \
+					else -0.29 + side * 0.58
+				pad.position = Vector3(-0.33 + lane * 0.165, _top + 0.014, pz)
+				add_child(pad)
+				_pads[key] = pad
+				var area := Area3D.new()
+				area.collision_layer = 2    # pads own a layer so clicks prefer them
+				area.collision_mask = 0
+				var col := CollisionShape3D.new()
+				var sb := BoxShape3D.new()
+				sb.size = Vector3(0.175, 0.02, 0.22 if row == 0 else 0.18)
+				col.shape = sb
+				area.add_child(col)
+				pad.add_child(area)
+				_pad_areas[area] = {"enemy": side == 0, "lane": lane,
+					"row": row}
 	# the pot — a physical chip pile on the felt's right edge; every chip
 	# the blinds, raises or wounds pay stacks up here
 	for i in range(16):
@@ -383,17 +411,18 @@ func _start_round() -> void:
 		if e["id"] == "debtor_bell":
 			ante += 1              # the bell tolls — both antes rise
 	# High Priestess of Chance: each round she flips — heads +3, tails −1
-	for lane in range(LANES):
-		var c = _board_p.get(lane)
-		if c != null and not c.face_down and c.def != null 			and c.def.id == "priestess":
+	# she flips from either rank — sheltered behind a wall she keeps
+	# turning the coin (§2.2 back rank is where she belongs)
+	for c in _all_p():
+		if not c.face_down and c.def != null and c.def.id == "priestess":
 			var won := _roll_chance()
 			_chips_you += 3 if won else -1
 			_burst(c.position + Vector3(0, 0.03, 0),
 				Color(1.0, 0.8, 0.2) if won else Color(0.5, 0.1, 0.4),
 				14, 0.01, 0.45)
 			_hint((tr("PRIESTESS_WON") if won else tr("PRIESTESS_LOST")))
-		var e = _board_e.get(lane)
-		if e != null and not e.face_down and e.def != null 			and e.def.id == "priestess":
+	for e in _all_e():
+		if not e.face_down and e.def != null and e.def.id == "priestess":
 			var devil_won := _roll_chance()
 			_chips_devil += 3 if devil_won else -1
 			_burst(e.position + Vector3(0, 0.03, 0),
@@ -411,7 +440,7 @@ func _start_round() -> void:
 		if e["id"] == "croupier":
 			_chips_you += 1        # the House's hand pays your ante back
 	# venom stacks tick — wounded cards rot a little each round
-	for side in [_board_p, _board_e]:
+	for side in [_board_p, _board_pb, _board_e, _board_eb]:
 		for lane in range(LANES):
 			var c = side.get(lane)
 			if c != null and c.venom > 0 and not c.face_down:
@@ -500,7 +529,8 @@ func hover_target(collider) -> void:
 	_hovered_pad = pad
 	if lit != null and lit != pad:
 		_pad_glow(lit, 0.0)
-	if pad != null and _selected != null and not _board_p.has(pad["lane"]):
+	if pad != null and _selected != null \
+		and not _prow(int(pad["row"])).has(pad["lane"]):
 		_pad_glow(pad, 0.8)
 
 func click(collider) -> void:
@@ -514,7 +544,7 @@ func click(collider) -> void:
 	var card = _area_to_card.get(collider)
 	if _call_armed:
 		if card != null and card.placed and card.face_down \
-			and _board_e.values().has(card):
+			and _all_e().has(card):
 			_call_bluff(card)
 		else:
 			_hint(tr("HINT_CALL"))
@@ -529,8 +559,9 @@ func click(collider) -> void:
 		return
 	# reposition armed — an empty lane takes the card, another card swaps
 	if _repos_armed != null:
-		if pad != null and not pad["enemy"] 			and not _board_p.has(pad["lane"]):
-			_do_repos(pad["lane"])
+		if pad != null and not pad["enemy"] \
+			and not _prow(int(pad["row"])).has(pad["lane"]):
+			_do_repos(pad["lane"], int(pad["row"]))
 		elif card != null and _board_p.values().has(card) 			and card != _repos_armed and not card.face_down:
 			_swap_lanes(_repos_armed, card)
 		else:
@@ -543,7 +574,7 @@ func click(collider) -> void:
 			_select(card if card != _selected else null)
 		return
 	# a revealed pawn on the board can be picked up for reposition
-	if card != null and card.placed and _board_p.values().has(card):
+	if card != null and card.placed and _all_p().has(card):
 		if card.face_down:
 			_hint(tr("HINT_REPOS_DOWN"))
 		elif card.moved_once:
@@ -552,7 +583,7 @@ func click(collider) -> void:
 			_repos_arm(card)
 		return
 	if pad != null and not pad["enemy"] and _selected != null:
-		_try_place(pad["lane"])
+		_try_place(pad["lane"], int(pad["row"]))
 
 func right_click(collider) -> void:
 	if _phase != Phase.PLACE or _autoplay:
@@ -571,9 +602,9 @@ func _select(card) -> void:
 	else:
 		_hint(tr("HINT_PLACE"))
 
-func _try_place(lane: int) -> void:
+func _try_place(lane: int, row := 0) -> void:
 	var card = _selected
-	if _board_p.has(lane):
+	if _prow(row).has(lane):
 		return
 	if card.def.blood_cost > _blood:
 		_hint(tr("HINT_NOBLOOD"))
@@ -587,9 +618,11 @@ func _try_place(lane: int) -> void:
 		_hovered_pad = null
 	_hand.erase(card)
 	card.lane = lane
+	card.row = row
 	card.hp = card.def.health
-	_board_p[lane] = card
-	var dest: Vector3 = _pads["p" + str(lane)].position + Vector3(0, 0.002, 0)
+	_prow(row)[lane] = card
+	var dest: Vector3 = _pads[_pad_key("p", lane, row)].position \
+		+ Vector3(0, 0.002, 0)
 	var rot := Vector3(PI, 0, PI * randf() * 0.06)
 	card.placed = true
 	card.set_face_down(true)
@@ -598,7 +631,7 @@ func _try_place(lane: int) -> void:
 		await _phand.pick_and_place(card, dest, rot)
 		card.scale = Vector3.ONE * 0.72
 	else:
-		card.place_on_pad(_pads["p" + str(lane)].position, false)
+		card.place_on_pad(_pads[_pad_key("p", lane, row)].position, false)
 	if "tithe" in card.def.sigils:
 		_chips_you += 2
 		_pulse(_l_chips)
@@ -691,9 +724,11 @@ func _enemy_place() -> void:
 	# a decision, not a coin toss. It's his table; he reads even the
 	# face-down cards (he's the devil — thematically a cheat, and it
 	# makes his placements feel predatory, not random).
+	# §2.2: a lane counts as free while either of its ranks is open —
+	# he can tuck a support pawn behind a wall of his own
 	var free_lanes: Array = []
 	for lane in range(LANES):
-		if not _board_e.has(lane):
+		if not _board_e.has(lane) or not _board_eb.has(lane):
 			free_lanes.append(lane)
 	var peek: CardDef = _edeck.back() if not _edeck.is_empty() else null
 
@@ -719,9 +754,18 @@ func _enemy_place() -> void:
 		card.rotation = Vector3(PI, 0, 0)
 		card.lane = lane
 		card.hp = d.health
-		_board_e[lane] = card
+		# §2.2: 0-attack supports shelter in the back rank; everything
+		# else takes the front. Fall back to whichever rank is open.
+		var row := 1 if (d.attack == 0 and not _board_eb.has(lane)) else 0
+		if _erow(row).has(lane):
+			row = 1 - row
+		if _erow(row).has(lane):
+			continue
+		card.row = row
+		_erow(row)[lane] = card
 		_area_to_card[card.get_area()] = card
-		var dest: Vector3 = _pads["e" + str(lane)].position + Vector3(0, 0.002, 0)
+		var dest: Vector3 = _pads[_pad_key("e", lane, row)].position \
+			+ Vector3(0, 0.002, 0)
 		var rot := Vector3(PI, 0, PI * randf() * 0.06)
 		if _devil != null and not _autoplay:
 			card.placed = true
@@ -730,7 +774,7 @@ func _enemy_place() -> void:
 			card.set_base(dest, rot)
 			await _devil.play_card(card, dest, rot)
 		else:
-			card.place_on_pad(_pads["e" + str(lane)].position, true)
+			card.place_on_pad(_pads[_pad_key("e", lane, row)].position, true)
 		_sfx.play(Sfx.PLACE_E, -10.0)
 		_sfx.play(Sfx.SLIDE, -14.0, 1.2)   # the arc whoosh
 
@@ -771,19 +815,20 @@ func _run_resolution() -> void:
 	# reveal all concealed cards, staggered
 	_sfx.play(Sfx.FAN, -7.0)
 	for lane in range(LANES):
-		var p = _board_p.get(lane)
-		var e = _board_e.get(lane)
-		if p != null and p.face_down:
-			p.reveal()
-			_on_reveal(p, e)
-			_burst(p.position + Vector3(0, 0.03, 0),
-				Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
-		if e != null and e.face_down:
-			e.reveal_enemy()
-			if _devil != null:
-				_devil.watch(e.position, 1.4)
-			_burst(e.position + Vector3(0, 0.03, 0),
-				Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
+		# reveal both ranks, staggered — support cards flip with the rest
+		for p in [_board_p.get(lane), _board_pb.get(lane)]:
+			if p != null and p.face_down:
+				p.reveal()
+				_on_reveal(p, _board_e.get(lane))
+				_burst(p.position + Vector3(0, 0.03, 0),
+					Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
+		for e in [_board_e.get(lane), _board_eb.get(lane)]:
+			if e != null and e.face_down:
+				e.reveal_enemy()
+				if _devil != null:
+					_devil.watch(e.position, 1.4)
+				_burst(e.position + Vector3(0, 0.03, 0),
+					Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
 		await get_tree().create_timer(0.18).timeout
 	await get_tree().create_timer(0.5).timeout
 	# strikes lane by lane: player hits first, then the Devil answers
@@ -797,24 +842,37 @@ func _run_resolution() -> void:
 		var sharp_kill := false
 		if p != null and not p.face_down and p.def.attack > 0 \
 			and p.hp > 0:
-			p.lunge(_pads["e" + str(lane)].position)
-			if e != null and not e.face_down:
-				var atk: float = float(p.def.attack) + (3.0 					if "executioner" in p.def.sigils 					and e.hp < float(e.def.health) else 0.0)
-				var hp_before: float = e.hp
-				e.hp -= atk
-				if "pierce" in p.def.sigils and e.hp <= 0:
+			# §2.2/§3.3: the back rank is shielded by its own front card;
+			# only Reach lets a strike bypass the wall
+			var tgt = _board_eb.get(lane) if (
+				"reach" in p.def.sigils and _board_eb.get(lane) != null) \
+				else e
+			if tgt == null:
+				tgt = _board_eb.get(lane)
+			p.lunge(_pads[_pad_key("e", lane,
+				1 if tgt == _board_eb.get(lane) else 0)].position)
+			if tgt != null and not tgt.face_down:
+				var e2 = tgt
+				var atk: float = float(p.def.attack) + (3.0 \
+					if "executioner" in p.def.sigils \
+						and e2.hp < float(e2.def.health) else 0.0)
+				var hp_before: float = e2.hp
+				e2.hp -= atk
+				if "pierce" in p.def.sigils and e2.hp <= 0:
 					var over: float = atk - hp_before
 					if over > 0.0:
 						_chips_devil -= int(over)
 						_pot += int(over)
 						_pulse(_l_pot)
-				if "venom" in p.def.sigils and e.hp > 0:
-					e.venom = mini(e.venom + 1, 3)
-				if e.hp <= 0:
+				if "venom" in p.def.sigils and e2.hp > 0:
+					e2.venom = mini(e2.venom + 1, 3)
+				if e2.hp <= 0:
 					_bump("respect", 0.4)   # a clean kill earns a nod
-					sharp_kill = "sharp" in p.def.sigils
-				e.flash()
-				_burst(e.position + Vector3(0, 0.03, 0),
+					# Sharp only silences the front rank — a back-rank
+					# target never earned an answer anyway
+					sharp_kill = "sharp" in p.def.sigils and tgt == e
+				e2.flash()
+				_burst(e2.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
 			else:
 				# §2.4: chip damage bleeds 1:1 — and antes the same into the pot
@@ -836,21 +894,29 @@ func _run_resolution() -> void:
 			await get_tree().create_timer(0.42).timeout
 		if e != null and not e.face_down and e.def != null and e_answer \
 			and not sharp_kill:
-			e.lunge(_pads["p" + str(lane)].position)
-			if p != null and not p.face_down:
-				var eatk: float = float(e.def.attack) + (3.0 					if "executioner" in e.def.sigils 					and p.hp < float(p.def.health) else 0.0)
-				var php_before: float = p.hp
-				p.hp -= eatk
-				if "pierce" in e.def.sigils and p.hp <= 0:
+			# §2.2 symmetric: his Reach slips past your wall; an empty
+			# front leaves your back rank exposed
+			var pb = _board_pb.get(lane)
+			var ptgt = pb if ("reach" in e.def.sigils and pb != null) \
+				else (p if p != null else pb)
+			e.lunge(_pads[_pad_key("p", lane,
+				1 if ptgt == pb else 0)].position)
+			if ptgt != null and not ptgt.face_down:
+				var eatk: float = float(e.def.attack) + (3.0 \
+					if "executioner" in e.def.sigils \
+						and ptgt.hp < float(ptgt.def.health) else 0.0)
+				var php_before: float = ptgt.hp
+				ptgt.hp -= eatk
+				if "pierce" in e.def.sigils and ptgt.hp <= 0:
 					var eover: float = eatk - php_before
 					if eover > 0.0:
 						_chips_you -= int(eover)
 						_pot += int(eover)
 						_pulse(_l_pot)
-				if "venom" in e.def.sigils and p.hp > 0:
-					p.venom = mini(p.venom + 1, 3)
-				p.flash()
-				_burst(p.position + Vector3(0, 0.03, 0),
+				if "venom" in e.def.sigils and ptgt.hp > 0:
+					ptgt.venom = mini(ptgt.venom + 1, 3)
+				ptgt.flash()
+				_burst(ptgt.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
 			else:
 				_chips_you -= e.def.attack
@@ -899,38 +965,39 @@ func _shake(amt: float) -> void:
 
 func _cleanup_dead() -> void:
 	for lane in range(LANES):
-		var p = _board_p.get(lane)
-		if p != null and p.hp <= 0:
-			_board_p.erase(lane)
-			_area_to_card.erase(p.get_area())
-			var e_killer = _board_e.get(lane)
-			if "haunt" in p.def.sigils and e_killer != null:
-				e_killer.def.attack = maxi(0, e_killer.def.attack - 1)
-				_burst(e_killer.position + Vector3(0, 0.03, 0),
-					Color(0.4, 0.1, 0.5), 12, 0.01, 0.5)
-			if "revival" in p.def.sigils and not p.revived:
-				p.revived = true
-				_dead_to_hand(p.def)
-			elif "brood" in p.def.sigils:
-				_dead_p.append(p.def)
-				_spawn_grub(lane, true)
-			else:
-				_dead_p.append(p.def)
-			p.die()
-		var e = _board_e.get(lane)
-		if e != null and e.hp <= 0:
-			_board_e.erase(lane)
-			_area_to_card.erase(e.get_area())
-			var p_killer = _board_p.get(lane)
-			if "haunt" in e.def.sigils and p_killer != null:
-				p_killer.def.attack = maxi(0, p_killer.def.attack - 1)
-				_burst(p_killer.position + Vector3(0, 0.03, 0),
-					Color(0.4, 0.1, 0.5), 12, 0.01, 0.5)
-			elif "brood" in e.def.sigils:
-				_spawn_grub(lane, false)
-			else:
-				_dead_e.append(e.def)
-			e.die()
+		for row in 2:   # front rank, then the support rank behind it
+			var p = _prow(row).get(lane)
+			if p != null and p.hp <= 0:
+				_prow(row).erase(lane)
+				_area_to_card.erase(p.get_area())
+				var e_killer = _board_e.get(lane)
+				if "haunt" in p.def.sigils and e_killer != null:
+					e_killer.def.attack = maxi(0, e_killer.def.attack - 1)
+					_burst(e_killer.position + Vector3(0, 0.03, 0),
+						Color(0.4, 0.1, 0.5), 12, 0.01, 0.5)
+				if "revival" in p.def.sigils and not p.revived:
+					p.revived = true
+					_dead_to_hand(p.def)
+				elif "brood" in p.def.sigils:
+					_dead_p.append(p.def)
+					_spawn_grub(lane, true, row)
+				else:
+					_dead_p.append(p.def)
+				p.die()
+			var e = _erow(row).get(lane)
+			if e != null and e.hp <= 0:
+				_erow(row).erase(lane)
+				_area_to_card.erase(e.get_area())
+				var p_killer = _board_p.get(lane)
+				if "haunt" in e.def.sigils and p_killer != null:
+					p_killer.def.attack = maxi(0, p_killer.def.attack - 1)
+					_burst(p_killer.position + Vector3(0, 0.03, 0),
+						Color(0.4, 0.1, 0.5), 12, 0.01, 0.5)
+				elif "brood" in e.def.sigils:
+					_spawn_grub(lane, false, row)
+				else:
+					_dead_e.append(e.def)
+				e.die()
 
 func _check_over() -> bool:
 	if _chips_you > 0 and _chips_devil > 0:
@@ -1165,7 +1232,7 @@ func _resolve_event(card) -> void:
 				var tgt: String = str(_run["spoils"][_run["spoils"].size() - 1])
 				var tgt_def: CardDef = CardDef.spoil(tgt)
 				var graft_pool: Array = ["venom", "haunt", "mimic",
-					"pierce", "revival", "executioner", "sharp"]
+					"pierce", "revival", "executioner", "sharp", "reach"]
 				if tgt_def != null:
 					for s in tgt_def.sigils:
 						graft_pool.erase(s)
@@ -1339,7 +1406,7 @@ func _call_bluff(card) -> void:
 	if card.def.is_bluff:
 		_chips_devil -= 2
 		_bump("anger", 0.6)          # caught palming a fake — he hates it
-		_board_e.erase(card.lane)
+		_erow(card.row).erase(card.lane)
 		_area_to_card.erase(card.get_area())
 		card.burn()
 		_hint(tr("CALL_BLUFF"))
@@ -1363,7 +1430,7 @@ func _process(delta: float) -> void:
 	_tell_t += delta
 	# §2.3 tells: a concealed card betrays its weight — real violence can't
 	# stop trembling; a palmed bluff lies unnaturally still.
-	for e in _board_e.values():
+	for e in _all_e():
 		if e.face_down and e.def != null:
 			var restless: float = 0.0012 * float(e.def.attack) * (
 				2.5 if _pact else 1.0)
@@ -1408,7 +1475,7 @@ func use_trump(idx: int) -> void:
 	match id:
 		"sleeve_ace":
 			var any := false
-			for e in _board_e.values():
+			for e in _all_e():
 				if e.face_down:
 					any = true
 					e.reveal_enemy()
@@ -1438,7 +1505,8 @@ func use_trump(idx: int) -> void:
 func _peek_rehide(card) -> void:
 	# the peek lasts a breath — then the card lies down again
 	await get_tree().create_timer(2.6).timeout
-	if is_instance_valid(card) and card.placed 		and _board_e.values().has(card) and not card.face_down:
+	if is_instance_valid(card) and card.placed \
+		and _all_e().has(card) and not card.face_down:
 		card.set_face_down(true)
 
 func restart() -> void:
@@ -1466,7 +1534,8 @@ func _hint(t: String) -> void:
 	_l_hint.text = t
 
 func _pad_glow(pad, amt: float) -> void:
-	var m: StandardMaterial3D = _pads["p" + str(pad["lane"])].material_override
+	var m: StandardMaterial3D = _pads[_pad_key("p", pad["lane"],
+		int(pad["row"]))].material_override
 	var tw := create_tween()
 	tw.tween_property(m, "emission_energy_multiplier", amt, 0.15)
 
@@ -1489,17 +1558,18 @@ func _repos_cancel() -> void:
 	_repos_armed = null
 	_hint(tr("HINT_PLACE"))
 
-func _repos_dest(lane: int) -> Vector3:
-	return _pads["p" + str(lane)].position + Vector3(0, 0.002, 0)
+func _repos_dest(lane: int, row := 0) -> Vector3:
+	return _pads[_pad_key("p", lane, row)].position + Vector3(0, 0.002, 0)
 
-func _do_repos(lane: int) -> void:
+func _do_repos(lane: int, row := 0) -> void:
 	var card = _repos_armed
 	_repos_cancel()
-	_board_p.erase(card.lane)
-	_board_p[lane] = card
+	_prow(card.row).erase(card.lane)
+	_prow(row)[lane] = card
 	card.lane = lane
+	card.row = row
 	card.moved_once = true
-	var dest := _repos_dest(lane)
+	var dest := _repos_dest(lane, row)
 	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(card, "position", dest, 0.35)
 	card.set_base(dest, card.rotation)
@@ -1511,13 +1581,19 @@ func _swap_lanes(a, b) -> void:
 	_repos_cancel()
 	var la: int = a.lane
 	var lb: int = b.lane
-	_board_p[la] = b
-	_board_p[lb] = a
+	var ra: int = a.row
+	var rb: int = b.row
+	_prow(ra).erase(la)
+	_prow(rb).erase(lb)
+	_prow(ra)[la] = b
+	_prow(rb)[lb] = a
 	a.lane = lb
+	a.row = rb
 	b.lane = la
+	b.row = ra
 	a.moved_once = true
-	var da := _repos_dest(lb)
-	var db := _repos_dest(la)
+	var da := _repos_dest(lb, rb)
+	var db := _repos_dest(la, ra)
 	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(a, "position", da, 0.35)
 	tw.parallel().tween_property(b, "position", db, 0.35)
@@ -1655,13 +1731,15 @@ func _on_reveal(card, opposing) -> void:
 	if "swap" in sig:
 		var empty: Array = []
 		for l in range(LANES):
-			if not _board_p.has(l):
-				empty.append(l)
+			for r in 2:
+				if not _prow(r).has(l):
+					empty.append([l, r])
 		if empty.size() > 0:
 			_repos_armed = card
-			_do_repos(empty[randi() % empty.size()])
+			var pick = empty[randi() % empty.size()]
+			_do_repos(int(pick[0]), int(pick[1]))
 
-func _spawn_grub(lane: int, mine: bool) -> void:
+func _spawn_grub(lane: int, mine: bool, row := 0) -> void:
 	var d: CardDef = CardDef.make("grub", "chalices", 0, 0, 1, 0,
 		"res://assets_external/card-art/gwd/face_imp.png")
 	var card := GameCard.new()
@@ -1669,15 +1747,18 @@ func _spawn_grub(lane: int, mine: bool) -> void:
 	add_child(card)
 	card.setup(load(d.face_file), _back_tex)
 	card.lane = lane
+	card.row = row
 	card.hp = d.health
 	card.placed = true
 	card.scale = Vector3.ONE * 0.72
 	_area_to_card[card.get_area()] = card
-	var dest: Vector3 = _repos_dest(lane) if mine 		else _pads["e" + str(lane)].position + Vector3(0, 0.002, 0)
+	# the grub crawls out where its mother died — same lane, same rank
+	var dest: Vector3 = _repos_dest(lane, row) if mine \
+		else _pads[_pad_key("e", lane, row)].position + Vector3(0, 0.002, 0)
 	if mine:
-		_board_p[lane] = card
+		_prow(row)[lane] = card
 	else:
-		_board_e[lane] = card
+		_erow(row)[lane] = card
 	card.position = dest + Vector3(0, 0.05, 0)
 	card.set_base(dest, Vector3(PI, 0, 0))
 	var tw := create_tween().set_trans(Tween.TRANS_CUBIC)
@@ -1732,11 +1813,14 @@ func _autoplay_run() -> void:
 	await get_tree().create_timer(1.2).timeout
 	if _phase != Phase.PLACE:
 		return
-	# place hand[0] on lane 1, next free on lane 3, sacrifice hand[0]
+	# place hand[0] on lane 1, next free on lane 3, one support behind
+	# lane 1 (exercises the back rank), sacrifice hand[0]
 	if _hand.size() >= 1:
 		_select(_hand[0]); _try_place(1)
 	if _hand.size() >= 1:
 		_select(_hand[1] if _hand.size() > 1 else _hand[0]); _try_place(3)
+	if _hand.size() >= 1:
+		_select(_hand[0]); _try_place(1, 1)
 	for c in _hand.duplicate():
 		if c.def.kind == "trick":
 			_play_trick(c)

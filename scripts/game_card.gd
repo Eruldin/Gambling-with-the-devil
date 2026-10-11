@@ -11,6 +11,7 @@ var def = null                 # CardDef
 var placed := false            # on the board (not in hand)
 var face_down := false         # concealed on a pad
 var lane := -1                 # board lane index when placed
+var row := 0                   # 0 = front rank (strikes), 1 = back rank (support)
 var hp := 1                    # remaining health on board
 
 var _front: MeshInstance3D
