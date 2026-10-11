@@ -336,3 +336,18 @@ msgstr "GÜNAH"
 
 msgid "EV_BROKEN"
 msgstr "Sakladığın kart pazarlığı kırıyor —"
+
+msgid "DOOR_CRUELTY"
+msgstr "Tırnağını keçeye vuruyor — ısıranı seçeceksin."
+
+msgid "DOOR_CURIOSITY"
+msgstr "Öne eğiliyor — açlığın seni hangi kapıdan geçirecek görmek istiyor."
+
+msgid "DOOR_ANGER"
+msgstr "Aldıklarını hâlâ sayıyor. Seç. Dikkatli seç."
+
+msgid "DOOR_RESPECT"
+msgstr "Yavaş bir baş sallama — daha zor bir kapıyı hak ettin."
+
+msgid "DOOR_BOREDOM"
+msgstr "Dişlerinin ardından esniyor — çabuk. Kapılar kararsızlar içindir."

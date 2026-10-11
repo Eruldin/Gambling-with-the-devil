@@ -336,3 +336,18 @@ msgstr "SIN"
 
 msgid "EV_BROKEN"
 msgstr "The card you kept snaps the bargain —"
+
+msgid "DOOR_CRUELTY"
+msgstr "He taps a nail on the felt — you will pick the one that bites."
+
+msgid "DOOR_CURIOSITY"
+msgstr "He leans in — he wants to see which door hunger takes you through."
+
+msgid "DOOR_ANGER"
+msgstr "He is still counting what you took. Choose. Carefully."
+
+msgid "DOOR_RESPECT"
+msgstr "A slow nod — you have earned the right to a harder door."
+
+msgid "DOOR_BOREDOM"
+msgstr "He yawns behind his teeth — hurry. Doors are for the dithering."
