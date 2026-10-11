@@ -541,6 +541,7 @@ func _run_resolution() -> void:
 				_bump("respect", 0.2)      # ...and impresses him
 				_pulse(_l_chips)
 				_shake(0.022)
+				_punch(0.4 + 0.12 * p.def.attack)
 				if _scale != null:
 					_scale.tip(0.25 * p.def.attack)
 				_burst(_pads["e" + str(lane)].position + Vector3(0, 0.05, 0),
@@ -564,6 +565,7 @@ func _run_resolution() -> void:
 				_bump("cruelty", 0.4)     # he tastes your blood
 				_pulse(_l_chips)
 				_shake(0.028)
+				_punch(0.6 + 0.15 * e.def.attack)
 				if _scale != null:
 					_scale.tip(-0.25 * e.def.attack)
 				_burst(_pads["p" + str(lane)].position + Vector3(0, 0.05, 0),
@@ -582,6 +584,15 @@ func _run_resolution() -> void:
 	_start_round()
 
 ## impact shake: quick camera offset jitter, settles in ~0.25s
+func _punch(strength: float) -> void:
+	# dramatic camera kick — the lens dips for a frame then snaps back,
+	# like the table itself flinched when chips changed hands
+	if _cam == null:
+		return
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(_cam, "fov", _cam.fov - 4.0 * strength, 0.06)
+	tw.tween_property(_cam, "fov", 46.0, 0.38).set_ease(Tween.EASE_OUT)
+
 func _shake(amt: float) -> void:
 	if _cam == null:
 		return
