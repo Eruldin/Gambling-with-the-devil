@@ -70,6 +70,8 @@ func _ready() -> void:
 	_hand.home_pos(Vector3(0.42, top - 0.13, 0.62))
 	_hud()
 	_vignette()
+	_light_shafts(top)
+	_ca_overlay()
 	_battle = Battle.new()
 	add_child(_battle)
 	_battle.setup(top, _cam, _hud_layer, _hud_font, _devil, _hand)
@@ -97,6 +99,11 @@ func _environment() -> void:
 	env.ambient_light_color = Color(0.022, 0.034, 0.03)
 	env.ambient_light_energy = 0.2
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.glow_enabled = true
+	env.glow_intensity = 0.28
+	env.glow_strength = 0.9
+	env.glow_bloom = 0.12
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	env.adjustment_enabled = true
 	env.adjustment_brightness = 0.9
 	env.adjustment_contrast = 1.25
@@ -571,3 +578,50 @@ func _local_aabb(root: Node3D) -> AABB:
 			stack.push_back(ch)
 	return out
 
+
+# ---------------------------------------------------------------- film pass
+
+func _light_shafts(top: float) -> void:
+	# fake volumetric beams — dusty air catching the candle pool and a
+	# cold blade of moonlight from the cabinet window. Additive unshaded
+	# quads, soft-faded on every edge so they read as light, not sprites.
+	var mk := func(pos: Vector3, rot: Vector3, w: float, h: float,
+		col: Color, str_: float) -> void:
+		var mi := MeshInstance3D.new()
+		var q := QuadMesh.new()
+		q.size = Vector2(w, h)
+		mi.mesh = q
+		var sm := ShaderMaterial.new()
+		var sh := Shader.new()
+		sh.code = "shader_type spatial;" 			+ "render_mode unshaded, blend_add, cull_disabled," 			+ " depth_draw_never;" 			+ "uniform vec4 tint : source_color = vec4(1.0);" 			+ "uniform float strength = 0.05;" 			+ "void fragment(){" 			+ " float a = smoothstep(0.5, 0.02, abs(UV.x - 0.5));" 			+ " a *= smoothstep(0.0, 0.25, UV.y) * smoothstep(1.0, 0.6, UV.y);" 			+ " ALBEDO = tint.rgb;" 			+ " ALPHA = a * strength;" 			+ "}"
+		sm.shader = sh
+		sm.set_shader_parameter("tint", col)
+		sm.set_shader_parameter("strength", str_)
+		mi.material_override = sm
+		mi.position = pos
+		mi.rotation = rot
+		add_child(mi)
+	# two warm beams falling from the candle clusters onto the felt
+	mk.call(Vector3(-0.34, top + 0.42, -0.1),
+		Vector3(-0.32, 0.12, -0.18), 0.34, 0.9,
+		Color(1.0, 0.6, 0.28, 1.0), 0.055)
+	mk.call(Vector3(0.42, top + 0.5, -0.14),
+		Vector3(-0.3, -0.1, 0.16), 0.4, 1.05,
+		Color(1.0, 0.58, 0.26, 1.0), 0.05)
+	# one cold moonbeam slicing in from the cabinet window, behind Azrail
+	mk.call(Vector3(0.95, top + 1.15, -0.62),
+		Vector3(-0.5, -0.55, 0.3), 0.55, 1.7,
+		Color(0.4, 0.55, 0.72, 1.0), 0.045)
+
+func _ca_overlay() -> void:
+	# chromatic aberration — filmic edge fringing, only at the frame rim;
+	# the center stays optically clean so the table reads crisp
+	var r := ColorRect.new()
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sm := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = "shader_type canvas_item;" 		+ "uniform sampler2D screen : hint_screen_texture;" 		+ "void fragment(){" 		+ " float d = distance(UV, vec2(0.5)) * 2.0;" 		+ " float m = smoothstep(0.55, 1.3, d);" 		+ " vec2 off = (UV - vec2(0.5)) * 0.0035 * m;" 		+ " float cr = texture(screen, UV + off).r;" 		+ " float cb = texture(screen, UV - off).b;" 		+ " vec3 base = texture(screen, UV).rgb;" 		+ " COLOR = vec4(vec3(cr, base.g, cb), m * 0.8);" 		+ "}"
+	sm.shader = sh
+	r.material = sm
+	_hud_layer.add_child(r)
