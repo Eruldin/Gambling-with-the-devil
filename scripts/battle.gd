@@ -88,7 +88,7 @@ var _event_cards: Array = []
 # debt follows you, luck keeps its tilt, carried souls ride in extra.
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
-	"psyche": {}, "taunted": []}
+	"psyche": {}, "taunted": [], "spoils": []}
 
 # ---------------------------------------------------------------- setup
 
@@ -108,6 +108,13 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_make_hud()
 	_spawn_effigies()
 	_deck = CardDef.starter_deck()
+	# §18 spoils: every table you owned leaves a card in your deck —
+	# the pile you carry grows as the Descent does (cap 24)
+	for sid in _run["spoils"]:
+		if _deck.size() < 24:
+			var sd: CardDef = CardDef.spoil(sid)
+			if sd != null:
+				_deck.append(sd)
 	_edeck = CardDef.devil_deck(_run["depth"])
 	# Azrail palms counterfeits into his deck — Call the Bluff prey;
 	# he palms more of them the deeper the Descent takes you.
@@ -846,6 +853,8 @@ func _finish_over(won: bool) -> void:
 		_run["luck"] = _luck
 		_run["psyche"] = _psyche.duplicate()
 		_run["taunted"] = _taunted.keys()
+		var spoil_ids: Array = CardDef.spoil_ids()
+		_run["spoils"].append(spoil_ids[randi() % spoil_ids.size()])
 		_l_over.text = tr("YOU_WIN") + "\n" + str(_pot) + " " \
 			+ tr("EMBERS_WON")
 		_l_phase.text = tr("GAME_OVER")
@@ -872,6 +881,7 @@ func _reset_run() -> void:
 	_run["luck"] = 0.0
 	_run["psyche"] = {}
 	_run["taunted"] = []
+	_run["spoils"] = []
 
 # ------------------------------------------------------------ descent (§18)
 

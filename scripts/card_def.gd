@@ -90,3 +90,29 @@ static func devil_deck(depth: int) -> Array:
 		d.append(make("priestess", "eyes", 1, 3, 4, 1,
 			"res://assets_external/card-art/gwd/face_seer.png"))
 	return d
+
+## §18 spoils: cards a won table pays into your deck — slightly better
+## than the starter line, drawn from the same face set.
+static func spoil_ids() -> Array:
+	return ["grave_duelist", "hell_warden", "choir_seer", "debt_reaper",
+		"plague_votary"]
+
+static func spoil(sid: String) -> RefCounted:
+	var g := "res://assets_external/card-art/gwd/"
+	match sid:
+		"grave_duelist":
+			return make("duelist", "blades", 1, 3, 2, 1,
+				g + "face_duelist.png", ["executioner"])
+		"hell_warden":
+			return make("warden", "chalices", 1, 1, 5, 1,
+				g + "face_warden.png", ["revival", "haunt"])
+		"choir_seer":
+			return make("seer", "eyes", 1, 2, 3, 1,
+				g + "face_seer.png", ["mimic"])
+		"debt_reaper":
+			return make("reaper", "blades", 2, 4, 2, 1,
+				g + "face_reaper.png", ["pierce"])
+		"plague_votary":
+			return make("votary", "chalices", 1, 0, 5, 2,
+				g + "face_votary.png", ["brood", "venom"])
+	return null
