@@ -607,6 +607,103 @@ Kalıcı ilerleme olasılık alanını genişletir; sayıları asla doğrudan ar
 - **İlk günden çift dil:** tüm kart metinleri, UI, ev kuralları, olaylar, ipuçları **TR + EN** — Godot çeviri (.po/.csv) ile; metin anahtarları şimdi tasarlanır, sonra değil.
 - **Veri-odaklı kartlar:** kart = veri (anatomi alanları) + mühür scriptleri; tüm kart havuzu içerik-adreslenebilir ve mod'lanabilir.
 
+
+---
+
+# 18. OLAY & SENARYO ÇATISI — "ODAYI ŞEYTAN YAZAR"
+
+> **Üretim ilkesi.** Bu oyunun gücü kaç hikâye olduğu değil — *aynı olayın farklı sonuçlar doğurması ve Şeytan'ın bunu kişiselleştirmesidir*. Yüzlerce senaryo yazmayız; küçük bir mekanik dil kurarız ve kombinasyonlar işi yapar (Inscryption dersi: az yazılmış parça, sonsuz keşfedilen kombo).
+> **1 senaryo kartı = 1 içerik değil, değişken parametreli olay motoru.**
+
+## 18.1 Olay Şablonu (Event Template)
+
+Her senaryo bir **şablon**dur: bir iskelet + parametre havuzları. Motor yuvaları doldurur; tek yazılmış şablon oyuncuya düzinelerce farklı olay gibi görünür.
+
+| Yuvalama | Havuz | Örnekler |
+|---|---|---|
+| **Tehlike tipi** | 5 | Fiziksel · Zihinsel · Ruhsal · Sosyal · Zamansal |
+| **Tehdit** | ~20 | Düşme · Zehir · Lanet · İhanet · Hafıza kaybı |
+| **Bedel** | ~20 | Çip kaybı · Kart kaybı · Günah artışı · Gelecek tur dezavantajı |
+| **Kurtuluş yolu** | ~20 | Güç kartı · Fedakarlık · Blöf · Risk alma · Özel kombinasyon |
+| **Sonuç/Çeşni** | ~20 | Temiz kaçış · Pirus zaferi · Şeytan'ın merhameti · İkiye katla |
+
+Tek iskelet — "Kırık Köprü" — şunlara dönüşür: *Sisli Köprü* (zihinsel: blöfle geç), *Cehennem Köprüsü* (ruhsal: günah öde), *Ruh Köprüsü* (bedel: bir kart), *Zaman Köprüsü* (zamansal: perdeye karşı yarış). Oyuncu dört farklı olay algılar; biz bir tane yazarız.
+
+**Üretim matematiği:** 50 şablon × yuva başına ~20 varyasyon = *farklı hissedilen* 1000+ olay — 50 yazıyla.
+
+Kök arketipler (her şablonun türediği "fiiller"): **Tuzak · Pazarlık · Lanet · Test · Kurban · İhanet · Kumar · Son Tarih**.
+
+## 18.2 Şeytan Psikolojisi — içerik üreten sistem
+
+Şeytan'ın davranışları yazılmış replikler değil, ayrı bir sistemdir. Nasıl oynadığına göre mutasyona uğrayan beş kişilik ekseni:
+
+| Eksen | Ne zaman yükselir | Şeytan'ın tepkisi |
+|---|---|---|
+| **Cruelty (Zalimlik)** | tereddüt, pas, korku | *"Seçmeyeceğini biliyordum."* — avantajı sıkar, korkaklığını yüzüne vurur |
+| **Curiosity (Merak)** | alışılmadık hamleler | *"İlginç…"* — garip masa kurallarıyla seni yoklar |
+| **Anger (Öfke)** | hile, Koz kullanımı | kart çalar, tur ortasında kuralı değiştirir, ante'yi kaçak artırır |
+| **Respect (Saygı)** | temiz risk, iyi oyun | *"Hm."* — daha zor ama adil oynar; daha iyi pazarlıklar açar |
+| **Boredom (Can sıkıntısı)** | kaplumbağa oyunu, tekrar | potu karıştırır, perdeleri erken sıçratır, sataşır |
+
+**Gerçekleme:** ~20 temel davranış (kart çalma, yeniden ante, pasa gülme, blöfü ödüllendirme, sahte merhamet…) × beş eksenli durum × mevcut şablon = binlerce kişisel an. ~50 kişilik kuralı + ~30 özel Şeytan olayı yazarız; varyasyon motoru (platform izin verirse LLM ses katmanı) gerisini getirir. 1000 satırlık diyalog ağacı yok.
+
+## 18.3 Yedi Günah — bölüm değil, sahneli boss'lar
+
+Her Günah 3 perdelik bir yay, 50 ayrı olay değil:
+
+| Perde | İçerik | Görevi |
+|---|---|---|
+| **Giriş** | 5 olay | Günahın mekaniğini öğretir |
+| **Derinlik** | 5 olay | İter, adaptasyon ister |
+| **Final** | 1 özel boss olayı | Günahın bedenlenişi — tek, yazılmış |
+
+7 günah × 11 = boss omurgasının tamamı için **77 yazılmış içerik**.
+
+## 18.4 Kart–senaryo bağlaşımı — asıl çeşitlilik motoru
+
+Olaylar **desteyi, eli ve sahayı okur**. Genel cezalar kişiselleşir:
+
+- "Yalnızlık" olayı: normalde kart çekmeyi kilitler — ama elinde **Sadık Ruh** varsa olay *kırılır*: ruh yoldaşlık eder, Şeytan kaşlarını çatar. Oyuncu hisseder: *"Bu kartı işte bunun için saklamıştım."*
+- Bir **Tehdit** yuvası karta göre farklı çözülür: Kılıçlar (kanla öder), Tılsımlar (korla öder), Gözler (önceden görür — bedel düşer), Kadehler (kurban yakıtına çevirir).
+- Kural: her şablon **kırıcı kartlar** (sonucunu doğrudan bozan) ve **manivela kartları** (bedelini düşüren) ilan eder. "Azrail bana güldü / son anda kurtuldum" anılarını üreten şey budur — olay sayısı değil.
+
+## 18.5 Üretim bütçesi (tam sürüm)
+
+| Katman | Yazılan | Efektif çeşitlilik |
+|---|---|---|
+| Olay şablonları | 50 | parametre havuzlarıyla 1000+ |
+| Benzersiz özel olaylar | 70 | — |
+| Boss olayları (günah finalleri + şeytan sahneleri) | 20 | — |
+| Şeytan özel olayları | 30 | × kişilik eksenleri |
+| **Toplam olay içeriği** | **~170** | **binlerce** |
+| Kartlar | 120 ana + 30 özel + 20 lanetli + 20 joker = **190** | mühür/aşıyla |
+| Şeytan AI | 50 kişilik kuralı | 1000+ varyasyon |
+
+## 18.6 Mimari
+
+```
+                 ŞEYTAN (AI)
+                       |
+        --------------------------------
+        |                              |
+   Olay Üreteci                  Psikoloji Sistemi
+   (şablon × havuzlar)           (5 eksen, 50 kural)
+        |                              |
+  Senaryo Şablonu              sataşma, ruh hali,
+        |                      kural bükme
+   Tehdit·Ödül·Bedel·Çeşni
+        |
+      Kartları okur (kırıcı/manivela)
+        |
+     Sonuç → hatırlanan an
+```
+
+**Turnusol testi:** Oyuncu asla *"350 olay gördüm"* dememeli; *"Şeytan bana güldü — sonra bir çiple kurtuldum"* demeli.
+
+---
+
+*İniş haritasındaki olay düğümleri (§7.1 — Covenant, Whisper, Wheel) bu motorla üretilir: Covenant = Bedeli Borç olan bir Pazarlık arketipi; Whisper = Şans'la açılan bir Test arketipi.*
+
 ---
 
 *Tasarım dokümanı sonu.*
