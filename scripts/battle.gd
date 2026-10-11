@@ -996,8 +996,8 @@ func _spawn_event_cards() -> void:
 	var faces := {
 		"event_whisper": "face_seer.png", "event_wheel": "face_imp.png",
 		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
-		"event_mirror": "face_acolyte.png", "event_furnace": "face_martyr.png",
-		"event_taxidermist": "face_cutpurse.png", "event_pact": "face_votary.png"}
+		"event_mirror": "face_acolyte.png", "event_furnace": "face_furnace.png",
+		"event_taxidermist": "face_taxidermist.png", "event_pact": "face_votary.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
