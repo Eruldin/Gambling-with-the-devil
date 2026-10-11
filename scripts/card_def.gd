@@ -15,7 +15,8 @@ var is_bluff := false       # §2.3: a counterfeit — destroyed when Called
 var kind := "pawn"          # pawn | trick — tricks resolve instantly, no slot
 
 static func make(p_id: String, p_suit: String, p_cost: int, p_atk: int,
-		p_hp: int, p_sac: int, p_face: String) -> RefCounted:
+		p_hp: int, p_sac: int, p_face: String,
+		p_sigils: Array[String] = []) -> RefCounted:
 	var c = (load("res://scripts/card_def.gd") as GDScript).new()
 	c.id = p_id
 	c.name_key = "CARD_" + p_id.to_upper()
@@ -25,6 +26,7 @@ static func make(p_id: String, p_suit: String, p_cost: int, p_atk: int,
 	c.health = p_hp
 	c.sacrifice_value = p_sac
 	c.face_file = p_face
+	c.sigils = p_sigils
 	return c
 
 static func make_trick(p_id: String, p_suit: String, p_cost: int,
@@ -46,16 +48,16 @@ static func starter_deck() -> Array:
 	# 10-card opening deck, mirrored for the Devil. Suits per design doc:
 	# blades=Kılıç, chalices=Kupa, pentacles=Tılsım, eyes=Göz.
 	return [
-		make("cutpurse", "blades", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_cutpurse.png"),
-		make("duelist", "blades", 1, 2, 2, 1, "res://assets_external/card-art/gwd/face_duelist.png"),
-		make("reaper", "blades", 1, 3, 1, 1, "res://assets_external/card-art/gwd/face_reaper.png"),
-		make("warden", "chalices", 0, 1, 3, 1, "res://assets_external/card-art/gwd/face_warden.png"),
-		make("votary", "chalices", 0, 0, 4, 2, "res://assets_external/card-art/gwd/face_votary.png"),
-		make("martyr", "chalices", 0, 1, 2, 2, "res://assets_external/card-art/gwd/face_martyr.png"),
-		make("acolyte", "pentacles", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_acolyte.png"),
-		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png"),
-		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_imp.png"),
-		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png"),
+		make("cutpurse", "blades", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_cutpurse.png", ["tithe"]),
+		make("duelist", "blades", 1, 2, 2, 1, "res://assets_external/card-art/gwd/face_duelist.png", ["executioner"]),
+		make("reaper", "blades", 1, 3, 1, 1, "res://assets_external/card-art/gwd/face_reaper.png", ["pierce"]),
+		make("warden", "chalices", 0, 1, 3, 1, "res://assets_external/card-art/gwd/face_warden.png", ["revival"]),
+		make("votary", "chalices", 0, 0, 4, 2, "res://assets_external/card-art/gwd/face_votary.png", ["brood"]),
+		make("martyr", "chalices", 0, 1, 2, 2, "res://assets_external/card-art/gwd/face_martyr.png", ["haunt"]),
+		make("acolyte", "pentacles", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_acolyte.png", ["venom"]),
+		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png", ["loan_shark"]),
+		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_imp.png", ["swap"]),
+		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic"]),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_martyr.png"),
