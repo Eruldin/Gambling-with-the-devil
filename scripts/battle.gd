@@ -92,6 +92,9 @@ static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {}}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
+var _anger_lies := false  # §18.2: carried anger packs his sleeve
+var _cruel_seats := false  # carried cruelty seats an extra ambush
+var _bored_ante := false   # carried boredom hurries the blinds
 var _sin_name := ""       # which of the seven is on the throne
 
 # ---------------------------------------------------------------- setup
@@ -126,11 +129,14 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 				_deck.append(sd)
 	_edeck = CardDef.devil_deck(_run["depth"])
 	# Azrail palms counterfeits into his deck — Call the Bluff prey;
-	# he palms more of them the deeper the Descent takes you, and a
-	# drowning debtor makes him greedy: every 10 souls of debt adds
-	# one more lie to his sleeve (§18: debt has teeth, not just a label)
+	# he palms more of them the deeper the Descent takes you, a
+	# drowning debtor makes him greedy, and a carried-over temper
+	# makes him cheat: anger crossing the run also packs one more
+	# lie into his sleeve (§18: he changes the rules when angry)
+	_anger_lies = float(_run["psyche"].get("anger", 0.0)) * 0.7 \
+		>= TAUNT_AT
 	for i in range(2 + mini(_run["depth"], 3)
-			+ int(_run["debt"] / 10)):
+			+ int(_run["debt"] / 10) + (1 if _anger_lies else 0)):
 		_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
 	_deck.shuffle()
 	_edeck.shuffle()
@@ -170,9 +176,16 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 			if _edeck[j].is_bluff:
 				_edeck.remove_at(j)
 				break
+	# §18.2 psyche bends the rules: cruelty carried across tables seats
+	# him one extra ambush pawn; boredom walks the ante one step higher
+	_cruel_seats = float(_run["psyche"].get("cruelty", 0.0)) * 0.7 \
+		>= TAUNT_AT
+	_bored_ante = float(_run["psyche"].get("boredom", 0.0)) * 0.7 \
+		>= TAUNT_AT
 	# §18 ambush: from the third door down he's already seated pawns
 	# face-down — deeper tables start rigged against you
-	var ambush := mini(maxi(_run["depth"] - 2, 0), 3)
+	var ambush := mini(maxi(_run["depth"] - 2, 0)
+		+ (1 if _cruel_seats else 0), 3)
 	for i in range(ambush):
 		var free_l: Array = []
 		for l in range(LANES):
@@ -312,6 +325,8 @@ func _start_round() -> void:
 	ante += _run["depth"]          # the Descent taxes every hand deeper
 	if _sin_table:
 		ante += 2                  # a sin at the table raises the tithe
+	if _bored_ante:
+		ante += 1                  # boredom hurries the blinds (§18.2)
 	for e in _effigies:
 		if e["id"] == "debtor_bell":
 			ante += 1              # the bell tolls — both antes rise
