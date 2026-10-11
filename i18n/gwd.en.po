@@ -420,3 +420,6 @@ msgstr "eight souls of debt — his tells shout at the next table"
 
 msgid "EV_PACT"
 msgstr "Signed in owed souls — next table, his hands cannot hold still."
+
+msgid "ANGER_STEAL"
+msgstr "He reaches across — a card burns straight out of your hand."
