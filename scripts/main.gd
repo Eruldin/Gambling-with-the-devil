@@ -29,6 +29,13 @@ func _ready() -> void:
 	_room()
 	var table := _place(PH + "WoodenTable_02/WoodenTable_02_1k.gltf", "table", Vector3.ZERO, 0.56)
 	var top := _world_aabb(table).end.y
+	# stain the tabletop nearly black — Inscryption's table is dark carved wood,
+	# not bright blonde timber; the candle pool will do the warming
+	var stain := StandardMaterial3D.new()
+	stain.albedo_color = Color(0.05, 0.032, 0.02)
+	stain.roughness = 0.9
+	for mi: MeshInstance3D in table.find_children("*", "MeshInstance3D", true, false):
+		mi.material_override = stain
 	_felt(top)
 	_floor_props()
 	_table_props(top)
@@ -55,17 +62,17 @@ func _ready() -> void:
 func _environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.004, 0.002, 0.002)
+	env.background_color = Color(0.003, 0.005, 0.004)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.05, 0.032, 0.024)
-	env.ambient_light_energy = 0.22
+	env.ambient_light_color = Color(0.022, 0.034, 0.03)
+	env.ambient_light_energy = 0.2
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
 	env.adjustment_enabled = true
 	env.adjustment_brightness = 0.9
 	env.adjustment_contrast = 1.25
 	env.adjustment_saturation = 0.85
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.05, 0.025, 0.012)
+	env.fog_light_color = Color(0.02, 0.03, 0.024)
 	env.fog_density = 0.34
 	env.fog_height = 0.4
 	env.fog_height_density = 0.12
@@ -102,8 +109,9 @@ func _felt(top: float) -> void:
 	bm.size = Vector3(0.95, 0.012, 0.5)
 	felt.mesh = bm
 	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.045, 0.075, 0.05)
-	m.roughness = 0.95
+	# near-black worn felt, cold tint — the candle pool warms it
+	m.albedo_color = Color(0.012, 0.022, 0.016)
+	m.roughness = 0.98
 	felt.material_override = m
 	felt.position = Vector3(0, top + 0.006, 0)
 	add_child(felt)
@@ -123,6 +131,12 @@ func _table_props(top: float) -> void:
 	# spare, occult only — Inscryption keeps the felt clean
 	_place(PH + "book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf", "books", Vector3(0.72, top, -0.28), 0.09, 0.35)
 	_place(PH + "ornate_medieval_dagger/ornate_medieval_dagger_1k.gltf", "dagger", Vector3(-0.18, top, -0.33), 0.05, 0.9)
+	# wall talismans at the frame edges — gas mask + rat idol, like Inscryption's
+	# hanging pelts and charms around the table
+	_place("res://assets_external/pawn-models/polyhaven/old_gas_mask/old_gas_mask_1k.gltf",
+		"gasmask", Vector3(-1.45, 0.72, -1.35), 0.45, 0.5)
+	_place("res://assets_external/pawn-models/polyhaven/street_rat/street_rat_1k.gltf",
+		"rat_idol", Vector3(1.42, 0.55, -1.3), 0.4, -0.6)
 
 func _flame_frames() -> Array[Texture2D]:
 	var out: Array[Texture2D] = []
@@ -153,7 +167,7 @@ func _candles(top: float) -> void:
 	var hero := OmniLight3D.new()
 	hero.position = Vector3(0, top + 0.38, -0.02)
 	hero.light_color = Color(1.0, 0.58, 0.26)
-	hero.light_energy = 1.0
+	hero.light_energy = 0.8
 	hero.omni_range = 1.35
 	hero.omni_attenuation = 2.6
 	hero.shadow_enabled = true
@@ -269,9 +283,13 @@ func _vignette() -> void:
 		+ "uniform float inner : hint_range(0.0,1.5) = 0.42;" \
 		+ "uniform float outer : hint_range(0.0,2.0) = 1.18;" \
 		+ "uniform float strength : hint_range(0.0,1.0) = 0.82;" \
+		+ "uniform float grain : hint_range(0.0,0.2) = 0.055;" \
 		+ "void fragment(){" \
 		+ " float d = distance(UV, vec2(0.5, 0.44)) * 1.7;" \
-		+ " COLOR = vec4(0.0, 0.0, 0.0, smoothstep(inner, outer, d) * strength);" \
+		+ " float n = fract(sin(dot(UV * (TIME * 6.0 + 1.0)," \
+		+ " vec2(12.9898, 78.233))) * 43758.5453);" \
+		+ " float a = smoothstep(inner, outer, d) * strength;" \
+		+ " COLOR = vec4(0.0, 0.0, 0.0, a + n * grain);" \
 		+ "}"
 	sm.shader = sh
 	r.material = sm

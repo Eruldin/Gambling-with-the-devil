@@ -6,6 +6,7 @@ extends Node3D
 
 const GameCard := preload("res://scripts/game_card.gd")
 const CardDef := preload("res://scripts/card_def.gd")
+const Sfx := preload("res://scripts/sfx.gd")
 const CARDS_DIR := "res://assets_external/card-art/kenney/boardgame-pack/PNG/Cards/"
 const BLINDS := [1, 2, 3, 5, 8, 13]
 const LANES := 5
@@ -48,6 +49,7 @@ var _l_over: Label
 var _font: Font
 var _devil = null
 var _phand = null
+var _sfx: Node
 
 # ---------------------------------------------------------------- setup
 
@@ -59,7 +61,9 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_font = font
 	_devil = devil
 	_phand = phand
-	_back_tex = load(CARDS_DIR + "cardBack_red4.png")
+	_sfx = Sfx.new()
+	_sfx.setup(self)
+	_back_tex = load("res://assets_external/card-art/gwd/card_back.png")
 	_autoplay = OS.get_environment("GWD_AUTO") == "1"
 	_make_pads()
 	_make_hud()
@@ -75,14 +79,14 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 
 func _make_pads() -> void:
 	var mat_p := StandardMaterial3D.new()
-	mat_p.albedo_color = Color(0.075, 0.12, 0.08)
-	mat_p.roughness = 0.9
+	mat_p.albedo_color = Color(0.016, 0.028, 0.02)
+	mat_p.roughness = 0.95
 	mat_p.emission_enabled = true
 	mat_p.emission = Color(0.35, 0.6, 0.3)
 	mat_p.emission_energy_multiplier = 0.0
 	var mat_e := StandardMaterial3D.new()
-	mat_e.albedo_color = Color(0.09, 0.1, 0.09)
-	mat_e.roughness = 0.9
+	mat_e.albedo_color = Color(0.012, 0.02, 0.016)
+	mat_e.roughness = 0.95
 	for side in 2:
 		for lane in range(LANES):
 			var key := ("e" if side == 0 else "p") + str(lane)
@@ -164,6 +168,7 @@ func _start_round() -> void:
 	_l_phase.text = "%s %d  ·  %s %d" % [tr("ROUND"), _round, tr("BLIND"), ante]
 	_hint(tr("HINT_PLACE"))
 	_update_chips()
+	_sfx.play(Sfx.SHUFFLE, -8.0)
 	_check_over()
 
 func _draw_hand() -> void:
@@ -253,6 +258,7 @@ func _try_place(lane: int) -> void:
 		return
 	if card.def.blood_cost > _blood:
 		_hint(tr("HINT_NOBLOOD"))
+		_sfx.play(Sfx.DENIED, -10.0)
 		return
 	_blood -= card.def.blood_cost
 	_select(null)
@@ -276,6 +282,7 @@ func _try_place(lane: int) -> void:
 	_reflow_hand()
 	_update_chips()
 	_hint(tr("HINT_PLACE_MORE"))
+	_sfx.play(Sfx.PLACE_P, -6.0)
 
 func _sacrifice_card(card) -> void:
 	_hand.erase(card)
@@ -291,6 +298,8 @@ func _sacrifice_card(card) -> void:
 	_reflow_hand()
 	_update_chips()
 	_hint("%s +%d %s" % [tr("SACRIFICED"), card.def.sacrifice_value, tr("BLOOD")])
+	_sfx.play(Sfx.SHOVE, -6.0)
+	_sfx.play(Sfx.CHIP_HANDLE, -10.0)
 
 # ---------------------------------------------------------------- reveal/strike
 
@@ -336,10 +345,12 @@ func _enemy_place() -> void:
 			await _devil.play_card(card, dest, rot)
 		else:
 			card.place_on_pad(_pads["e" + str(lane)].position, true)
+		_sfx.play(Sfx.PLACE_E, -10.0)
 
 func _run_resolution() -> void:
 	await get_tree().create_timer(0.5).timeout
 	# reveal all concealed cards, staggered
+	_sfx.play(Sfx.FAN, -7.0)
 	for lane in range(LANES):
 		var p = _board_p.get(lane)
 		var e = _board_e.get(lane)
@@ -362,6 +373,7 @@ func _run_resolution() -> void:
 				_chips_devil -= p.def.attack
 				_pulse(_l_chips)
 				_shake(0.012)
+				_sfx.play(Sfx.CHIP_HIT, -5.0)
 				if _devil != null:
 					_devil.eyes_flare(0.7)
 			await get_tree().create_timer(0.42).timeout
@@ -375,6 +387,7 @@ func _run_resolution() -> void:
 				_chips_you -= e.def.attack
 				_pulse(_l_chips)
 				_shake(0.016)
+				_sfx.play(Sfx.CHIP_HIT, -5.0, 0.85)
 				if _devil != null:
 					_devil.lean_in(0.3)
 			await get_tree().create_timer(0.42).timeout
@@ -425,6 +438,7 @@ func _check_over() -> bool:
 	_l_over.text = tr("YOU_WIN") if won else tr("DEVIL_WINS")
 	_l_over.text += "\n" + tr("RESTART")
 	_l_phase.text = tr("GAME_OVER")
+	_sfx.play(Sfx.WIN if won else Sfx.LOSE, -4.0)
 	return true
 
 func restart() -> void:

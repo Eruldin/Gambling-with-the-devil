@@ -3,7 +3,7 @@ extends Node3D
 ## Attach under a holder root positioned at the flame's base.
 
 @export var fps := 11.0
-@export var light_energy_base := 1.15
+@export var light_energy_base := 0.4
 
 var _flame: MeshInstance3D
 var _smoke: MeshInstance3D
@@ -57,7 +57,7 @@ func _build() -> void:
 	_light = OmniLight3D.new()
 	_light.light_color = Color(1.0, 0.55, 0.22)
 	_light.light_energy = light_energy_base
-	_light.omni_range = 1.6
+	_light.omni_range = 0.9
 	_light.omni_attenuation = 1.4
 	_light.position = Vector3(0, 0.12, 0)
 	add_child(_light)
