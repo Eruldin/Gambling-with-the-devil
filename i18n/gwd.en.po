@@ -315,3 +315,21 @@ msgstr "strike five debts — for four souls now"
 
 msgid "CARD_EVENT_MIRROR_DESC"
 msgstr "your luck, flipped to its opposite"
+
+msgid "CARD_EVENT_SIN"
+msgstr "The Sin"
+
+msgid "CARD_EVENT_SIN_DESC"
+msgstr "a boss sits the next table — walk around and he marks it"
+
+msgid "EV_SIN"
+msgstr "He drags a throne to the felt —"
+
+msgid "SIN_NAMES"
+msgstr "PRIDE,GREED,LUST,ENVY,GLUTTONY,WRATH,SLOTH"
+
+msgid "SIN_BEATEN"
+msgstr "— the sin is beaten"
+
+msgid "SIN_GATE"
+msgstr "SIN"

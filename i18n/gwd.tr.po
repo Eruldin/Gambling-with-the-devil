@@ -315,3 +315,21 @@ msgstr "beş borcu sil — peşin dört ruh"
 
 msgid "CARD_EVENT_MIRROR_DESC"
 msgstr "şansın, tam tersine çevrilmiş hali"
+
+msgid "CARD_EVENT_SIN"
+msgstr "Günah"
+
+msgid "CARD_EVENT_SIN_DESC"
+msgstr "sonraki masada bir baş düşman oturuyor — kaçarsan not eder"
+
+msgid "EV_SIN"
+msgstr "Masaya bir taht çekiyor —"
+
+msgid "SIN_NAMES"
+msgstr "KİBİR,AHKGÖZLÜLÜK,ŞEHVET,KISKANÇLIK,OBURLUK,ÖFKE,TEMBELLİK"
+
+msgid "SIN_BEATEN"
+msgstr "— günah yenildi"
+
+msgid "SIN_GATE"
+msgstr "GÜNAH"
