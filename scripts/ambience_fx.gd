@@ -5,6 +5,7 @@ extends Node3D
 const SMOKE := "res://assets_external/anim-vfx/kenney/particle-pack/PNG (Transparent)/smoke_03.png"
 const GUST := "res://assets_external/audio/gwd/gust.wav"
 const THUNDER := "res://assets_external/audio/gwd/thunder.wav"
+const DRONE := "res://assets_external/audio/gwd/drone.wav"
 const SFX_C := preload("res://scripts/sfx.gd")
 
 var _sfx: Node
@@ -22,6 +23,16 @@ func setup(flames: Array, hero: OmniLight3D, table_y: float) -> void:
 	_hero = hero
 	_sfx = SFX_C.new()
 	_sfx.setup(self)
+	# the room's voice — a low cathedral drone under everything; the loop
+	# fades breathe into each other so the seam sits in the quiet tail
+	var st: AudioStream = load(DRONE)
+	if st != null:
+		var d := AudioStreamPlayer.new()
+		d.stream = st
+		d.volume_db = -24.0
+		d.finished.connect(d.play)
+		add_child(d)
+		d.play()
 	# storm flash light above the gothic window (cold, far away)
 	_flash = OmniLight3D.new()
 	_flash.position = Vector3(-0.6, 2.0, -0.9)
