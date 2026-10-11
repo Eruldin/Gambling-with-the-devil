@@ -147,3 +147,6 @@ msgstr "Azrail takes the cards back and redeals — a fresh hand."
 
 msgid "HINT_NOMULL"
 msgstr "No mulligan left in this battle"
+
+msgid "INTRO_SUB"
+msgstr "You took his seat. The wager is your soul."
