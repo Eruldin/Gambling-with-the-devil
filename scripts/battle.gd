@@ -89,7 +89,7 @@ var _event_cards: Array = []
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
-	"sin_idx": 0}
+	"sin_idx": 0, "sin_name": ""}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _sin_name := ""       # which of the seven is on the throne
@@ -154,6 +154,7 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 		_chips_devil += 5
 		for d in _edeck:
 			d.attack += 1
+		_sin_name = str(_run["sin_name"])
 	_wager_offered = _run["wager_used"]
 	# embers spent at the last door burn his counterfeits out of the deck
 	for i in range(_run["cleanse"]):
@@ -350,7 +351,13 @@ func _start_round() -> void:
 	_draw_hand()
 	_l_phase.text = "%s %d  ·  %s %d  ·  %s %d" % [tr("DEPTH"),
 		_run["depth"] + 1, tr("ROUND"), _round, tr("BLIND"), ante]
-	_hint(tr("HINT_PLACE_R1") if _round == 1 else tr("HINT_PLACE"))
+	# a sin at the table announces itself on the first hand only —
+	# the throne name rides the phase line until the fight is done
+	if _sin_table and _round == 1:
+		_l_phase.text = tr("SIN_GATE") + ": " + _sin_name
+		_hint(tr("EV_SIN") + " " + _sin_name)
+	else:
+		_hint(tr("HINT_PLACE_R1") if _round == 1 else tr("HINT_PLACE"))
 	_update_chips()
 	_sfx.play(Sfx.SHUFFLE, -8.0)
 	_check_over()
@@ -897,11 +904,12 @@ func _finish_over(won: bool) -> void:
 
 func _reset_run() -> void:
 	for k in _run:
-		_run[k] = false if k == "wager_used" else 0
+		_run[k] = false if ["wager_used", "sin_next"].has(k) else 0
 	_run["luck"] = 0.0
 	_run["psyche"] = {}
 	_run["taunted"] = []
 	_run["spoils"] = []
+	_run["sin_name"] = ""
 
 # ------------------------------------------------------------ descent (§18)
 
@@ -994,8 +1002,8 @@ func _resolve_event(card) -> void:
 			_run["sin_next"] = true
 			var sins: Array = tr("SIN_NAMES").split(",")
 			_run["sin_idx"] = (_run["won"] / 3) % sins.size()
-			_sin_name = sins[int(_run["sin_idx"])].strip_edges()
-			_hint(tr("EV_SIN") + " " + _sin_name)
+			_run["sin_name"] = sins[int(_run["sin_idx"])].strip_edges()
+			_hint(tr("EV_SIN") + " " + str(_run["sin_name"]))
 		_:
 			_run["purse"] += 5
 			_run["luck"] = minf(_run["luck"] + 0.2, 3.0)
