@@ -300,3 +300,18 @@ msgstr "Tefeci beş borcu sildi — peşin dört ruh karşılığında."
 
 msgid "EV_MIRROR"
 msgstr "Ayna şansını ters gösterdi — artık tersine döndü."
+
+msgid "CARD_EVENT_WHISPER_DESC"
+msgstr "kumar: keskin şans ya da altı ruh borç"
+
+msgid "CARD_EVENT_WHEEL_DESC"
+msgstr "büyük kumar: on iki ruh ya da on borç"
+
+msgid "CARD_EVENT_COVENANT_DESC"
+msgstr "güvenli geçiş: beş ruh, küçük lütuf"
+
+msgid "CARD_EVENT_LEDGER_DESC"
+msgstr "beş borcu sil — peşin dört ruh"
+
+msgid "CARD_EVENT_MIRROR_DESC"
+msgstr "şansın, tam tersine çevrilmiş hali"

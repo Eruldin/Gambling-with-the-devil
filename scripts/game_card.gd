@@ -176,6 +176,9 @@ func burn() -> void:
 func tool_text() -> String:
 	if def == null:
 		return ""
+	if def.id.begins_with("event_"):
+		# descent doors read as promises, not stats (§18)
+		return "%s  —  %s" % [tr(def.name_key), tr(def.name_key + "_DESC")]
 	return "%s  ·  %s %d  ·  atk %d  hp %d  ·  sac %d" % [
 		tr(def.name_key), tr("BLOOD"), def.blood_cost,
 		def.attack, def.health, def.sacrifice_value]

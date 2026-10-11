@@ -300,3 +300,18 @@ msgstr "The Usurer strikes five debts — for four souls up front."
 
 msgid "EV_MIRROR"
 msgstr "The mirror shows your luck backwards — it is flipped."
+
+msgid "CARD_EVENT_WHISPER_DESC"
+msgstr "a gamble: sharper luck, or six souls owed"
+
+msgid "CARD_EVENT_WHEEL_DESC"
+msgstr "a big gamble: twelve souls, or ten owed"
+
+msgid "CARD_EVENT_COVENANT_DESC"
+msgstr "a safe passage: five souls, a small blessing"
+
+msgid "CARD_EVENT_LEDGER_DESC"
+msgstr "strike five debts — for four souls now"
+
+msgid "CARD_EVENT_MIRROR_DESC"
+msgstr "your luck, flipped to its opposite"
