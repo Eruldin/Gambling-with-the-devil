@@ -246,3 +246,33 @@ msgstr "The Priestess frowns — tails: −1 chip."
 msgid "CARD_PRIESTESS"
 msgstr "High Priestess of Chance"
 
+
+msgid "DEPTH"
+msgstr "Descent"
+
+msgid "HINT_EVENT"
+msgstr "The table opens three doors — pick your descent."
+
+msgid "CARD_EVENT_WHISPER"
+msgstr "The Whisper"
+
+msgid "CARD_EVENT_WHEEL"
+msgstr "The Wheel"
+
+msgid "CARD_EVENT_COVENANT"
+msgstr "The Covenant"
+
+msgid "EV_WHISPER_WIN"
+msgstr "He whispers a cheat in your ear — your luck sharpens."
+
+msgid "EV_WHISPER_LOSE"
+msgstr "The whisper was a hook — you owe him 6 more."
+
+msgid "EV_WHEEL_WIN"
+msgstr "The wheel stops on gold — +12 souls ride with you."
+
+msgid "EV_WHEEL_LOSE"
+msgstr "The wheel lands on him — 10 more souls owed."
+
+msgid "EV_COVENANT"
+msgstr "A signed passage — +5 souls, a small blessing."

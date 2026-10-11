@@ -16,7 +16,7 @@ const HAND_MAX := 6
 const RAISE_MAX := 5           # §2.3: stake 1–5 extra chips once per turn
 const TAUNT_AT := 2.5          # psyche axis level that makes Azrail speak
 
-enum Phase { PLACE, BUSY, OVER }
+enum Phase { PLACE, BUSY, OVER, EVENT }
 
 var _top := 0.0
 var _cam: Camera3D
@@ -82,6 +82,11 @@ var _font: Font
 var _devil = null
 var _phand = null
 var _sfx: Node
+var _event_cards: Array = []
+# §18 Descent — run state survives the scene reload between tables:
+# debt follows you, luck keeps its tilt, carried souls ride in extra.
+static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
+	"won": 0, "embers": 0, "wager_used": false}
 
 # ---------------------------------------------------------------- setup
 
@@ -107,9 +112,18 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
 	_deck.shuffle()
 	_edeck.shuffle()
+	if OS.get_environment("GWD_WIN") == "1":   # probe: instant event phase
+		_chips_devil = 1
 	_trump_pool.shuffle()
 	_trumps = _trump_pool.slice(0, 3)   # §4.6: max 3 held
 	_update_trumps()
+	# §18: the run carries across tables — debt follows, luck tilts stay,
+	# souls won at the last door ride in on top of the fresh pile.
+	_debt = _run["debt"]
+	_luck = _run["luck"]
+	_chips_you += _run["purse"]
+	_run["purse"] = 0
+	_wager_offered = _run["wager_used"]
 	for i in range(5):
 		_draw_hand()
 	_start_round()
@@ -228,6 +242,7 @@ func _mk_label(offset: Vector2, size: int, col: Color) -> Label:
 
 func _start_round() -> void:
 	var ante := _blind_for(_round)
+	ante += _run["depth"]          # the Descent taxes every hand deeper
 	for e in _effigies:
 		if e["id"] == "debtor_bell":
 			ante += 1              # the bell tolls — both antes rise
@@ -265,7 +280,8 @@ func _start_round() -> void:
 		if _sfx != null:
 			_devil._sfx_ref = _sfx
 	_draw_hand()
-	_l_phase.text = "%s %d  ·  %s %d" % [tr("ROUND"), _round, tr("BLIND"), ante]
+	_l_phase.text = "%s %d  ·  %s %d  ·  %s %d" % [tr("DEPTH"),
+		_run["depth"] + 1, tr("ROUND"), _round, tr("BLIND"), ante]
 	_hint(tr("HINT_PLACE_R1") if _round == 1 else tr("HINT_PLACE"))
 	_update_chips()
 	_sfx.play(Sfx.SHUFFLE, -8.0)
@@ -312,8 +328,9 @@ func hover_target(collider) -> void:
 	var card = _area_to_card.get(collider)
 	var pad = _pad_areas.get(collider)
 	if _phase != Phase.PLACE:
-		card = null
 		pad = null
+		if _phase != Phase.EVENT:
+			card = null
 	if card != _hovered_card:
 		if _hovered_card != null:
 			_hovered_card.set_hovered(false)
@@ -332,6 +349,11 @@ func hover_target(collider) -> void:
 		_pad_glow(pad, 0.8)
 
 func click(collider) -> void:
+	if _phase == Phase.EVENT:
+		var door = _area_to_card.get(collider)
+		if door != null and _event_cards.has(door):
+			_resolve_event(door)
+		return
 	if _phase != Phase.PLACE or _autoplay:
 		return
 	var card = _area_to_card.get(collider)
@@ -761,23 +783,115 @@ func _check_over() -> bool:
 	return true
 
 func _finish_over(won: bool) -> void:
-	_phase = Phase.OVER
 	_wager_pending = false
 	if _devil != null:
 		if won:
 			_devil.defeat()
 		else:
 			_devil.victory()
-	_l_over.text = tr("YOU_WIN") if won else tr("DEVIL_WINS")
 	if won:
-		# §2.4: the pot converts to embers — the fatter the violence,
-		# the fatter the payday.
-		_l_over.text += "\n" + str(_pot) + " " + tr("EMBERS_WON")
+		# §18: a won table opens the Descent — three doors drop on
+		# the felt and the run continues a chamber deeper.
+		_phase = Phase.EVENT
+		_run["won"] += 1
+		_run["embers"] += _pot   # §2.4: the pot converts to embers
+		_run["debt"] = _debt
+		_run["luck"] = _luck
+		_l_over.text = tr("YOU_WIN") + "\n" + str(_pot) + " " \
+			+ tr("EMBERS_WON")
+		_l_phase.text = tr("GAME_OVER")
+		_sfx.play(Sfx.WIN, -4.0)
+		_hint(tr("HINT_EVENT"))
+		_spawn_event_cards()
+		if _autoplay:
+			await get_tree().create_timer(1.6).timeout
+			_resolve_event(_event_cards[randi() % _event_cards.size()])
+		return
+	_phase = Phase.OVER
+	_reset_run()
+	_l_over.text = tr("DEVIL_WINS")
 	if _debt > 0:
 		_l_over.text += "\n" + tr("DEBT_LBL") + " " + str(_debt)
 	_l_over.text += "\n" + tr("RESTART")
 	_l_phase.text = tr("GAME_OVER")
-	_sfx.play(Sfx.WIN if won else Sfx.LOSE, -4.0)
+	_sfx.play(Sfx.LOSE, -4.0)
+
+func _reset_run() -> void:
+	for k in _run:
+		_run[k] = false if k == "wager_used" else 0
+	_run["luck"] = 0.0
+
+# ------------------------------------------------------------ descent (§18)
+
+## Three door cards drop face-up on the felt — the Whisper (small
+## gamble), the Wheel (big gamble), the Covenant (safe passage).
+func _spawn_event_cards() -> void:
+	var defs: Array = [
+		CardDef.make("event_whisper", "eyes", 0, 0, 1, 0,
+			"res://assets_external/card-art/gwd/face_seer.png"),
+		CardDef.make("event_wheel", "pentacles", 0, 0, 1, 0,
+			"res://assets_external/card-art/gwd/face_imp.png"),
+		CardDef.make("event_covenant", "chalices", 0, 0, 1, 0,
+			"res://assets_external/card-art/gwd/face_warden.png"),
+	]
+	for i in range(3):
+		var card := GameCard.new()
+		card.def = defs[i]
+		add_child(card)
+		card.setup(load(defs[i].face_file), _back_tex)
+		var pos := Vector3(-0.17 + i * 0.17, _top + 0.028, 0.03)
+		card.position = pos + Vector3(0, 0.5, 0)
+		card.scale = Vector3.ONE * 0.001
+		_area_to_card[card.get_area()] = card
+		_event_cards.append(card)
+		var tw := create_tween().set_trans(Tween.TRANS_CUBIC) \
+			.set_ease(Tween.EASE_OUT)
+		tw.tween_interval(0.14 * i)
+		tw.tween_property(card, "position", pos, 0.5)
+		tw.parallel().tween_property(card, "scale",
+			Vector3.ONE * 0.9, 0.5)
+		card.set_base(pos, Vector3.ZERO)
+	if _devil != null:
+		_devil.watch(Vector3(0, _top + 0.05, 0.03), 1.4)
+
+func _resolve_event(card) -> void:
+	_phase = Phase.BUSY
+	for c in _event_cards:
+		if c != card:
+			c.burn()
+	card.flash(Color(0.9, 0.7, 0.2))
+	var gamble: bool = card.def.id != "event_covenant"
+	var won_roll := true
+	if gamble:
+		won_roll = _roll_chance()
+	match card.def.id:
+		"event_whisper":
+			if won_roll:
+				_run["luck"] = minf(_run["luck"] + 0.5, 3.0)
+				_hint(tr("EV_WHISPER_WIN"))
+			else:
+				_run["debt"] += 6
+				_hint(tr("EV_WHISPER_LOSE"))
+		"event_wheel":
+			if won_roll:
+				_run["purse"] += 12
+				_hint(tr("EV_WHEEL_WIN"))
+			else:
+				_run["debt"] += 10
+				_hint(tr("EV_WHEEL_LOSE"))
+		_:
+			_run["purse"] += 5
+			_run["luck"] = minf(_run["luck"] + 0.2, 3.0)
+			_hint(tr("EV_COVENANT"))
+	_sfx.play(Sfx.WIN if won_roll else Sfx.LOSE, -12.0)
+	if _devil != null:
+		_devil.watch(card.position, 1.2)
+	_descend()
+
+func _descend() -> void:
+	_run["depth"] += 1
+	await get_tree().create_timer(1.8).timeout
+	get_tree().reload_current_scene()
 
 # ---------------------------------------------------------------- Azrail
 
@@ -829,6 +943,7 @@ func wager_accept() -> void:
 		return
 	_wager_pending = false
 	_wager_offered = true
+	_run["wager_used"] = true   # one bargain per run — even across tables
 	_chips_you = 10
 	_debt += 15
 	_l_over.text = ""
@@ -971,8 +1086,8 @@ func restart() -> void:
 # ---------------------------------------------------------------- hud bits
 
 func _update_chips() -> void:
-	_l_chips.text = "%s %d   ·   %s %d" % [tr("CHIPS_YOU"), _chips_you,
-		tr("CHIPS_DEVIL"), _chips_devil]
+	_l_chips.text = "%s %d   ·   %s %d" % [tr("CHIPS_YOU"),
+		maxi(_chips_you, 0), tr("CHIPS_DEVIL"), maxi(_chips_devil, 0)]
 	_l_blood.text = "%s %d   ·   %s %d" % [tr("BLOOD"), _blood,
 		tr("CARDS_LEFT"), _deck.size()]
 	if _debt > 0:
@@ -1215,6 +1330,8 @@ func _roll_chance() -> bool:
 
 func _autoplay_run() -> void:
 	await get_tree().create_timer(1.2).timeout
+	if _phase != Phase.PLACE:
+		return
 	# place hand[0] on lane 1, next free on lane 3, sacrifice hand[0]
 	if _hand.size() >= 1:
 		_select(_hand[0]); _try_place(1)
