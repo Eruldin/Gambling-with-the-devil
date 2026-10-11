@@ -53,10 +53,10 @@ static func starter_deck() -> Array:
 	# 10-card opening deck, mirrored for the Devil. Suits per design doc:
 	# blades=Kılıç, chalices=Kupa, pentacles=Tılsım, eyes=Göz.
 	return [
-		make("cutpurse", "blades", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_cutpurse.png", ["tithe"]),
+		make("cutpurse", "blades", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_cutpurse.png", ["tithe", "pot_cut"]),
 		make("duelist", "blades", 1, 2, 2, 1, "res://assets_external/card-art/gwd/face_duelist.png", ["executioner"]),
 		make("reaper", "blades", 1, 3, 1, 1, "res://assets_external/card-art/gwd/face_reaper.png", ["pierce"]),
-		make("hangman", "blades", 2, 2, 4, 1, "res://assets_external/card-art/gwd/face_hangman.png", ["executioner"]),
+		make("hangman", "blades", 2, 2, 4, 1, "res://assets_external/card-art/gwd/face_hangman.png", ["executioner", "anchor"]),
 		# §2.2/§3.3 Reach: the pikeman strikes over his own wall —
 		# a back-rank guard can't hide from the point
 		make("halberd", "blades", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_halberd.png", ["reach"]),
@@ -64,13 +64,13 @@ static func starter_deck() -> Array:
 		# §2.2 support pair: the Deacon blesses its lane's striker from
 		# the sheltered rank; the Gravedigger feeds on friendly deaths
 		make("deacon", "chalices", 1, 0, 3, 1, "res://assets_external/card-art/gwd/face_deacon.png"),
-		make("votary", "chalices", 0, 0, 4, 2, "res://assets_external/card-art/gwd/face_votary.png", ["brood"]),
+		make("votary", "chalices", 0, 0, 4, 2, "res://assets_external/card-art/gwd/face_votary.png", ["brood", "shell"]),
 		make("martyr", "chalices", 0, 1, 2, 2, "res://assets_external/card-art/gwd/face_martyr.png", ["haunt"]),
 		make("acolyte", "pentacles", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_acolyte.png", ["venom"]),
 		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png", ["loan_shark"]),
-		make("penitent", "pentacles", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_penitent.png", ["loan_shark"]),
+		make("penitent", "pentacles", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_penitent.png", ["loan_shark", "waxhide"]),
 		make("gravedigger", "pentacles", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_gravedigger.png"),
-		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap"]),
+		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap", "veil"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic"]),
 		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot

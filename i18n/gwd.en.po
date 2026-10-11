@@ -528,3 +528,24 @@ msgstr "The Gravedigger"
 
 msgid "CARD_GRAVEDIGGER_DESC"
 msgstr "1/2 · every friendly corpse in his lane sharpens him: +1 attack"
+
+msgid "SIGIL_WAXHIDE"
+msgstr "Waxhide — ignores the first wound each round"
+
+msgid "SIGIL_SHELL"
+msgstr "Shell — sacrificing it yields +1 extra blood"
+
+msgid "SIGIL_VEIL"
+msgstr "Veil — cannot be Called as a bluff"
+
+msgid "SIGIL_ANCHOR"
+msgstr "Anchor — cannot be moved or swapped"
+
+msgid "SIGIL_POT_CUT"
+msgstr "Pot Cut — on reveal, skims a chip per five in the pot"
+
+msgid "HINT_VEIL"
+msgstr "That one is veiled — it cannot be Called."
+
+msgid "HINT_ANCHOR"
+msgstr "Anchored — this card cannot move."
