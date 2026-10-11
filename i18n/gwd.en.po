@@ -276,3 +276,6 @@ msgstr "The wheel lands on him — 10 more souls owed."
 
 msgid "EV_COVENANT"
 msgstr "A signed passage — +5 souls, a small blessing."
+
+msgid "PRIESTESS_DEVIL"
+msgstr "His Priestess flips — the House collects, or bleeds."

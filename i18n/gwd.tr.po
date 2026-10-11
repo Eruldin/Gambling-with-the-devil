@@ -276,3 +276,6 @@ msgstr "Çark ona düştü — 10 ruh daha borçlusun."
 
 msgid "EV_COVENANT"
 msgstr "İmzalı bir geçiş — +5 ruh, küçük bir lütuf."
+
+msgid "PRIESTESS_DEVIL"
+msgstr "Rahibesi yazı-tura atıyor — kasa ya toplar ya kanar."

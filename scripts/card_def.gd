@@ -69,3 +69,24 @@ static func starter_deck() -> Array:
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_martyr.png"),
 		make_trick("razor", "blades", 1, "res://assets_external/card-art/gwd/face_duelist.png"),
 	]
+
+## §18: Azrail's deck hardens down the Descent — his pawns sharpen one
+## edge per two depths, and his hand grows meaner tricks and counterfeits.
+static func devil_deck(depth: int) -> Array:
+	var d := starter_deck()
+	var sharpen := depth / 2
+	if sharpen > 0:
+		for c in d:
+			if c.kind == "pawn":
+				c.attack += sharpen
+	if depth >= 1:
+		d.append(make_trick("razor", "blades", 1,
+			"res://assets_external/card-art/gwd/face_duelist.png"))
+	if depth >= 2:
+		d.append(make("reaper", "blades", 1, 3, 1, 1,
+			"res://assets_external/card-art/gwd/face_reaper.png",
+			["pierce"]))
+	if depth >= 3:
+		d.append(make("priestess", "eyes", 1, 3, 4, 1,
+			"res://assets_external/card-art/gwd/face_seer.png"))
+	return d

@@ -106,10 +106,11 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_make_hud()
 	_spawn_effigies()
 	_deck = CardDef.starter_deck()
-	_edeck = CardDef.starter_deck()
-	# Azrail palms two counterfeits into his deck — Call the Bluff prey
-	_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
-	_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
+	_edeck = CardDef.devil_deck(_run["depth"])
+	# Azrail palms counterfeits into his deck — Call the Bluff prey;
+	# he palms more of them the deeper the Descent takes you.
+	for i in range(2 + mini(_run["depth"], 3)):
+		_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
 	_deck.shuffle()
 	_edeck.shuffle()
 	if OS.get_environment("GWD_WIN") == "1":   # probe: instant event phase
@@ -256,6 +257,14 @@ func _start_round() -> void:
 				Color(1.0, 0.8, 0.2) if won else Color(0.5, 0.1, 0.4),
 				14, 0.01, 0.45)
 			_hint((tr("PRIESTESS_WON") if won else tr("PRIESTESS_LOST")))
+		var e = _board_e.get(lane)
+		if e != null and not e.face_down and e.def != null 			and e.def.id == "priestess":
+			var devil_won := _roll_chance()
+			_chips_devil += 3 if devil_won else -1
+			_burst(e.position + Vector3(0, 0.03, 0),
+				Color(1.0, 0.8, 0.2) if devil_won else Color(0.5, 0.1, 0.4),
+				14, 0.01, 0.45)
+			_hint(tr("PRIESTESS_DEVIL"))
 	_chips_you -= ante
 	_chips_devil -= ante
 	_pot += ante * 2
