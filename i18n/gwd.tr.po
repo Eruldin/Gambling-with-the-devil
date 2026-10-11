@@ -288,3 +288,15 @@ msgstr "On beş kor, destesindeki bir sahte kartı yakıyor."
 
 msgid "HINT_EMBER"
 msgstr "— ya da E: 15 kor onun bir sahte kartını yakar."
+
+msgid "CARD_EVENT_LEDGER"
+msgstr "Defter"
+
+msgid "CARD_EVENT_MIRROR"
+msgstr "Ayna"
+
+msgid "EV_LEDGER"
+msgstr "Tefeci beş borcu sildi — peşin dört ruh karşılığında."
+
+msgid "EV_MIRROR"
+msgstr "Ayna şansını ters gösterdi — artık tersine döndü."
