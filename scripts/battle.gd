@@ -1259,10 +1259,19 @@ func _bump(axis: String, amt: float) -> void:
 		_hint(tr("AZRAIL_" + axis.to_upper()))
 		if _devil != null:
 			_devil.eyes_flare(0.8)
+	# §18.2: push the same axis twice as far and he remarks again —
+	# a second, deeper line that only long tables ever hear
+	elif before < TAUNT_AT * 2.0 and _psyche[axis] >= TAUNT_AT * 2.0 \
+		and not _taunted.has(axis + "_2"):
+		_taunted[axis + "_2"] = true
+		_hint(tr("AZRAIL_" + axis.to_upper() + "_2"))
+		if _devil != null:
+			_devil.eyes_flare(1.0)
 		# §18.2: the first time his temper crosses he cheats openly —
 		# reaches across and burns a card straight out of your hand
 		if axis == "anger" and _phase == Phase.PLACE \
-			and not _hand.is_empty():
+			and not _hand.is_empty() and not _taunted.has("anger_stole"):
+			_taunted["anger_stole"] = true
 			var stolen = _hand[randi() % _hand.size()]
 			_hand.erase(stolen)
 			_area_to_card.erase(stolen.get_area())

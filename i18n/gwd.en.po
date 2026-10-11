@@ -477,3 +477,18 @@ msgstr "The Penitent"
 
 msgid "CARD_PENITENT_DESC"
 msgstr "0/4 · each blow he takes pays a chip into the pot"
+
+msgid "AZRAIL_CRUELTY_2"
+msgstr "Azrail savors it. \"You bleed beautifully — do it again.\""
+
+msgid "AZRAIL_CURIOSITY_2"
+msgstr "Azrail studies you. \"Every move of yours is a page I've already read.\""
+
+msgid "AZRAIL_ANGER_2"
+msgstr "Azrail rises half out of his seat. \"The table turns against you now.\""
+
+msgid "AZRAIL_RESPECT_2"
+msgstr "Azrail pours himself a measure. \"I will hate to lose you. Almost.\""
+
+msgid "AZRAIL_BOREDOM_2"
+msgstr "Azrail counts the ceiling cracks aloud. \"Entertain me, debtor.\""
