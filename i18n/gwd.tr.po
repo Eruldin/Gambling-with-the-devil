@@ -147,3 +147,6 @@ msgstr "Azrail kağıtları geri alıp yeniden dağıttı — yeni bir el."
 
 msgid "HINT_NOMULL"
 msgstr "Bu savaşta yeni el hakkın kalmadı"
+
+msgid "INTRO_SUB"
+msgstr "Onun yerini aldın — bahis ruhun."

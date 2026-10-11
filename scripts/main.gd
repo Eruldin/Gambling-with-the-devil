@@ -29,6 +29,10 @@ var _hand: Node3D
 var _scale: Node3D
 var _sfx: Node
 var _crackle_in := 0.5
+var _intro_done := false
+var _cam_home := Vector3.ZERO
+var _cam_look := Vector3.ZERO
+var _title_layer: CanvasLayer = null
 var _flames: Array = []
 var _hero: OmniLight3D
 
@@ -76,6 +80,7 @@ func _ready() -> void:
 	add_child(_battle)
 	_battle.setup(top, _cam, _hud_layer, _hud_font, _devil, _hand)
 	_battle._scale = _scale
+	_intro()
 	_sfx = Sfx.new()
 	_sfx.setup(self)
 	# living room layer: the cat prowls the edges, moth/storm/gust/fog live here
@@ -407,6 +412,8 @@ func _camera(top: float) -> void:
 	add_child(_cam)
 	_cam.position = Vector3(0, top + 0.52, 0.85)
 	_cam.look_at(Vector3(0, top + 0.06, -0.5), Vector3.UP)
+	_cam_home = _cam.position
+	_cam_look = Vector3(0, top + 0.06, -0.5)
 	# dim warm fill from the player's side so card faces and felt read
 	var fill := SpotLight3D.new()
 	fill.position = Vector3(0, top + 0.7, 1.2)
@@ -460,6 +467,10 @@ func _vignette() -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
+	if not _intro_done:
+		# during the dolly-in, keep eyes on Azrail while the seat pulls you in
+		_cam.look_at(_cam_look, Vector3.UP)
+		return
 	# camera slow sway
 	_cam.position.x = 0.06 * sin(_t * 0.11)
 	_cam.position.y += (1.1 + 0.02 * sin(_t * 0.23) - _cam.position.y) * delta
@@ -625,3 +636,47 @@ func _ca_overlay() -> void:
 	sm.shader = sh
 	r.material = sm
 	_hud_layer.add_child(r)
+
+func _intro() -> void:
+	# cinematic seat-in: the room is already dealt, you arrive late to it —
+	# the camera glides out of the dark into the player's chair while the
+	# title fades like smoke, then the HUD comes up and the game is live.
+	_hud_layer.visible = false
+	_cam.position = _cam_home + Vector3(0.3, 1.15, 1.15)
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC) 		.set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(_cam, "position", _cam_home, 3.6)
+	tw.tween_callback(_intro_seated)
+	_title_layer = CanvasLayer.new()
+	_title_layer.layer = 40
+	add_child(_title_layer)
+	var l := Label.new()
+	l.text = "GAMBLING WITH THE DEVIL"
+	l.add_theme_font_override("font", _hud_font)
+	l.add_theme_font_size_override("font_size", 46)
+	l.add_theme_color_override("font_color", Color(0.8, 0.46, 0.24))
+	l.set_anchors_preset(Control.PRESET_CENTER)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.modulate.a = 0.0
+	_title_layer.add_child(l)
+	var sub := Label.new()
+	sub.text = tr("INTRO_SUB")
+	sub.add_theme_font_override("font", _hud_font)
+	sub.add_theme_font_size_override("font_size", 16)
+	sub.add_theme_color_override("font_color", Color(0.55, 0.4, 0.3))
+	sub.set_anchors_preset(Control.PRESET_CENTER)
+	sub.position.y += 46
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.modulate.a = 0.0
+	_title_layer.add_child(sub)
+	var ft := create_tween()
+	ft.tween_interval(0.8)
+	ft.tween_property(l, "modulate:a", 1.0, 1.1)
+	ft.parallel().tween_property(sub, "modulate:a", 1.0, 1.1)
+	ft.tween_interval(1.0)
+	ft.tween_property(l, "modulate:a", 0.0, 1.0)
+	ft.parallel().tween_property(sub, "modulate:a", 0.0, 1.0)
+	ft.tween_callback(_title_layer.queue_free)
+
+func _intro_seated() -> void:
+	_intro_done = true
+	_hud_layer.visible = true
