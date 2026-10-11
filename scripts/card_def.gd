@@ -73,6 +73,14 @@ static func starter_deck() -> Array:
 		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap", "veil"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic", "eyecorner"]),
 		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),
+		# doc §6 roster — trickier bodies the starter line lacked:
+		# the Owed Pig is a wall you pay for in debt, the Choir Leech
+		# sips a chip per clash, the Eyes' Servant carries the Eyecorner
+		# seal proper, and the Mirror Hound wears the foe it meets.
+		make("owed_pig", "pentacles", 1, 4, 4, 1, "res://assets_external/card-art/gwd/face_owed_pig.png"),
+		make("choir_leech", "chalices", 1, 1, 3, 1, "res://assets_external/card-art/gwd/face_choir_leech.png"),
+		make("eyes_servant", "eyes", 2, 1, 3, 1, "res://assets_external/card-art/gwd/face_eyes_servant.png", ["eyecorner"]),
+		make("mirror_hound", "eyes", 2, 1, 1, 1, "res://assets_external/card-art/gwd/face_mirror_hound.png", ["mimic"]),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_pale_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_tithe.png"),

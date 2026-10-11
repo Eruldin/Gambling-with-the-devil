@@ -664,6 +664,11 @@ func _try_place(lane: int, row := 0) -> void:
 		_pulse(_l_chips)
 		_burst(card.position + Vector3(0, 0.03, 0),
 			Color(1.0, 0.7, 0.25), 12, 0.01, 0.4)
+	if card.def.id == "owed_pig":
+		# doc §6 Ahdili Domuz — the wall binds you deeper the moment
+		# it hits the felt, whichever side played it
+		_debt += 3
+		_hint(tr("HINT_OWED_PIG"))
 	_reflow_hand()
 	_update_chips()
 	_hint(tr("HINT_PLACE_MORE"))
@@ -804,6 +809,8 @@ func _enemy_place() -> void:
 			await _devil.play_card(card, dest, rot)
 		else:
 			card.place_on_pad(_pads[_pad_key("e", lane, row)].position, true)
+		if card.def.id == "owed_pig":
+			_debt += 3    # his pig feeds the same ledger
 		_sfx.play(Sfx.PLACE_E, -10.0)
 		_sfx.play(Sfx.SLIDE, -14.0, 1.2)   # the arc whoosh
 
@@ -909,6 +916,11 @@ func _run_resolution() -> void:
 					# Sharp only silences the front rank — a back-rank
 					# target never earned an answer anyway
 					sharp_kill = "sharp" in p.def.sigils and tgt == e
+					if p.def.id == "choir_leech":
+						# doc §6 Koro Sülüğü — every clash it joins sips
+						# one chip back into your pile
+						_chips_you += 1
+						_pulse(_l_chips)
 				e2.flash()
 				_burst(e2.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
@@ -989,6 +1001,9 @@ func _run_resolution() -> void:
 				ptgt.flash()
 				_burst(ptgt.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
+				if e.def.id == "choir_leech":
+					_chips_devil += 1   # his leech drinks for his pile
+					_pulse(_l_chips)
 				# §3.3 Frenzied — his killers press on too
 				if ptgt.hp <= 0 and "frenzied" in e.def.sigils:
 					var fatk2: float = maxf(float(e.def.attack) - 2.0, 0.0)
@@ -1846,6 +1861,11 @@ func _on_reveal(card, opposing) -> void:
 		for sg in opposing.def.sigils:
 			if not sig.has(sg):
 				sig.append(sg)
+		# doc §6 Ayna Tazısı: the Mirror Hound wears the foe it
+		# meets — stats as well as seals
+		card.def.attack = opposing.def.attack
+		card.def.health = opposing.def.health
+		card.hp = card.def.health
 	if "eyecorner" in sig:
 		# §3.3: glimpse one enemy concealed card — only you read it;
 		# the card itself stays hidden from the table
@@ -1885,6 +1905,9 @@ func _on_reveal_his(card, opposing) -> void:
 		for sg in opposing.def.sigils:
 			if not sig.has(sg):
 				sig.append(sg)
+		card.def.attack = opposing.def.attack
+		card.def.health = opposing.def.health
+		card.hp = card.def.health
 	if "eyecorner" in sig:
 		# he glimpses one of your concealed cards — a learned read
 		var yours := []
