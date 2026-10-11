@@ -31,7 +31,7 @@ var _dead := false
 
 func setup(front_tex: Texture2D, back_tex: Texture2D) -> void:
 	_emat = StandardMaterial3D.new()
-	_emat.albedo_color = Color(0.07, 0.05, 0.04)
+	_emat.albedo_color = Color(0.11, 0.08, 0.05)
 	_emat.roughness = 0.7
 	_emat.emission_enabled = true
 	_emat.emission = Color(0.5, 0.16, 0.05)

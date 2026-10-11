@@ -82,7 +82,7 @@ func build(top: float, seat_z := -1.10) -> void:
 	add_child(face)
 	face.look_at(Vector3(0, 1.05, seat_z + 0.15), Vector3.UP)
 	face.light_color = Color(0.9, 0.2, 0.08)
-	face.light_energy = 0.55
+	face.light_energy = 0.34
 	face.spot_angle = 30.0
 	face.spot_attenuation = 1.2
 	# clawed hands resting on the felt edge (kept: they reach mid-table)
