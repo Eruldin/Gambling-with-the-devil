@@ -34,7 +34,7 @@ msgid "HINT_PLACE"
 msgstr "Place cards concealed — right-click sacrifices for blood — B raises the stakes — SPACE reveals"
 
 msgid "HINT_PAD"
-msgstr "Pick a lane pad on your row"
+msgstr "Pick a lane pad — front rank strikes, back rank shelters"
 
 msgid "HINT_NOBLOOD"
 msgstr "Not enough blood — sacrifice a card (right-click)"
@@ -495,3 +495,24 @@ msgstr "Azrail counts the ceiling cracks aloud. \"Entertain me, debtor.\""
 
 msgid "TRICK_HIS"
 msgstr "Azrail slides %s from his sleeve."
+
+msgid "CARD_HALBERD"
+msgstr "The Halberdier"
+
+msgid "CARD_HALBERD_DESC"
+msgstr "1/2 · his point clears the wall — strikes the back rank"
+
+msgid "SIGIL_REACH"
+msgstr "Reach — strikes over the wall into the back rank"
+
+msgid "SIGIL_SHARP"
+msgstr "Sharp — strikes first; a kill earns no answer"
+
+msgid "SIGIL_LOAN_SHARK"
+msgstr "Loan Shark — each wound it takes pays a chip"
+
+msgid "SIGIL_SWAP"
+msgstr "Swap — on reveal it slips to a free lane"
+
+msgid "HINT_BACKROW"
+msgstr "Back rank: sheltered support — it can't strike, and it can't be struck while its lane's front stands."

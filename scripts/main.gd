@@ -42,6 +42,9 @@ func _ready() -> void:
 	_environment()
 	_room()
 	var table := _place(PH + "WoodenTable_02/WoodenTable_02_1k.gltf", "table", Vector3.ZERO, 0.56)
+	# §2.2 back rows need a deeper felt — stretch the table toward each
+	# seat so two full rows of pads stay on the wood
+	table.scale.z *= 1.55
 	var top := _world_aabb(table).end.y
 	# keep the model's real wood diffuse/normal/ARM — darken via the
 	# albedo multiplier only, so the grain reads in candlelight
@@ -162,7 +165,7 @@ func _room() -> void:
 func _felt(top: float) -> void:
 	var felt := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	bm.size = Vector3(0.95, 0.012, 0.5)
+	bm.size = Vector3(0.95, 0.012, 0.78)
 	felt.mesh = bm
 	var m := StandardMaterial3D.new()
 	# woven cloth texture (generated) — worn, stained, cold; the candle

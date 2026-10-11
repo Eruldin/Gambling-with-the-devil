@@ -34,7 +34,7 @@ msgid "HINT_PLACE"
 msgstr "Kartları gizli koy — sağ tık kurban — B yükseltme — SPACE aç"
 
 msgid "HINT_PAD"
-msgstr "Kendi sıradan bir şerit seç"
+msgstr "Bir şerit seç — ön sıra vurur, arka sıra korunur"
 
 msgid "HINT_NOBLOOD"
 msgstr "Kan yetmez — kart kurban et (sağ tık)"
@@ -495,3 +495,24 @@ msgstr "Azrail tavandaki çatlakları sesli sayıyor. \"Eğlendir beni, borçlu.
 
 msgid "TRICK_HIS"
 msgstr "Azrail kolundan %s çıkarıyor."
+
+msgid "CARD_HALBERD"
+msgstr "Mızraklı"
+
+msgid "CARD_HALBERD_DESC"
+msgstr "1/2 · ucu duvarı aşar — arka sıraya vurur"
+
+msgid "SIGIL_REACH"
+msgstr "Menzil — duvarın üstünden arka sıraya vurur"
+
+msgid "SIGIL_SHARP"
+msgstr "Keskin — önce vurur; öldürürse karşılık gelmez"
+
+msgid "SIGIL_LOAN_SHARK"
+msgstr "Tefeci — yediği her yara pote bir çip düşürür"
+
+msgid "SIGIL_SWAP"
+msgstr "Kaydırma — açıldığında boş bir şeride kayar"
+
+msgid "HINT_BACKROW"
+msgstr "Arka sıra: korunaklı destek — vuramaz, öndeki kartı ayaktayken yara da almaz."
