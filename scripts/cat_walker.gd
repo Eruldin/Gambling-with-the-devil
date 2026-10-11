@@ -15,11 +15,14 @@ var _idle_clip := ""
 
 func build() -> void:
 	_model = load(CAT).instantiate()
+	# real-cat shoulder height — the raw Quaternius model reads as a
+	# monster on the far floor; ~0.5× brings it to believable scale
+	_model.scale = Vector3.ONE * 0.5
 	add_child(_model)
 	# near-black but readable — pure black vanished against the floor
 	var dm := StandardMaterial3D.new()
-	dm.albedo_color = Color(0.12, 0.09, 0.075)
-	dm.roughness = 0.85
+	dm.albedo_color = Color(0.08, 0.06, 0.05)
+	dm.roughness = 0.9
 	for mi: MeshInstance3D in _model.find_children(
 			"*", "MeshInstance3D", true, false):
 		mi.material_override = dm
@@ -27,17 +30,17 @@ func build() -> void:
 	for side in [-1.0, 1.0]:
 		var e := MeshInstance3D.new()
 		var es := SphereMesh.new()
-		es.radius = 0.008
-		es.height = 0.016
+		es.radius = 0.005
+		es.height = 0.01
 		e.mesh = es
 		var em := StandardMaterial3D.new()
 		em.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
 		em.emission_enabled = true
 		em.emission = Color(1.0, 0.75, 0.2)
-		em.emission_energy_multiplier = 4.0
+		em.emission_energy_multiplier = 2.2
 		e.material_override = em
 		_model.add_child(e)
-		e.position = Vector3(0.02 * side, 0.11, 0.09)
+		e.position = Vector3(0.015 * side, 0.115, 0.09)
 	# Quaternius cat ships real clips — walk while crossing, idle at rest
 	var aps := _model.find_children("*", "AnimationPlayer", true, false)
 	if not aps.is_empty():
@@ -73,14 +76,17 @@ func _cross() -> void:
 	# the deep route disappears behind the devil's chair — keep it rare
 	var behind := randf() < 0.35 and OS.get_environment("GWD_CATNOW") != "1"
 	var y := 0.0
-	var z := -0.75 if behind else 0.15
+	# z=-0.45 is the lit floor band between the table's far lip and
+	# Azrail's chair — the only strip the camera actually sees
+	var z := -0.75 if behind else -0.45
 	var from := Vector3(-1.7, y, z - (0.2 if behind else 0.0))
 	var to := Vector3(1.7, y, z + (0.15 if behind else 0.1))
 	if randf() < 0.5:
 		var tmp := from; from = to; to = tmp
 	_model.position = from
 	_face(to)
-	var speed := 0.35   # slow, measured prowl
+	var speed := 0.65   # a real cat's crossing pace — a slow prowl
+	# at 0.35 m/s read as something much bigger stalking the room
 	# tween the MODEL's local position — the wrapper stays at origin
 	# (tweening the wrapper dragged the cat a whole route-length off-path
 	# and left it crossing behind furniture where nobody could see it)
