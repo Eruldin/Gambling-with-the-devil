@@ -15,6 +15,8 @@ const Sfx := preload("res://scripts/sfx.gd")
 const Devil := preload("res://scripts/devil.gd")
 const HandRig := preload("res://scripts/hand_rig.gd")
 const GloveHand := preload("res://scripts/glove_hand.gd")
+const CatWalker := preload("res://scripts/cat_walker.gd")
+const Ambience := preload("res://scripts/ambience_fx.gd")
 
 var _cam: Camera3D
 var _t := 0.0
@@ -27,6 +29,8 @@ var _hand: Node3D
 var _scale: Node3D
 var _sfx: Node
 var _crackle_in := 0.5
+var _flames: Array = []
+var _hero: OmniLight3D
 
 # ---------------------------------------------------------------- assembly
 
@@ -66,6 +70,13 @@ func _ready() -> void:
 	_battle._scale = _scale
 	_sfx = Sfx.new()
 	_sfx.setup(self)
+	# living room layer: the cat prowls the edges, moth/storm/gust/fog live here
+	var cat := CatWalker.new()
+	add_child(cat)
+	cat.build()
+	var amb := Ambience.new()
+	add_child(amb)
+	amb.setup(_flames, _hero, top)
 	if OS.get_environment("GWD_SHOT") == "1":
 		_shot_frames = 800 if OS.get_environment("GWD_AUTO") == "1" else 150
 
@@ -140,6 +151,10 @@ func _floor_props() -> void:
 	_place(PH + "vintage_grandfather_clock_01/vintage_grandfather_clock_01_1k.gltf", "clock", Vector3(0.72, 0, -1.25), 1.55)
 	# old clutter removed (chest/crate/lantern) — Inscryption keeps frame edges sparse
 	_place(PH + "ornate_mirror_01/ornate_mirror_01_1k.gltf", "mirror", Vector3(1.3, 0.9, -0.6), 0.95, -0.5)
+	# lived-in details at the edges: wine on the cabinet, jug + bowl by the shelf
+	_place(PH + "wine_bottles_01/wine_bottles_01_1k.gltf", "wine", Vector3(1.12, 0.62, -0.52), 0.3, -0.4)
+	_place(PH + "jug_01/jug_01_1k.gltf", "jug", Vector3(-1.32, 0.0, -0.55), 0.32, 0.6)
+	_place(PH + "wooden_bowl_01/wooden_bowl_01_1k.gltf", "bowl", Vector3(-1.05, 0.78, -0.7), 0.14, 0.2)
 
 func _table_props(top: float) -> void:
 	# spare, occult only — Inscryption keeps the felt clean
@@ -221,6 +236,7 @@ func _candles(top: float) -> void:
 		flame.position = Vector3(pos.x, htop + 0.002, pos.z)
 		add_child(flame)
 		flame.setup(frames, smoke, i * 3.7)
+		_flames.append(flame)
 		i += 1
 	# one shadow-casting hero light: tight warm pool over the felt
 	var hero := OmniLight3D.new()
@@ -231,6 +247,7 @@ func _candles(top: float) -> void:
 	hero.omni_attenuation = 2.6
 	hero.shadow_enabled = true
 	add_child(hero)
+	_hero = hero
 	_dust(top)
 	_embers(top)
 	_contact_shadow(top)
@@ -531,3 +548,4 @@ func _local_aabb(root: Node3D) -> AABB:
 		for ch in c.get_children():
 			stack.push_back(ch)
 	return out
+

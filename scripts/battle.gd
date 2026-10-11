@@ -165,6 +165,10 @@ func _start_round() -> void:
 	_chips_devil -= ante
 	_blood = BLOOD_PER_ROUND
 	_phase = Phase.PLACE
+	if _devil != null:
+		_devil.set_mood(_round)
+		if _sfx != null:
+			_devil._sfx_ref = _sfx
 	_draw_hand()
 	_l_phase.text = "%s %d  ·  %s %d" % [tr("ROUND"), _round, tr("BLIND"), ante]
 	_hint(tr("HINT_PLACE"))
@@ -291,6 +295,8 @@ func _sacrifice_card(card) -> void:
 	if card == _selected:
 		_select(null)
 	_blood += card.def.sacrifice_value
+	if _devil != null:
+		_devil.feed(card.position)   # he feeds on the offering
 	if _phand != null and not _autoplay:
 		var away := Vector3(0.55, _top - 0.35, 0.75)
 		await _phand.grab_and_pull(card, away, card.burn)
@@ -354,6 +360,9 @@ func end_turn() -> void:
 	_run_resolution()
 
 func _enemy_place() -> void:
+	# he reads your row first — a thinking beat, not a random drop
+	if _devil != null and not _autoplay:
+		await _devil.think(Vector3(0, _top + 0.05, 0.12))
 	var want := randi_range(1, 2)
 	var free_lanes: Array = []
 	for lane in range(LANES):
@@ -386,6 +395,7 @@ func _enemy_place() -> void:
 		else:
 			card.place_on_pad(_pads["e" + str(lane)].position, true)
 		_sfx.play(Sfx.PLACE_E, -10.0)
+		_sfx.play(Sfx.SLIDE, -14.0, 1.2)   # the arc whoosh
 
 func _run_resolution() -> void:
 	await get_tree().create_timer(0.5).timeout
@@ -400,6 +410,8 @@ func _run_resolution() -> void:
 				Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
 		if e != null and e.face_down:
 			e.reveal_enemy()
+			if _devil != null:
+				_devil.watch(e.position, 1.4)
 			_burst(e.position + Vector3(0, 0.03, 0),
 				Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
 		await get_tree().create_timer(0.18).timeout
@@ -426,6 +438,7 @@ func _run_resolution() -> void:
 				_sfx.play(Sfx.CHIP_HIT, -5.0)
 				if _devil != null:
 					_devil.eyes_flare(0.7)
+					_devil.strike_pose(_pads["e" + str(lane)].position.x, true)
 			await get_tree().create_timer(0.42).timeout
 		if e != null and not e.face_down and e.def != null and e.hp > 0 \
 			and e.def.attack > 0:
@@ -446,6 +459,7 @@ func _run_resolution() -> void:
 				_sfx.play(Sfx.CHIP_HIT, -5.0, 0.85)
 				if _devil != null:
 					_devil.lean_in(0.3)
+					_devil.watch(_pads["p" + str(lane)].position, 1.5)
 			await get_tree().create_timer(0.42).timeout
 	_update_chips()
 	await get_tree().create_timer(0.4).timeout
@@ -487,10 +501,9 @@ func _check_over() -> bool:
 	var won := _chips_devil <= 0 and _chips_you > 0
 	if _devil != null:
 		if won:
-			_devil.eyes_flare(0.3)
+			_devil.defeat()
 		else:
-			_devil.eyes_flare(2.0)
-			_devil.lean_in(0.55, 0.9)
+			_devil.victory()
 	_l_over.text = tr("YOU_WIN") if won else tr("DEVIL_WINS")
 	_l_over.text += "\n" + tr("RESTART")
 	_l_phase.text = tr("GAME_OVER")
