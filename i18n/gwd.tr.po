@@ -178,7 +178,7 @@ msgid "TRICK_TITHE"
 msgstr "Mezar %s geri verdi."
 
 msgid "TRICK_RAZOR"
-msgstr "Keskin kenar — %s +2 saldırı kazandı."
+msgstr "Keskin kenar — %s kulvarında önce vurur."
 
 msgid "CARD_USURER_T"
 msgstr "Solgun Tefeci"
