@@ -333,3 +333,6 @@ msgstr "— günah yenildi"
 
 msgid "SIN_GATE"
 msgstr "GÜNAH"
+
+msgid "EV_BROKEN"
+msgstr "Sakladığın kart pazarlığı kırıyor —"

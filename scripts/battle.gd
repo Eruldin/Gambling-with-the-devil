@@ -89,7 +89,7 @@ var _event_cards: Array = []
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
-	"sin_idx": 0, "sin_name": ""}
+	"sin_idx": 0, "sin_name": "", "broken": []}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _sin_name := ""       # which of the seven is on the throne
@@ -910,6 +910,7 @@ func _reset_run() -> void:
 	_run["taunted"] = []
 	_run["spoils"] = []
 	_run["sin_name"] = ""
+	_run["broken"] = []
 
 # ------------------------------------------------------------ descent (§18)
 
@@ -968,6 +969,13 @@ func _resolve_event(card) -> void:
 	# walking around a dealt sin door reads as cowardice — he notes it
 	if _sin_offered and card.def.id != "event_sin":
 		_psyche["cruelty"] = minf(_psyche["cruelty"] + 0.2, 3.0)
+	# §18.4: a spoil soul in your deck can snap the door's harm — once
+	# per event kind per run. "I kept this card for this."
+	var breaker_id := CardDef.breaker_of(card.def.id)
+	var broken: bool = breaker_id != "" and _run["spoils"].has(breaker_id) \
+		and not _run["broken"].has(card.def.id)
+	if broken:
+		_run["broken"].append(card.def.id)
 	var gamble: bool = ["event_whisper", "event_wheel"].has(card.def.id)
 	var won_roll := true
 	if gamble:
@@ -977,6 +985,8 @@ func _resolve_event(card) -> void:
 			if won_roll:
 				_run["luck"] = minf(_run["luck"] + 0.5, 3.0)
 				_hint(tr("EV_WHISPER_WIN"))
+			elif broken:
+				_hint(tr("EV_BROKEN") + " " + tr("CARD_" + breaker_id.to_upper()))
 			else:
 				_run["debt"] += 6
 				_hint(tr("EV_WHISPER_LOSE"))
@@ -984,19 +994,28 @@ func _resolve_event(card) -> void:
 			if won_roll:
 				_run["purse"] += 12
 				_hint(tr("EV_WHEEL_WIN"))
+			elif broken:
+				_hint(tr("EV_BROKEN") + " " + tr("CARD_" + breaker_id.to_upper()))
 			else:
 				_run["debt"] += 10
 				_hint(tr("EV_WHEEL_LOSE"))
 		"event_ledger":
-			# the Usurer's ledger — pay souls now to strike the debt
+			# the Usurer's ledger — pay souls now to strike the debt;
+			# a Reaper in your pile collects it for free instead
 			_run["debt"] = maxi(_run["debt"] - 5, 0)
-			_run["purse"] = maxi(_run["purse"] - 4, 0)
-			_hint(tr("EV_LEDGER"))
+			if broken:
+				_hint(tr("EV_BROKEN") + " " + tr("CARD_" + breaker_id.to_upper()))
+			else:
+				_run["purse"] = maxi(_run["purse"] - 4, 0)
+				_hint(tr("EV_LEDGER"))
 		"event_mirror":
 			# his mirror flips your fortune — lucky becomes cursed,
 			# cursed becomes blessed (§4.7 tilts invert)
-			_run["luck"] = -_run["luck"]
-			_hint(tr("EV_MIRROR"))
+			if broken:
+				_hint(tr("EV_BROKEN") + " " + tr("CARD_" + breaker_id.to_upper()))
+			else:
+				_run["luck"] = -_run["luck"]
+				_hint(tr("EV_MIRROR"))
 		"event_sin":
 			# the sin door: the next table seats one of the seven
 			_run["sin_next"] = true
