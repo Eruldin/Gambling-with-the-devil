@@ -411,3 +411,12 @@ msgstr "Yavru"
 
 msgid "SIGIL_TITHE"
 msgstr "Öşür"
+
+msgid "CARD_EVENT_PACT"
+msgstr "Sözleşme"
+
+msgid "CARD_EVENT_PACT_DESC"
+msgstr "sekiz ruh borç — sonraki masada telleri haykırır"
+
+msgid "EV_PACT"
+msgstr "Borçlu ruhlarla imzalandı — sonraki masada elleri duramaz."
