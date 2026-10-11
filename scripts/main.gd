@@ -14,6 +14,7 @@ const Battle := preload("res://scripts/battle.gd")
 const Sfx := preload("res://scripts/sfx.gd")
 const Devil := preload("res://scripts/devil.gd")
 const HandRig := preload("res://scripts/hand_rig.gd")
+const GloveHand := preload("res://scripts/glove_hand.gd")
 
 var _cam: Camera3D
 var _t := 0.0
@@ -52,7 +53,7 @@ func _ready() -> void:
 	add_child(_devil)
 	_devil.build(top)
 	_devil._cam = _cam
-	_hand = HandRig.new()
+	_hand = GloveHand.new()
 	add_child(_hand)
 	_hand.setup(Color(0.085, 0.055, 0.04), false)
 	_hand.rotation = Vector3(-0.3, -0.4, 0.15)
@@ -137,14 +138,28 @@ func _floor_props() -> void:
 	_place(PH + "GothicCabinet_01/GothicCabinet_01_1k.gltf", "cabinet", Vector3(0.95, 0, -0.9), 1.35, -0.3)
 	_place(PH + "gothic_statue/gothic_statue_1k.gltf", "statue", Vector3(-1.25, 0, -1.0), 1.0, 0.45)
 	_place(PH + "vintage_grandfather_clock_01/vintage_grandfather_clock_01_1k.gltf", "clock", Vector3(0.72, 0, -1.25), 1.55)
-	_place(PH + "treasure_chest/treasure_chest_1k.gltf", "chest", Vector3(1.25, 0, 0.9), 0.32, -0.6)
-	_place(PH + "wooden_crate_01/wooden_crate_01_1k.gltf", "crate", Vector3(-1.3, 0, 0.55), 0.36, 0.3)
-	_place(PH + "wooden_lantern_01/wooden_lantern_01_1k.gltf", "lantern", Vector3(1.35, 0, 0.35), 0.28)
+	# old clutter removed (chest/crate/lantern) — Inscryption keeps frame edges sparse
+	_place(PH + "ornate_mirror_01/ornate_mirror_01_1k.gltf", "mirror", Vector3(1.3, 0.9, -0.6), 0.95, -0.5)
 
 func _table_props(top: float) -> void:
 	# spare, occult only — Inscryption keeps the felt clean
-	_place(PH + "book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf", "books", Vector3(0.72, top, -0.28), 0.09, 0.35)
 	_place(PH + "ornate_medieval_dagger/ornate_medieval_dagger_1k.gltf", "dagger", Vector3(-0.18, top, -0.33), 0.05, 0.9)
+	# a face-down deck waits at the right edge (the encyclopedia block read cheap)
+	var back: Texture2D = load("res://assets_external/card-art/gwd/card_back.png")
+	for i in range(5):
+		var dq := MeshInstance3D.new()
+		var dm := QuadMesh.new()
+		dm.size = Vector2(0.045, 0.063)
+		dq.mesh = dm
+		var dmat := StandardMaterial3D.new()
+		dmat.albedo_texture = back
+		dmat.albedo_color = Color(0.45, 0.36, 0.3)
+		dmat.roughness = 0.95
+		dq.material_override = dmat
+		dq.rotation.x = -PI / 2
+		dq.rotation.z = 0.12 + i * 0.008
+		dq.position = Vector3(0.66, top + 0.006 + i * 0.0012, -0.24)
+		add_child(dq)
 	# the Scales of the gamble — Inscryption's signature prop, center-left edge
 	_scale = ScaleProp.new()
 	_scale.position = Vector3(-0.45, top, 0.14)

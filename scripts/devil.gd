@@ -57,7 +57,8 @@ func build(top: float, seat_z := -1.10) -> void:
 	# for this asset: ~2m source → 0.45 ≈ looming seated silhouette
 	var s := 0.45
 	_model.scale = Vector3.ONE * s
-	_model.position.y = -0.36       # waist at pivot → lean bends torso
+	_model.position.y = -0.36
+	_model.rotation.x = -0.07   # chin up — face catches the hood light       # waist at pivot → lean bends torso
 	# the inquisitor's white cape lining pops in candlelight — darken any
 	# bright surface materials while keeping their textures
 	for mi: MeshInstance3D in _model.find_children(
@@ -139,10 +140,10 @@ func build(top: float, seat_z := -1.10) -> void:
 	face.spot_attenuation = 1.2
 	# tiny warm orb inside the hood — the pale face glows out of the dark
 	var hood := OmniLight3D.new()
-	hood.position = Vector3(0, 0.66, seat_z + 0.3)
+	hood.position = Vector3(0, 0.7, seat_z + 0.34)
 	add_child(hood)
 	hood.light_color = Color(1.0, 0.55, 0.3)
-	hood.light_energy = 0.5
+	hood.light_energy = 0.8
 	hood.omni_range = 0.55
 	hood.omni_attenuation = 1.8
 	# faint cold rim light so the robed silhouette reads against the dark
@@ -153,7 +154,8 @@ func build(top: float, seat_z := -1.10) -> void:
 	chest.light_energy = 0.16
 	chest.omni_range = 1.4
 	chest.omni_attenuation = 2.0
-	# clawed hands resting on the felt edge (kept: they reach mid-table)
+	# old primitive claws hidden — the inquisitor's presence carries the scene;
+	# the nodes stay (invisible) because their tweens still carry played cards
 	_hand_r = HandRig.new()
 	add_child(_hand_r)
 	_hand_r.setup(Color(0.02, 0.013, 0.011), true)
@@ -165,6 +167,8 @@ func build(top: float, seat_z := -1.10) -> void:
 	_hand_l.home_pos(Vector3(0.27, top + 0.028, seat_z + 0.72))
 	_hand_l.rotation = Vector3(-0.12, PI + 0.45, 0.08)
 	_hand_l.scale = Vector3(-1, 1, 1)  # mirrored
+	_hand_r.visible = false
+	_hand_l.visible = false
 
 func _process(delta: float) -> void:
 	_t += delta
