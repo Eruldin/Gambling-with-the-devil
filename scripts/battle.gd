@@ -98,6 +98,11 @@ var _cruel_seats := false  # carried cruelty seats an extra ambush
 var _bored_ante := false   # carried boredom hurries the blinds
 var _pact := false         # the Pact: debt bought louder tells
 var _sin_name := ""       # which of the seven is on the throne
+var _sin_idx := -1        # its seat in SIN_NAMES (-1 = no sin table)
+var _sin_ante := 0        # Greed's extra tithe per hand
+var _hand_cap := HAND_MAX # Lust trims how much you may hold
+var _glut_drain := false  # Gluttony feeds on the pot each round
+var _sloth_table := false # Sloth slows his plays to one
 
 # ---------------------------------------------------------------- setup
 
@@ -117,6 +122,9 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_make_hud()
 	_spawn_effigies()
 	_deck = CardDef.starter_deck()
+	# Envy's table chokes stitched seals — the graft keeps riding in
+	# _run but lies dormant while it sits the throne (§18.3)
+	var envy := bool(_run["sin_next"]) and int(_run["sin_idx"]) == 3
 	# §18 spoils: every table you owned leaves a card in your deck —
 	# the pile you carry grows as the Descent does (cap 24)
 	for sid in _run["spoils"]:
@@ -126,7 +134,7 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 				# §3.5 taxidermy: a grafted seal rides the spoil it was
 				# stitched onto — survives the reload like everything else
 				var graft: String = str(_run["grafts"].get(sid, ""))
-				if graft != "" and not sd.sigils.has(graft):
+				if graft != "" and not envy and not sd.sigils.has(graft):
 					sd.sigils.append(graft)
 				_deck.append(sd)
 	_edeck = CardDef.devil_deck(_run["depth"])
@@ -171,6 +179,27 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 		for d in _edeck:
 			d.attack += 1
 		_sin_name = str(_run["sin_name"])
+		_sin_idx = int(_run["sin_idx"])
+		# §18.3 the sin on the throne plays by its own rules —
+		# the seven are bosses, not just bigger stacks
+		match _sin_idx:
+			0:   # PRIDE seats a fortune it refuses to guard
+				_chips_devil += 10
+			1:   # GREED weighs the tithe heavier every hand
+				_sin_ante = 3
+			2:   # LUST courts your cards away — a smaller grip
+				_hand_cap = HAND_MAX - 2
+			4:   # GLUTTONY feeds on the pot itself
+				_glut_drain = true
+			5:   # WRATH sharpens his whole line a second step
+				for d in _edeck:
+					d.attack += 1
+				_chips_devil += 5
+			6:   # SLOTH barely stirs — one play, fat pockets
+				_sloth_table = true
+				_chips_devil += 10
+			_:   # ENVY already choked the grafts above
+				pass
 	_wager_offered = _run["wager_used"]
 	# embers spent at the last door burn his counterfeits out of the deck
 	for i in range(_run["cleanse"]):
@@ -191,7 +220,8 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# §18 ambush: from the third door down he's already seated pawns
 	# face-down — deeper tables start rigged against you
 	var ambush := mini(maxi(_run["depth"] - 2, 0)
-		+ (1 if _cruel_seats else 0), 3)
+		+ (1 if _cruel_seats else 0) + (1 if _sin_idx == 5 else 0),
+		4 if _sin_idx == 5 else 3)
 	for i in range(ambush):
 		var free_l: Array = []
 		for l in range(LANES):
@@ -333,6 +363,7 @@ func _start_round() -> void:
 		ante += 2                  # a sin at the table raises the tithe
 	if _bored_ante:
 		ante += 1                  # boredom hurries the blinds (§18.2)
+	ante += _sin_ante            # Greed's tithe (§18.3)
 	for e in _effigies:
 		if e["id"] == "debtor_bell":
 			ante += 1              # the bell tolls — both antes rise
@@ -357,6 +388,10 @@ func _start_round() -> void:
 	_chips_you -= ante
 	_chips_devil -= ante
 	_pot += ante * 2
+	if _glut_drain and _pot > 0:
+		var bite := mini(2, _pot)  # Gluttony eats from the pot (§18.3)
+		_pot -= bite
+		_chips_devil += bite
 	for e in _effigies:
 		if e["id"] == "croupier":
 			_chips_you += 1        # the House's hand pays your ante back
@@ -384,7 +419,8 @@ func _start_round() -> void:
 	# the throne name rides the phase line until the fight is done
 	if _sin_table and _round == 1:
 		_l_phase.text = tr("SIN_GATE") + ": " + _sin_name
-		_hint(tr("EV_SIN") + " " + _sin_name)
+		_hint(tr("EV_SIN") + " " + _sin_name
+			+ " — " + tr("SIN_RULE_" + str(_sin_idx)))
 	else:
 		_hint(tr("HINT_PLACE_R1") if _round == 1 else tr("HINT_PLACE"))
 	_update_chips()
@@ -392,7 +428,7 @@ func _start_round() -> void:
 	_check_over()
 
 func _draw_hand() -> void:
-	if _hand.size() >= HAND_MAX:
+	if _hand.size() >= _hand_cap:
 		return
 	if _deck.is_empty():
 		# Soul Draw (§2.3): thin decks bleed — 2 chips a card, into the pot.
@@ -649,7 +685,8 @@ func _enemy_place() -> void:
 	free_lanes.sort_custom(func(a: int, b: int) -> bool:
 		return _lane_score(a, peek) > _lane_score(b, peek))
 	# a bored devil presses the attack — more bodies on the felt
-	var want := randi_range(1, 2 if _psyche["boredom"] < TAUNT_AT else 3)
+	var want := randi_range(1, 1 if _sloth_table
+		else (2 if _psyche["boredom"] < TAUNT_AT else 3))
 	for i in range(mini(want, free_lanes.size())):
 		if _edeck.is_empty():
 			break
