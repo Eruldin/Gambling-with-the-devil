@@ -166,6 +166,7 @@ func _make_hud() -> void:
 	_l_hint.offset_bottom = -10
 	_l_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_l_over = _mk_label(Vector2(0, 0), 42, Color(0.85, 0.3, 0.15))
+	_l_over.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_l_over.set_anchors_preset(Control.PRESET_CENTER)
 	_l_over.offset_left = -400
 	_l_over.offset_right = 400
@@ -665,10 +666,11 @@ func raise() -> void:
 	_raise_used += 1
 	_chips_you -= 1
 	_pot += 1
+	# hint first — a taunt crossing inside _bump must not be clobbered
+	_hint(tr("RAISED"))
 	_bump("curiosity", 0.5)
 	if _devil != null:
 		_devil.watch(Vector3(0, _top + 0.04, 0.02), 1.2)
-	_hint(tr("RAISED"))
 	_sfx.play(Sfx.CHIP_HANDLE, -8.0)
 	_pulse(_l_pot)
 	_update_chips()
