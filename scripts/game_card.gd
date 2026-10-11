@@ -48,7 +48,7 @@ func setup(front_tex: Texture2D, back_tex: Texture2D) -> void:
 	_front.rotation.x = -PI / 2.0
 	add_child(_front)
 
-	_back = _face_quad(back_tex, 0.4)
+	_back = _face_quad(back_tex, 0.95)
 	_back.position = Vector3(0, -CARD_T * 0.51 - 0.0002, 0)
 	_back.rotation.x = PI / 2.0
 	add_child(_back)

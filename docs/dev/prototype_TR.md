@@ -48,3 +48,8 @@ Tasarım döngüsü: iki taraf da Perde öder (1/2/3/5/8/13 çip), kartları **g
 - `devil.gd`: prosedürel rakip — uzak sandalyede neredeyse siyah siluet: kambur gövde, boyun, uzun boynuzlu kafatası, parlayan gözler (flicker + hasarda/zaferde flare), çuha kenarında pençeli eller; nefes alma, kafa seğirmeleri, parmak tıkırdatma; `play_card()` sağ pençeyle gizli kartı şeride kayar; `lean_in()` vuruşta/sonda.
 - `hand_rig.gd`: ortak eklemli el (avut + başparmak + 4 çift-boğum parmak). Oyuncu eldiveni: `pick_and_place()` kartı şeride taşır, `grab_and_pull()` kurban kartı karanlığa çekip yakar.
 - Işık: neredeyse siyah oda (ambient 0.22), fog, çuha üstünde dar omni havuzu, ACES + kontrast, köşe kararması (CanvasItem shader), iblis yüzüne soluk kırmızı alt-ışık; kamera iblisin kafası üst kadrajda kalacak şekilde yukarı çevrildi.
+
+## Gerçek iblis modeli + atmosfer geçişi (feat/real-devil-model)
+- `devil.gd` artık primitif parçalar yerine gerçek texture'lı modeli kullanıyor (`assets_external/devil-model/demon_sorcerer.glb`, CC0, rigged) — uzak koltukta çuhanın üstüne eğilmiş oturuyor; parlayan göz küreleri + additive haleler, yüzde kırmızı alt-ışık, aynı API (`eyes_flare`, `lean_in`, `play_card`, parmak tıkırdatma).
+- Atmosfer: çuha üstü sadeleşti (Inscryption'ın temiz masası), aksesuarlar kadraj kenarlarına, hero ışık havuzu daraldı, ışık konisinde sürüklenen toz tanecikleri (`GPUParticles3D`), kart arkaları dokularını yaydığı için gizli kartlar kırmızı okunuyor.
+- His: çip vuruşlarında kamera sarsıntısı (`h_offset`/`v_offset`); `restart()` ertelendiği için ilk R sahneyi yeniden yüklüyor.
