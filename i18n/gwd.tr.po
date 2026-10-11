@@ -246,3 +246,33 @@ msgstr "Kahin surat asıyor — tura: −1 çip."
 msgid "CARD_PRIESTESS"
 msgstr "Şansın Yüksek Rahibi"
 
+
+msgid "DEPTH"
+msgstr "İniş"
+
+msgid "HINT_EVENT"
+msgstr "Masa üç kapı açıyor — inişini seç."
+
+msgid "CARD_EVENT_WHISPER"
+msgstr "Fısıltı"
+
+msgid "CARD_EVENT_WHEEL"
+msgstr "Çark"
+
+msgid "CARD_EVENT_COVENANT"
+msgstr "Sözleşme"
+
+msgid "EV_WHISPER_WIN"
+msgstr "Kulağına bir hile fısıldıyor — şansın keskinleşti."
+
+msgid "EV_WHISPER_LOSE"
+msgstr "Fısıltı bir kancaydı — 6 daha borçlusun."
+
+msgid "EV_WHEEL_WIN"
+msgstr "Çark altında durdu — yanında +12 ruh."
+
+msgid "EV_WHEEL_LOSE"
+msgstr "Çark ona düştü — 10 ruh daha borçlusun."
+
+msgid "EV_COVENANT"
+msgstr "İmzalı bir geçiş — +5 ruh, küçük bir lütuf."
