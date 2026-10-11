@@ -63,6 +63,7 @@ static func starter_deck() -> Array:
 		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png", ["loan_shark"]),
 		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_imp.png", ["swap"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic"]),
+		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_seer.png"),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_martyr.png"),

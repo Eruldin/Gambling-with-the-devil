@@ -222,4 +222,27 @@ msgstr "Debtor's Bell"
 
 msgid "EFFIGY_CROUPIER"
 msgstr "Croupier's Left Hand"
+msgid "TRUMP_LOADED_DICE"
+msgstr "Loaded Dice"
+
+msgid "TRUMP_MIRRORED_COIN"
+msgstr "Mirrored Coin"
+
+msgid "TRUMP_LOADED"
+msgstr "Loaded dice — your next roll can't lose."
+
+msgid "TRUMP_MIRRORED"
+msgstr "Mirrored coin — one lost roll comes back."
+
+msgid "COIN_REROLL"
+msgstr "The mirrored coin flips the roll again."
+
+msgid "PRIESTESS_WON"
+msgstr "The Priestess smiles — heads: +3 chips."
+
+msgid "PRIESTESS_LOST"
+msgstr "The Priestess frowns — tails: −1 chip."
+
+msgid "CARD_PRIESTESS"
+msgstr "High Priestess of Chance"
 

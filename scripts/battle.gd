@@ -50,7 +50,12 @@ var _mulligan_used := false
 var _repos_armed = null       # board card selected for reposition (§2.3)
 var _trick_armed = null       # razor awaiting a pawn target
 var _dead_p: Array = []       # player defs that died this battle (Tithe fodder)
-var _trumps: Array = ["sleeve_ace", "cold_deck", "marked_cards"]
+var _trump_pool: Array = ["sleeve_ace", "cold_deck", "marked_cards",
+	"loaded_dice", "mirrored_coin"]
+var _trumps: Array = []
+var _luck := 0              # §4.7 hidden meta-stat: −3…+3 tilts every roll
+var _loaded_next := false   # Loaded Dice spent — next roll wins
+var _mirrored := false      # Mirrored Coin spent — one reroll banked
 var _marked_active := false   # Marked Cards: your tells are unreadable
 var _l_trumps: Label
 var _effigies: Array = []     # mantel objects — passive per-round effects
@@ -102,6 +107,9 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
 	_deck.shuffle()
 	_edeck.shuffle()
+	_trump_pool.shuffle()
+	_trumps = _trump_pool.slice(0, 3)   # §4.6: max 3 held
+	_update_trumps()
 	for i in range(5):
 		_draw_hand()
 	_start_round()
@@ -223,6 +231,16 @@ func _start_round() -> void:
 	for e in _effigies:
 		if e["id"] == "debtor_bell":
 			ante += 1              # the bell tolls — both antes rise
+	# High Priestess of Chance: each round she flips — heads +3, tails −1
+	for lane in range(LANES):
+		var c = _board_p.get(lane)
+		if c != null and not c.face_down and c.def != null 			and c.def.id == "priestess":
+			var won := _roll_chance()
+			_chips_you += 3 if won else -1
+			_burst(c.position + Vector3(0, 0.03, 0),
+				Color(1.0, 0.8, 0.2) if won else Color(0.5, 0.1, 0.4),
+				14, 0.01, 0.45)
+			_hint((tr("PRIESTESS_WON") if won else tr("PRIESTESS_LOST")))
 	_chips_you -= ante
 	_chips_devil -= ante
 	_pot += ante * 2
@@ -927,6 +945,12 @@ func use_trump(idx: int) -> void:
 		"marked_cards":
 			_marked_active = true
 			_hint(tr("TRUMP_MARKED"))
+		"loaded_dice":
+			_loaded_next = true
+			_hint(tr("TRUMP_LOADED"))
+		"mirrored_coin":
+			_mirrored = true
+			_hint(tr("TRUMP_MIRRORED"))
 	_trumps.remove_at(idx)
 	_update_trumps()
 	_bump("anger", 0.35)      # §4.7 — he always notices a cheat
@@ -1175,6 +1199,19 @@ func _spawn_effigies() -> void:
 			Vector3(PI, 0, 0), 0.6)
 		card.set_base(dest, Vector3(PI, 0, 0))
 	_l_effigies.text = "%s  %s" % [tr("EFFIGY_LBL"), " · ".join(names)]
+
+## §4.7 Luck: every internal roll tilts by the hidden band; Loaded Dice
+## forces the next roll, Mirrored Coin refunds one lost roll.
+func _roll_chance() -> bool:
+	if _loaded_next:
+		_loaded_next = false
+		return true
+	var win := randf() < 0.5 + 0.08 * float(_luck)
+	if not win and _mirrored:
+		_mirrored = false
+		win = randf() < 0.5 + 0.08 * float(_luck)
+		_hint(tr("COIN_REROLL"))
+	return win
 
 func _autoplay_run() -> void:
 	await get_tree().create_timer(1.2).timeout
