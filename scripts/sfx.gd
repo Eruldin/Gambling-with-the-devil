@@ -29,6 +29,11 @@ static var TURN: String = AUDIO + "interface-sounds/Audio/click_002.ogg"
 static var WIN: String = AUDIO + "interface-sounds/Audio/confirmation_003.ogg"
 static var LOSE: String = AUDIO + "interface-sounds/Audio/bong_001.ogg"
 static var DROP: String = AUDIO + "interface-sounds/Audio/drop_002.ogg"
+static var CRACKLE: Array[String] = [
+	AUDIO + "interface-sounds/Audio/click_001.ogg",
+	AUDIO + "interface-sounds/Audio/click_003.ogg",
+	AUDIO + "interface-sounds/Audio/click_005.ogg",
+]
 
 var _root: Node
 

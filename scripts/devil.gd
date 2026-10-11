@@ -5,7 +5,7 @@ extends Node3D
 ## resting on the felt edge.
 
 const HandRig := preload("res://scripts/hand_rig.gd")
-const DEMON := "res://assets_external/devil-model/winged_demon_wraith.glb"
+const DEMON := "res://assets_external/devil-model/hooded_inquisitor.glb"
 
 var _eye_mat: StandardMaterial3D
 var _halo_mat: StandardMaterial3D
@@ -27,6 +27,21 @@ var _blink_in := 3.0 + randf() * 4.0
 var _blink := 0.0
 var _cam: Camera3D
 
+func _model_aabb(root: Node3D) -> AABB:
+	var inv := root.global_transform.affine_inverse()
+	var out := AABB()
+	var first := true
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var c: Node = stack.pop_back()
+		if c is MeshInstance3D:
+			var a: AABB = (inv * c.global_transform) * c.get_aabb()
+			out = a if first else out.merge(a)
+			first = false
+		for ch in c.get_children():
+			stack.push_back(ch)
+	return out
+
 ## seat_z: z of the far chair; top: table surface height.
 func build(top: float, seat_z := -1.10) -> void:
 	# real model: ~2.0m tall, faces +Z (toward the player — correct as-is).
@@ -37,10 +52,28 @@ func build(top: float, seat_z := -1.10) -> void:
 	_torso.rotation.x = 0.18
 	add_child(_torso)
 	_model = load(DEMON).instantiate()
-	var s := 0.62
-	_model.scale = Vector3.ONE * s
-	_model.position.y = -0.42       # waist at pivot → lean bends torso
 	_torso.add_child(_model)
+	# NOTE: skinned-mesh aabb reports bind-space (tiny) — size is hand-tuned
+	# for this asset: ~2m source → 0.45 ≈ looming seated silhouette
+	var s := 0.45
+	_model.scale = Vector3.ONE * s
+	_model.position.y = -0.36       # waist at pivot → lean bends torso
+	# the inquisitor's white cape lining pops in candlelight — darken any
+	# bright surface materials while keeping their textures
+	for mi: MeshInstance3D in _model.find_children(
+			"*", "MeshInstance3D", true, false):
+		var mesh := mi.mesh
+		if mesh == null:
+			continue
+		for si in range(mesh.get_surface_count()):
+			var om := mesh.surface_get_material(si)
+			if om is StandardMaterial3D and \
+					om.albedo_color.get_luminance() > 0.62:
+				var dm := StandardMaterial3D.new()
+				dm.albedo_texture = om.albedo_texture
+				dm.albedo_color = om.albedo_color * Color(0.3, 0.24, 0.24)
+				dm.roughness = 0.92
+				mi.set_surface_override_material(si, dm)
 	# skeletal animation — the body actually moves, not just node sways
 	var aps := _model.find_children("*", "AnimationPlayer", true, false)
 	var ap: AnimationPlayer = null if aps.is_empty() else aps[0]
@@ -57,9 +90,9 @@ func build(top: float, seat_z := -1.10) -> void:
 		if anim != null:
 			anim.loop_mode = Animation.LOOP_LINEAR
 		ap.play(pick)
-	# eye anchor: skull face height ≈ 1.72m * s above feet → ~0.77 over pivot
+	# eye anchor — hood brow ~0.62 torso-local on the 0.32-scale model
 	_head = Node3D.new()
-	_head.position = Vector3(0, 0.66, 0.16)
+	_head.position = Vector3(0, 0.31, 0.1)
 	_rest_head = _head.position
 	_torso.add_child(_head)
 	# glowing eyes — orbs + additive flare halo quads behind them
@@ -82,35 +115,43 @@ func build(top: float, seat_z := -1.10) -> void:
 		hq.size = Vector2(0.085, 0.085)
 		h.mesh = hq
 		h.material_override = _halo_mat
-		h.position = Vector3(0.031 * side, 0.005, 0.08)
+		h.position = Vector3(0.027 * side, 0.0, 0.07)
 		_head.add_child(h)
 		_halos.append(h)
 		var e := MeshInstance3D.new()
 		var es := SphereMesh.new()
-		es.radius = 0.019
-		es.height = 0.038
+		es.radius = 0.014
+		es.height = 0.028
 		es.radial_segments = 12
 		e.mesh = es
 		e.material_override = _eye_mat
-		e.position = Vector3(0.031 * side, 0.005, 0.085)
+		e.position = Vector3(0.027 * side, 0.0, 0.075)
 		_head.add_child(e)
 		_eyes.append(e)
 	# faint red uplight so the textured face is *just* readable
 	var face := SpotLight3D.new()
-	face.position = Vector3(0, 0.5, seat_z + 0.55)
+	face.position = Vector3(0, 0.42, seat_z + 0.5)
 	add_child(face)
-	face.look_at(Vector3(0, 1.05, seat_z + 0.15), Vector3.UP)
+	face.look_at(Vector3(0, 0.66, seat_z + 0.15), Vector3.UP)
 	face.light_color = Color(0.9, 0.2, 0.08)
-	face.light_energy = 0.34
-	face.spot_angle = 30.0
+	face.light_energy = 0.85
+	face.spot_angle = 36.0
 	face.spot_attenuation = 1.2
-	# the wraith's glowing chest throws faint magenta light onto the table
+	# tiny warm orb inside the hood — the pale face glows out of the dark
+	var hood := OmniLight3D.new()
+	hood.position = Vector3(0, 0.66, seat_z + 0.3)
+	add_child(hood)
+	hood.light_color = Color(1.0, 0.55, 0.3)
+	hood.light_energy = 0.5
+	hood.omni_range = 0.55
+	hood.omni_attenuation = 1.8
+	# faint cold rim light so the robed silhouette reads against the dark
 	var chest := OmniLight3D.new()
-	chest.position = Vector3(0, 0.75, seat_z + 0.35)
+	chest.position = Vector3(0, 0.85, seat_z - 0.15)
 	add_child(chest)
-	chest.light_color = Color(0.75, 0.12, 0.42)
-	chest.light_energy = 0.22
-	chest.omni_range = 1.6
+	chest.light_color = Color(0.3, 0.42, 0.5)
+	chest.light_energy = 0.16
+	chest.omni_range = 1.4
 	chest.omni_attenuation = 2.0
 	# clawed hands resting on the felt edge (kept: they reach mid-table)
 	_hand_r = HandRig.new()

@@ -43,6 +43,7 @@ var _hovered_pad = null
 var _l_phase: Label
 var _l_chips: Label
 var _l_blood: Label
+var _scale: Node3D       # the Scales prop — tips when souls swing
 var _l_hint: Label
 var _l_tool: Label
 var _l_over: Label
@@ -418,6 +419,8 @@ func _run_resolution() -> void:
 				_chips_devil -= p.def.attack
 				_pulse(_l_chips)
 				_shake(0.022)
+				if _scale != null:
+					_scale.tip(0.25 * p.def.attack)
 				_burst(_pads["e" + str(lane)].position + Vector3(0, 0.05, 0),
 					Color(1.0, 0.55, 0.15), 22, 0.014, 0.5)
 				_sfx.play(Sfx.CHIP_HIT, -5.0)
@@ -436,6 +439,8 @@ func _run_resolution() -> void:
 				_chips_you -= e.def.attack
 				_pulse(_l_chips)
 				_shake(0.028)
+				if _scale != null:
+					_scale.tip(-0.25 * e.def.attack)
 				_burst(_pads["p" + str(lane)].position + Vector3(0, 0.05, 0),
 					Color(1.0, 0.55, 0.15), 22, 0.014, 0.5)
 				_sfx.play(Sfx.CHIP_HIT, -5.0, 0.85)
