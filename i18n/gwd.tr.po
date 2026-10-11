@@ -447,3 +447,21 @@ msgstr "diz çök — üç ruh borç affedilir, ama seni daha derin okur"
 
 msgid "EV_CONFESS"
 msgstr "Bağışlandın — üç ruh hafifledin, ama seni eskisinden iyi tanıyor."
+
+msgid "CARD_EVENT_TOLL"
+msgstr "Geçiş Kapısı"
+
+msgid "CARD_EVENT_TOLL_DESC"
+msgstr "dört ruh borç — sonraki masa derinlik vergisi istemez"
+
+msgid "EV_TOLL"
+msgstr "Peşin ödendi — sonraki masa öşrünü tutmuyor."
+
+msgid "CARD_EVENT_RELIQUARY"
+msgstr "Kutsal Emanet"
+
+msgid "CARD_EVENT_RELIQUARY_DESC"
+msgstr "nişinde unutulmuş bir ruh — savaşsız sana katılır"
+
+msgid "EV_RELIC"
+msgstr "Niş açılıyor — bir ruh çıkıp tarafını tutuyor:"
