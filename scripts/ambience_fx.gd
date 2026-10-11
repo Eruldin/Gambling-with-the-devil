@@ -1,6 +1,6 @@
 extends Node3D
-## Living-room ambience: moth circling the hero candle, distant storm
-## flashes + thunder, wind gusts that lean every flame, floor fog tendrils.
+## Living-room ambience: distant storm flashes + thunder, wind gusts
+## that lean every flame, floor fog tendrils.
 
 const SMOKE := "res://assets_external/anim-vfx/kenney/particle-pack/PNG (Transparent)/smoke_03.png"
 const GUST := "res://assets_external/audio/gwd/gust.wav"
@@ -10,9 +10,7 @@ const SFX_C := preload("res://scripts/sfx.gd")
 var _sfx: Node
 var _hero: OmniLight3D
 var _flames: Array = []
-var _moth: MeshInstance3D
 var _moth_t := 0.0
-var _moth_r := 0.11
 var _storm_in := 25.0 + randf() * 25.0
 var _gust_in := 10.0 + randf() * 12.0
 var _flash: OmniLight3D
@@ -24,20 +22,6 @@ func setup(flames: Array, hero: OmniLight3D, table_y: float) -> void:
 	_hero = hero
 	_sfx = SFX_C.new()
 	_sfx.setup(self)
-	# moth — a faint speck of dusty wings orbiting the candle pool
-	_moth = MeshInstance3D.new()
-	var mq := QuadMesh.new()
-	mq.size = Vector2(0.014, 0.009)
-	_moth.mesh = mq
-	var mm := StandardMaterial3D.new()
-	mm.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	mm.albedo_color = Color(0.45, 0.36, 0.24)
-	mm.emission_enabled = true
-	mm.emission = Color(0.5, 0.38, 0.2)
-	mm.emission_energy_multiplier = 0.55
-	mm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	_moth.material_override = mm
-	add_child(_moth)
 	# storm flash light above the gothic window (cold, far away)
 	_flash = OmniLight3D.new()
 	_flash.position = Vector3(-0.6, 2.0, -0.9)
@@ -67,15 +51,6 @@ func setup(flames: Array, hero: OmniLight3D, table_y: float) -> void:
 
 func _process(delta: float) -> void:
 	_moth_t += delta
-	# moth: lissajous-ish erratic orbit + wing flap
-	if _moth != null and _hero != null:
-		var r := _moth_r + 0.03 * sin(_moth_t * 1.7)
-		_moth.global_position = _hero.global_position + Vector3(
-			cos(_moth_t * 2.3) * r,
-			0.05 + 0.05 * sin(_moth_t * 3.1),
-			sin(_moth_t * 1.9) * r)
-		var flap := 0.5 + 0.5 * sin(_moth_t * 28.0)
-		_moth.scale = Vector3(0.6 + 0.7 * flap, 1.0, 1.0)
 	# fog drift
 	for f in _fog:
 		var n: MeshInstance3D = f.n
