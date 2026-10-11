@@ -61,9 +61,9 @@ static func starter_deck() -> Array:
 		make("martyr", "chalices", 0, 1, 2, 2, "res://assets_external/card-art/gwd/face_martyr.png", ["haunt"]),
 		make("acolyte", "pentacles", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_acolyte.png", ["venom"]),
 		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png", ["loan_shark"]),
-		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_imp.png", ["swap"]),
+		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic"]),
-		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_seer.png"),
+		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_martyr.png"),
@@ -88,7 +88,7 @@ static func devil_deck(depth: int) -> Array:
 			["pierce"]))
 	if depth >= 3:
 		d.append(make("priestess", "eyes", 1, 3, 4, 1,
-			"res://assets_external/card-art/gwd/face_seer.png"))
+			"res://assets_external/card-art/gwd/face_priestess.png"))
 	return d
 
 ## §18 spoils: cards a won table pays into your deck — slightly better
@@ -102,23 +102,23 @@ static func spoil(sid: String) -> RefCounted:
 	match sid:
 		"grave_duelist":
 			return make("duelist", "blades", 1, 3, 2, 1,
-				g + "face_duelist.png", ["executioner"])
+				g + "face_grave_duelist.png", ["executioner"])
 		"hell_warden":
 			return make("warden", "chalices", 1, 1, 5, 1,
-				g + "face_warden.png", ["revival", "haunt"])
+				g + "face_hell_warden.png", ["revival", "haunt"])
 		"choir_seer":
 			return make("seer", "eyes", 1, 2, 3, 1,
-				g + "face_seer.png", ["mimic"])
+				g + "face_choir_seer.png", ["mimic"])
 		"debt_reaper":
 			return make("reaper", "blades", 2, 4, 2, 1,
-				g + "face_reaper.png", ["pierce"])
+				g + "face_debt_reaper.png", ["pierce"])
 		"plague_votary":
 			return make("votary", "chalices", 1, 0, 5, 2,
-				g + "face_votary.png", ["brood", "venom"])
+				g + "face_plague_votary.png", ["brood", "venom"])
 		"fused_abomination":
 			# §3.4 Furnace product — never dealt as a spoil, only melted
 			return make("fused_abomination", "blades", 3, 5, 6, 2,
-				g + "face_martyr.png", ["executioner", "haunt"])
+				g + "face_abomination.png", ["executioner", "haunt"])
 	return null
 
 ## §18.4 scenario breakers — a spoil soul whose presence in your deck
