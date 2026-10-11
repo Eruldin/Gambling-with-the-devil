@@ -351,3 +351,9 @@ msgstr "Yavaş bir baş sallama — daha zor bir kapıyı hak ettin."
 
 msgid "DOOR_BOREDOM"
 msgstr "Dişlerinin ardından esniyor — çabuk. Kapılar kararsızlar içindir."
+
+msgid "EP_TABLES"
+msgstr "masa"
+
+msgid "EP_DEPTH"
+msgstr "derinlik"

@@ -897,8 +897,14 @@ func _finish_over(won: bool) -> void:
 			_resolve_event(_event_cards[randi() % _event_cards.size()])
 		return
 	_phase = Phase.OVER
+	# the run's epitaph — what the Descent gave you before it took you
+	var epitaph := "%s %d · %s %d" % [tr("EP_TABLES"), _run["won"],
+		tr("EP_DEPTH"), _run["depth"] + 1]
+	if _run["embers"] > 0:
+		epitaph += " · %d %s" % [_run["embers"], tr("EMBERS_LBL")]
 	_reset_run()
 	_l_over.text = tr("DEVIL_WINS")
+	_l_over.text += "\n" + epitaph
 	if _debt > 0:
 		_l_over.text += "\n" + tr("DEBT_LBL") + " " + str(_debt)
 	_l_over.text += "\n" + tr("RESTART")

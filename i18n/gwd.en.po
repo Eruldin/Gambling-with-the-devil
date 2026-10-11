@@ -351,3 +351,9 @@ msgstr "A slow nod — you have earned the right to a harder door."
 
 msgid "DOOR_BOREDOM"
 msgstr "He yawns behind his teeth — hurry. Doors are for the dithering."
+
+msgid "EP_TABLES"
+msgstr "tables"
+
+msgid "EP_DEPTH"
+msgstr "depth"
