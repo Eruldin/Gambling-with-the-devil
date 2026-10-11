@@ -868,7 +868,10 @@ func _run_resolution() -> void:
 		# §3.3: clashes are simultaneous — a defender answers even in
 		# death, unless the attacker's Sharp seal slew it first
 		var e_answer: bool = e != null and not e.face_down \
-			and e.def != null and e.hp > 0 and e.def.attack > 0
+			and e.def != null and e.hp > 0 and e.def.attack > 0 \
+			and not "bulwark" in e.def.sigils \
+			and not (p != null and p.def != null \
+				and "bulwark" in p.def.sigils)
 		var sharp_kill := false
 		if p != null and not p.face_down and p.def.attack > 0 \
 			and p.hp > 0:
@@ -909,6 +912,35 @@ func _run_resolution() -> void:
 				e2.flash()
 				_burst(e2.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
+				# §3.3 Frenzied: a kill buys a second blow at −2 attack —
+				# the dying card is gone, so the follow-through takes the
+				# rank behind it, or the pot if the lane stands empty
+				if e2.hp <= 0 and "frenzied" in p.def.sigils:
+					var fatk: float = maxf(float(p.def.attack) - 2.0, 0.0)
+					var tgt2 = _board_eb.get(lane) if e2 == e else e
+					if fatk > 0.0:
+						if tgt2 != null and not tgt2.face_down:
+							p.lunge(_pads[_pad_key("e", lane,
+								1 if tgt2 == _board_eb.get(lane) else 0)].position)
+							if "waxhide" in tgt2.def.sigils \
+								and not tgt2.wax_used:
+								tgt2.wax_used = true
+								fatk = 0.0
+							tgt2.hp -= fatk
+							if "venom" in p.def.sigils and tgt2.hp > 0:
+								tgt2.venom = mini(tgt2.venom + 1, 3)
+							tgt2.flash()
+							_burst(tgt2.position + Vector3(0, 0.03, 0),
+								Color(1.0, 0.5, 0.12), 14, 0.01, 0.35)
+							if tgt2.hp <= 0:
+								_bump("respect", 0.3)
+						else:
+							p.lunge(_pads["e" + str(lane)].position)
+							_chips_devil -= int(fatk)
+							_pot += int(fatk)
+							_pulse(_l_chips)
+							_shake(0.018)
+							_sfx.play(Sfx.CHIP_HIT, -6.0)
 			else:
 				# §2.4: chip damage bleeds 1:1 — and antes the same into the pot
 				_chips_devil -= p.def.attack
@@ -957,6 +989,31 @@ func _run_resolution() -> void:
 				ptgt.flash()
 				_burst(ptgt.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
+				# §3.3 Frenzied — his killers press on too
+				if ptgt.hp <= 0 and "frenzied" in e.def.sigils:
+					var fatk2: float = maxf(float(e.def.attack) - 2.0, 0.0)
+					var ptgt2 = _board_pb.get(lane) if ptgt == p else p
+					if fatk2 > 0.0:
+						if ptgt2 != null and not ptgt2.face_down:
+							e.lunge(_pads[_pad_key("p", lane,
+								1 if ptgt2 == _board_pb.get(lane) else 0)].position)
+							if "waxhide" in ptgt2.def.sigils \
+								and not ptgt2.wax_used:
+								ptgt2.wax_used = true
+								fatk2 = 0.0
+							ptgt2.hp -= fatk2
+							if "venom" in e.def.sigils and ptgt2.hp > 0:
+								ptgt2.venom = mini(ptgt2.venom + 1, 3)
+							ptgt2.flash()
+							_burst(ptgt2.position + Vector3(0, 0.03, 0),
+								Color(1.0, 0.5, 0.12), 14, 0.01, 0.35)
+						else:
+							e.lunge(_pads["p" + str(lane)].position)
+							_chips_you -= int(fatk2)
+							_pot += int(fatk2)
+							_pulse(_l_chips)
+							_shake(0.018)
+							_sfx.play(Sfx.CHIP_HIT, -6.0, 0.85)
 			else:
 				_chips_you -= e.def.attack
 				_pot += e.def.attack
@@ -1284,7 +1341,8 @@ func _resolve_event(card) -> void:
 				var tgt_def: CardDef = CardDef.spoil(tgt)
 				var graft_pool: Array = ["venom", "haunt", "mimic",
 					"pierce", "revival", "executioner", "sharp", "reach",
-				"waxhide", "shell", "veil", "anchor", "pot_cut"]
+				"waxhide", "shell", "veil", "anchor", "pot_cut",
+				"eyecorner", "frenzied", "bulwark"]
 				if tgt_def != null:
 					for s in tgt_def.sigils:
 						graft_pool.erase(s)
@@ -1788,6 +1846,16 @@ func _on_reveal(card, opposing) -> void:
 		for sg in opposing.def.sigils:
 			if not sig.has(sg):
 				sig.append(sg)
+	if "eyecorner" in sig:
+		# §3.3: glimpse one enemy concealed card — only you read it;
+		# the card itself stays hidden from the table
+		var hidden := []
+		for c in _all_e():
+			if c.face_down:
+				hidden.append(c)
+		if not hidden.is_empty():
+			var peek = hidden[randi() % hidden.size()]
+			_hint(tr("HINT_EYECORNER") + " — " + tr(peek.def.name_key))
 	# §3.3 Anchor: an anchored card can't be moved — Swap can't lift it
 	if "swap" in sig and not "anchor" in sig:
 		var empty: Array = []
@@ -1817,6 +1885,16 @@ func _on_reveal_his(card, opposing) -> void:
 		for sg in opposing.def.sigils:
 			if not sig.has(sg):
 				sig.append(sg)
+	if "eyecorner" in sig:
+		# he glimpses one of your concealed cards — a learned read
+		var yours := []
+		for c in _all_p():
+			if c.face_down:
+				yours.append(c)
+		if not yours.is_empty():
+			var seen = yours[randi() % yours.size()]
+			seen.peeked = true
+			_hint(tr("HINT_EYECORNER_HIS"))
 
 func _spawn_grub(lane: int, mine: bool, row := 0) -> void:
 	var d: CardDef = CardDef.make("grub", "chalices", 0, 0, 1, 0,
