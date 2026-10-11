@@ -90,7 +90,7 @@ static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
 	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {},
-	"pact": false, "confessed": false}
+	"pact": false, "confessed": false, "toll": false}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _anger_lies := false  # §18.2: carried anger packs his sleeve
@@ -98,6 +98,7 @@ var _respect_fair := false # carried respect keeps his sleeve honest
 var _cruel_seats := false  # carried cruelty seats an extra ambush
 var _bored_ante := false   # carried boredom hurries the blinds
 var _pact := false         # the Pact: debt bought louder tells
+var _toll := false         # the Tollgate: paid up front, taxes waived
 var _sin_name := ""       # which of the seven is on the throne
 var _sin_idx := -1        # its seat in SIN_NAMES (-1 = no sin table)
 var _sin_ante := 0        # Greed's extra tithe per hand
@@ -225,6 +226,10 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# for this whole table — the information you paid for
 	_pact = bool(_run["pact"])
 	_run["pact"] = false
+	# §18 the Tollgate: souls paid up front waive the Descent's
+	# depth-tax on every hand of this table
+	_toll = bool(_run["toll"])
+	_run["toll"] = false
 	# §18 ambush: from the third door down he's already seated pawns
 	# face-down — deeper tables start rigged against you
 	var ambush := mini(maxi(_run["depth"] - 2, 0)
@@ -366,7 +371,8 @@ func _mk_label(offset: Vector2, size: int, col: Color) -> Label:
 
 func _start_round() -> void:
 	var ante := _blind_for(_round)
-	ante += _run["depth"]          # the Descent taxes every hand deeper
+	if not _toll:
+		ante += _run["depth"]      # the Descent taxes every hand deeper
 	if _sin_table:
 		ante += 2                  # a sin at the table raises the tithe
 	if _bored_ante:
@@ -994,6 +1000,7 @@ func _reset_run() -> void:
 	_run["grafts"] = {}
 	_run["pact"] = false
 	_run["confessed"] = false
+	_run["toll"] = false
 
 # ------------------------------------------------------------ descent (§18)
 
@@ -1007,16 +1014,19 @@ func _spawn_event_cards() -> void:
 		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
 		"event_mirror": "face_acolyte.png", "event_furnace": "face_furnace.png",
 		"event_taxidermist": "face_taxidermist.png", "event_pact": "face_votary.png",
-		"event_confessor": "face_confessor.png"}
+		"event_confessor": "face_confessor.png",
+		"event_toll": "face_tollgate.png", "event_reliquary": "face_reliquary.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
 		pool.append("event_ledger")
+		pool.append("event_toll")
 	if _run["depth"] >= 2:
 		pool.append("event_furnace")
 		pool.append("event_confessor")
 	if _run["depth"] >= 3:
 		pool.append("event_mirror")
+		pool.append("event_reliquary")
 	if _run["depth"] >= 4:
 		pool.append("event_taxidermist")
 		pool.append("event_pact")
@@ -1169,6 +1179,20 @@ func _resolve_event(card) -> void:
 			_run["debt"] = maxi(int(_run["debt"]) - 3, 0)
 			_run["confessed"] = true
 			_hint(tr("EV_CONFESS"))
+		"event_toll":
+			# §18 the Tollgate: owe him four souls now — pass the
+			# next table without the Descent's depth-tax on your antes
+			_run["debt"] += 4
+			_run["toll"] = true
+			_hint(tr("EV_TOLL"))
+		"event_reliquary":
+			# §18 the Reliquary: a forgotten soul waits in its niche —
+			# it joins your spoils without a fight
+			var sids: Array = CardDef.spoil_ids()
+			var gift: String = str(sids[randi() % sids.size()])
+			_run["spoils"].append(gift)
+			_hint(tr("EV_RELIC") + " "
+				+ tr(CardDef.spoil(gift).name_key))
 		"event_sin":
 			# the sin door: the next table seats one of the seven
 			_run["sin_next"] = true

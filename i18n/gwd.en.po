@@ -447,3 +447,21 @@ msgstr "kneel — three souls of debt forgiven, but he reads you deeper"
 
 msgid "EV_CONFESS"
 msgstr "Absolved — three souls lighter, and he knows you better than before."
+
+msgid "CARD_EVENT_TOLL"
+msgstr "The Tollgate"
+
+msgid "CARD_EVENT_TOLL_DESC"
+msgstr "four souls owed — the next table asks no depth-tax of you"
+
+msgid "EV_TOLL"
+msgstr "Paid on the nail — the next table holds its tithe."
+
+msgid "CARD_EVENT_RELIQUARY"
+msgstr "The Reliquary"
+
+msgid "CARD_EVENT_RELIQUARY_DESC"
+msgstr "a forgotten soul in its niche — it joins you freely"
+
+msgid "EV_RELIC"
+msgstr "The niche opens — a soul steps out and takes your side:"
