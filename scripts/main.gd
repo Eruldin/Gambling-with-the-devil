@@ -8,8 +8,10 @@ const PART := "res://assets_external/anim-vfx/kenney/particle-pack/PNG (Transpar
 const FONT_CINZEL := "res://assets_external/ui-fonts/Cinzel/Cinzel_0.ttf"
 
 const CandleFlame := preload("res://scripts/candle_flame.gd")
+const ScaleProp := preload("res://scripts/scale_prop.gd")
 const Sway := preload("res://scripts/sway.gd")
 const Battle := preload("res://scripts/battle.gd")
+const Sfx := preload("res://scripts/sfx.gd")
 const Devil := preload("res://scripts/devil.gd")
 const HandRig := preload("res://scripts/hand_rig.gd")
 
@@ -21,6 +23,9 @@ var _hud_layer: CanvasLayer
 var _hud_font: Font
 var _devil: Node3D
 var _hand: Node3D
+var _scale: Node3D
+var _sfx: Node
+var _crackle_in := 0.5
 
 # ---------------------------------------------------------------- assembly
 
@@ -57,6 +62,9 @@ func _ready() -> void:
 	_battle = Battle.new()
 	add_child(_battle)
 	_battle.setup(top, _cam, _hud_layer, _hud_font, _devil, _hand)
+	_battle._scale = _scale
+	_sfx = Sfx.new()
+	_sfx.setup(self)
 	if OS.get_environment("GWD_SHOT") == "1":
 		_shot_frames = 800 if OS.get_environment("GWD_AUTO") == "1" else 150
 
@@ -137,6 +145,36 @@ func _table_props(top: float) -> void:
 	# spare, occult only — Inscryption keeps the felt clean
 	_place(PH + "book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf", "books", Vector3(0.72, top, -0.28), 0.09, 0.35)
 	_place(PH + "ornate_medieval_dagger/ornate_medieval_dagger_1k.gltf", "dagger", Vector3(-0.18, top, -0.33), 0.05, 0.9)
+	# the Scales of the gamble — Inscryption's signature prop, center-left edge
+	_scale = ScaleProp.new()
+	_scale.position = Vector3(-0.45, top, 0.14)
+	_scale.rotation.y = 0.35
+	add_child(_scale)
+	_scale.build(0.17)
+	# a skull watches from behind the candles — stained bone, not bleach
+	var skull := _place("res://assets_external/props-occult/skull.glb",
+		"skull", Vector3(0.44, top, 0.12), 0.075, -2.2)
+	var bone := StandardMaterial3D.new()
+	bone.albedo_color = Color(0.16, 0.12, 0.085)
+	bone.roughness = 0.95
+	for mi: MeshInstance3D in skull.find_children(
+			"*", "MeshInstance3D", true, false):
+		mi.material_override = bone
+	# loose aged cards face-down on the felt edges
+	for i in range(3):
+		var lc := MeshInstance3D.new()
+		var lq := QuadMesh.new()
+		lq.size = Vector2(0.045, 0.063)
+		lc.mesh = lq
+		var lm := StandardMaterial3D.new()
+		lm.albedo_color = Color(0.16, 0.11, 0.07)
+		lm.roughness = 0.95
+		lc.material_override = lm
+		lc.rotation.x = -PI / 2
+		lc.rotation.z = randf() * 0.9 - 0.45
+		lc.position = Vector3(-0.3 - i * 0.05, top + 0.008 + i * 0.001,
+			0.3 + 0.02 * sin(i * 2.1))
+		add_child(lc)
 	# wall talismans at the frame edges — gas mask + rat idol, like Inscryption's
 	# hanging pelts and charms around the table
 	_place("res://assets_external/pawn-models/polyhaven/old_gas_mask/old_gas_mask_1k.gltf",
@@ -375,6 +413,13 @@ func _process(delta: float) -> void:
 	_cam.position.x = 0.06 * sin(_t * 0.11)
 	_cam.position.y += (1.1 + 0.02 * sin(_t * 0.23) - _cam.position.y) * delta
 	_cam.look_at(Vector3(0, 0.62, -0.5), Vector3.UP)
+	# fire crackle bed: sparse quiet ticks, feels like the room is burning low
+	_crackle_in -= delta
+	if _crackle_in <= 0.0:
+		_crackle_in = randf_range(0.25, 1.6)
+		if _sfx != null:
+			_sfx.play(Sfx.CRACKLE, randf_range(-30.0, -22.0),
+				randf_range(0.5, 0.75))
 	_battle.hover_target(_ray_hit().get("collider"))
 	if _shot_frames >= 0:
 		_shot_frames -= 1
