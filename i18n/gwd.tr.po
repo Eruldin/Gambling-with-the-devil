@@ -188,4 +188,30 @@ msgstr "Mezarcının Öşrü"
 
 msgid "CARD_RAZOR"
 msgstr "Ustura"
+msgid "TRUMPS_LBL"
+msgstr "KOZLAR"
+
+msgid "TRUMP_SLEEVE_ACE"
+msgstr "Kol Ası"
+
+msgid "TRUMP_COLD_DECK"
+msgstr "Soğuk Deste"
+
+msgid "TRUMP_MARKED_CARDS"
+msgstr "İşaretli Kağıtlar"
+
+msgid "TRUMPS_EMPTY"
+msgstr "Kolunda koz kalmadı."
+
+msgid "TRUMP_NOPEEK"
+msgstr "Göz atılacak kapalı kart yok."
+
+msgid "TRUMP_PEEKED"
+msgstr "Bir bakış — gizli kartları bir anlığına açıldı."
+
+msgid "TRUMP_COLD"
+msgstr "Soğuk deste — elini geri alıp yeniden dağıttı."
+
+msgid "TRUMP_MARKED"
+msgstr "İşaretli kağıtlar — bu savaş tellerin okunamaz."
 

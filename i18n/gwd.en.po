@@ -188,4 +188,30 @@ msgstr "Gravedigger's Tithe"
 
 msgid "CARD_RAZOR"
 msgstr "Straight Razor"
+msgid "TRUMPS_LBL"
+msgstr "TRUMPS"
+
+msgid "TRUMP_SLEEVE_ACE"
+msgstr "Sleeve Ace"
+
+msgid "TRUMP_COLD_DECK"
+msgstr "Cold Deck"
+
+msgid "TRUMP_MARKED_CARDS"
+msgstr "Marked Cards"
+
+msgid "TRUMPS_EMPTY"
+msgstr "No trump left up that sleeve."
+
+msgid "TRUMP_NOPEEK"
+msgstr "Nothing concealed to peek at."
+
+msgid "TRUMP_PEEKED"
+msgstr "A glance — his hidden cards turn over for a breath."
+
+msgid "TRUMP_COLD"
+msgstr "Cold deck — he takes your hand back and redeals."
+
+msgid "TRUMP_MARKED"
+msgstr "Marked cards — your tells are invisible this battle."
 

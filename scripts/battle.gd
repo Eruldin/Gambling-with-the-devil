@@ -49,7 +49,10 @@ var _call_armed := false
 var _mulligan_used := false
 var _repos_armed = null       # board card selected for reposition (§2.3)
 var _trick_armed = null       # razor awaiting a pawn target
-var _dead_p: Array = []       # player defs that died this battle (Tithe fodder)    # opening redeal — once per battle
+var _dead_p: Array = []       # player defs that died this battle (Tithe fodder)
+var _trumps: Array = ["sleeve_ace", "cold_deck", "marked_cards"]
+var _marked_active := false   # Marked Cards: your tells are unreadable
+var _l_trumps: Label    # opening redeal — once per battle
 # Azrail psychology (§18.2) — five axes the game feeds; his table manners
 # and his AI both read these.
 var _psyche := {"cruelty": 0.0, "curiosity": 0.0, "anger": 0.0,
@@ -164,6 +167,8 @@ func _make_hud() -> void:
 	_l_chips.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_l_blood = _mk_label(Vector2(16, 68), 14, Color(0.65, 0.2, 0.15))
 	_l_pot = _mk_label(Vector2(16, 90), 15, Color(0.78, 0.58, 0.2))
+	_l_trumps = _mk_label(Vector2(16, 112), 13, Color(0.58, 0.46, 0.26))
+	_update_trumps()
 	_l_tool = _mk_label(Vector2(0, 0), 14, Color(0.7, 0.6, 0.45))
 	_l_tool.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_l_tool.offset_left = 16
@@ -191,6 +196,12 @@ func _make_hud() -> void:
 	btn.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	btn.pressed.connect(end_turn)
 	_layer.add_child(btn)
+
+func _update_trumps() -> void:
+	var parts: Array[String] = []
+	for i in range(_trumps.size()):
+		parts.append("[%d] %s" % [i + 1, tr("TRUMP_" + _trumps[i].to_upper())])
+	_l_trumps.text = tr("TRUMPS_LBL") + " " + ("  ".join(parts) 		if parts.size() > 0 else "—")
 
 func _mk_label(offset: Vector2, size: int, col: Color) -> Label:
 	var l := Label.new()
@@ -516,7 +527,7 @@ func _lane_score(lane: int, d: CardDef) -> float:
 	# block: prefer lanes where our card outlives theirs. Once respect is
 	# high he plays fair — a concealed card is priced as an average pawn,
 	# not read through the felt.
-	var guessed: bool = _psyche["respect"] >= TAUNT_AT and p.face_down
+	var guessed: bool = (_psyche["respect"] >= TAUNT_AT 		or _marked_active) and p.face_down
 	var p_atk := 1.5 if guessed else float(p.def.attack)
 	var p_hp := 1.5 if guessed else float(
 		p.hp if p.hp > 0 else p.def.health)
@@ -807,6 +818,11 @@ func mulligan() -> void:
 		_hint(tr("HINT_NOMULL"))
 		return
 	_mulligan_used = true
+	_redeal()
+	_bump("boredom", 0.15)   # hesitation bores him
+	_hint(tr("MULLIGAN"))
+
+func _redeal() -> void:
 	var n := _hand.size()
 	for card in _hand:
 		_deck.append(card.def)
@@ -816,9 +832,47 @@ func mulligan() -> void:
 	_deck.shuffle()
 	for i in range(n):
 		_draw_hand()
-	_bump("boredom", 0.15)   # hesitation bores him
-	_hint(tr("MULLIGAN"))
 	_sfx.play(Sfx.SHUFFLE, -4.0)
+
+## §4.6 Trumps — consumable cheats, keys 1..3, max 3 held.
+## He always notices a cheat: every trump feeds his Anger.
+func use_trump(idx: int) -> void:
+	if _phase != Phase.PLACE and _phase != Phase.BUSY:
+		return
+	if idx < 0 or idx >= _trumps.size():
+		_hint(tr("TRUMPS_EMPTY"))
+		_sfx.play(Sfx.DENIED, -10.0)
+		return
+	var id: String = _trumps[idx]
+	match id:
+		"sleeve_ace":
+			var any := false
+			for e in _board_e.values():
+				if e.face_down:
+					any = true
+					e.reveal_enemy()
+					_peek_rehide(e)
+			if not any:
+				_hint(tr("TRUMP_NOPEEK"))
+				_sfx.play(Sfx.DENIED, -10.0)
+				return
+			_hint(tr("TRUMP_PEEKED"))
+		"cold_deck":
+			_redeal()
+			_hint(tr("TRUMP_COLD"))
+		"marked_cards":
+			_marked_active = true
+			_hint(tr("TRUMP_MARKED"))
+	_trumps.remove_at(idx)
+	_update_trumps()
+	_bump("anger", 0.35)      # §4.7 — he always notices a cheat
+	_sfx.play(Sfx.CHIP_HANDLE, -8.0)
+
+func _peek_rehide(card) -> void:
+	# the peek lasts a breath — then the card lies down again
+	await get_tree().create_timer(2.6).timeout
+	if is_instance_valid(card) and card.placed 		and _board_e.values().has(card) and not card.face_down:
+		card.set_face_down(true)
 
 func restart() -> void:
 	# one-shot frame signal — a deferred call on the tree gets queued
