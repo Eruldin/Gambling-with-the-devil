@@ -448,6 +448,22 @@ func _start_round() -> void:
 				c.flash()
 				_burst(c.position + Vector3(0, 0.03, 0),
 					Color(0.35, 0.6, 0.15), 10, 0.01, 0.4)
+	# §2.2 support: the Deacon blesses its lane's striker once a round —
+	# sheltered in the back rank it keeps preaching as long as it lives
+	for c in _all_p():
+		if not c.face_down and c.def != null and c.def.id == "deacon":
+			var f = _board_p.get(c.lane)
+			if f != null and f.def != null:
+				f.def.attack += 1
+				_burst(f.position + Vector3(0, 0.03, 0),
+					Color(0.9, 0.75, 0.3), 10, 0.01, 0.4)
+	for c in _all_e():
+		if not c.face_down and c.def != null and c.def.id == "deacon":
+			var f = _board_e.get(c.lane)
+			if f != null and f.def != null:
+				f.def.attack += 1
+				_burst(f.position + Vector3(0, 0.03, 0),
+					Color(0.9, 0.75, 0.3), 10, 0.01, 0.4)
 	_blood = BLOOD_PER_ROUND
 	_raise_used = 0
 	_placed_this = 0
@@ -984,6 +1000,13 @@ func _cleanup_dead() -> void:
 				else:
 					_dead_p.append(p.def)
 				p.die()
+				# the Gravedigger feeds — every friendly corpse in its
+				# lane sharpens its shovel
+				for c in _all_p():
+					if c.lane == lane and c.def != null \
+						and c.def.id == "gravedigger" and c.hp > 0:
+						c.def.attack += 1
+						c.flash()
 			var e = _erow(row).get(lane)
 			if e != null and e.hp <= 0:
 				_erow(row).erase(lane)
@@ -998,6 +1021,11 @@ func _cleanup_dead() -> void:
 				else:
 					_dead_e.append(e.def)
 				e.die()
+				for c in _all_e():
+					if c.lane == lane and c.def != null \
+						and c.def.id == "gravedigger" and c.hp > 0:
+						c.def.attack += 1
+						c.flash()
 
 func _check_over() -> bool:
 	if _chips_you > 0 and _chips_devil > 0:

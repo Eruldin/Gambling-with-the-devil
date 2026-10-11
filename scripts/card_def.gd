@@ -61,11 +61,15 @@ static func starter_deck() -> Array:
 		# a back-rank guard can't hide from the point
 		make("halberd", "blades", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_halberd.png", ["reach"]),
 		make("warden", "chalices", 0, 1, 3, 1, "res://assets_external/card-art/gwd/face_warden.png", ["revival"]),
+		# §2.2 support pair: the Deacon blesses its lane's striker from
+		# the sheltered rank; the Gravedigger feeds on friendly deaths
+		make("deacon", "chalices", 1, 0, 3, 1, "res://assets_external/card-art/gwd/face_deacon.png"),
 		make("votary", "chalices", 0, 0, 4, 2, "res://assets_external/card-art/gwd/face_votary.png", ["brood"]),
 		make("martyr", "chalices", 0, 1, 2, 2, "res://assets_external/card-art/gwd/face_martyr.png", ["haunt"]),
 		make("acolyte", "pentacles", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_acolyte.png", ["venom"]),
 		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png", ["loan_shark"]),
 		make("penitent", "pentacles", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_penitent.png", ["loan_shark"]),
+		make("gravedigger", "pentacles", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_gravedigger.png"),
 		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic"]),
 		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),

@@ -516,3 +516,15 @@ msgstr "Swap — on reveal it slips to a free lane"
 
 msgid "HINT_BACKROW"
 msgstr "Back rank: sheltered support — it can't strike, and it can't be struck while its lane's front stands."
+
+msgid "CARD_DEACON"
+msgstr "The Deacon"
+
+msgid "CARD_DEACON_DESC"
+msgstr "0/3 · each round he blesses his lane's striker: +1 attack"
+
+msgid "CARD_GRAVEDIGGER"
+msgstr "The Gravedigger"
+
+msgid "CARD_GRAVEDIGGER_DESC"
+msgstr "1/2 · every friendly corpse in his lane sharpens him: +1 attack"
