@@ -68,7 +68,7 @@ static func starter_deck() -> Array:
 		make("martyr", "chalices", 0, 1, 2, 2, "res://assets_external/card-art/gwd/face_martyr.png", ["haunt"]),
 		make("acolyte", "pentacles", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_acolyte.png", ["venom"]),
 		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png", ["loan_shark"]),
-		make("penitent", "pentacles", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_penitent.png", ["loan_shark", "waxhide"]),
+		make("penitent", "pentacles", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_penitent.png", ["loan_shark", "waxhide", "protection"]),
 		make("gravedigger", "pentacles", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_gravedigger.png"),
 		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap", "veil"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic", "eyecorner"]),
@@ -81,6 +81,10 @@ static func starter_deck() -> Array:
 		make("choir_leech", "chalices", 1, 1, 3, 1, "res://assets_external/card-art/gwd/face_choir_leech.png"),
 		make("eyes_servant", "eyes", 2, 1, 3, 1, "res://assets_external/card-art/gwd/face_eyes_servant.png", ["eyecorner"]),
 		make("mirror_hound", "eyes", 2, 1, 1, 1, "res://assets_external/card-art/gwd/face_mirror_hound.png", ["mimic"]),
+		# doc §6 Blöfcü: a concealed trap — it is nothing on the felt,
+		# but the instant an enemy read *sees* it, it bursts and the
+		# reader pays two chips for the look
+		make("bluffer", "eyes", 0, 0, 1, 1, "res://assets_external/card-art/gwd/face_bluffer.png"),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_pale_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_tithe.png"),
@@ -108,6 +112,8 @@ static func devil_deck(depth: int) -> Array:
 			"res://assets_external/card-art/gwd/face_priestess.png"))
 		d.append(make_trick("usurer_t", "pentacles", 0,
 			"res://assets_external/card-art/gwd/face_pale_usurer.png"))
+		d.append(make_trick("hot_iron_t", "blades", 1,
+			"res://assets_external/card-art/gwd/face_hot_iron.png"))
 	if depth >= 4:
 		d.append(make_trick("tithe", "chalices", 1,
 			"res://assets_external/card-art/gwd/face_tithe.png"))

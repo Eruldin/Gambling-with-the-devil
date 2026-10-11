@@ -591,3 +591,21 @@ msgstr "Taklit — açılışta karşı kartın statlarını ve mühürlerini gi
 
 msgid "HINT_OWED_PIG"
 msgstr "Domuz defteri besliyor — borç +3."
+
+msgid "SIGIL_PROTECTION"
+msgstr "Koruma — düşman hileleri ona dokunamaz"
+
+msgid "CARD_BLUFFER"
+msgstr "Blöfcü"
+
+msgid "CARD_BLUFFER_DESC"
+msgstr "Masada hiçbir şey — ama bir düşman okuması onu görürse patlar ve okuyan 2 çip öder"
+
+msgid "CARD_HOT_IRON_T"
+msgstr "Sıcak Demir"
+
+msgid "HINT_IRON_WARDED"
+msgstr "Demir dağlayacak hiçbir şey bulamadı — hilesi geri döndü."
+
+msgid "HINT_BLUFFER_CAUGHT"
+msgstr "Bakarken yakalandı — Blöfcü patlıyor ve okuma için 2 çip ödüyor."
