@@ -5,7 +5,7 @@ extends Node3D
 ## resting on the felt edge.
 
 const HandRig := preload("res://scripts/hand_rig.gd")
-const DEMON := "res://assets_external/devil-model/demon_sorcerer.glb"
+const DEMON := "res://assets_external/devil-model/winged_demon_wraith.glb"
 
 var _eye_mat: StandardMaterial3D
 var _halo_mat: StandardMaterial3D
@@ -23,6 +23,9 @@ var _flare := 0.0
 var _twitch_in := 5.0 + randf() * 6.0
 var _twitch := 0.0
 var _drum_in := 8.0 + randf() * 8.0
+var _blink_in := 3.0 + randf() * 4.0
+var _blink := 0.0
+var _cam: Camera3D
 
 ## seat_z: z of the far chair; top: table surface height.
 func build(top: float, seat_z := -1.10) -> void:
@@ -38,9 +41,25 @@ func build(top: float, seat_z := -1.10) -> void:
 	_model.scale = Vector3.ONE * s
 	_model.position.y = -0.42       # waist at pivot → lean bends torso
 	_torso.add_child(_model)
+	# skeletal animation — the body actually moves, not just node sways
+	var aps := _model.find_children("*", "AnimationPlayer", true, false)
+	var ap: AnimationPlayer = null if aps.is_empty() else aps[0]
+	if ap != null:
+		var anims := ap.get_animation_list()
+		print("DEVIL anims:", anims)
+		var pick := anims[0]
+		for a in anims:
+			var n := String(a).to_lower()
+			if "idle" in n or "fly" in n or "float" in n or "hover" in n:
+				pick = a
+				break
+		var anim := ap.get_animation(pick)
+		if anim != null:
+			anim.loop_mode = Animation.LOOP_LINEAR
+		ap.play(pick)
 	# eye anchor: skull face height ≈ 1.72m * s above feet → ~0.77 over pivot
 	_head = Node3D.new()
-	_head.position = Vector3(0, 0.65, 0.12)
+	_head.position = Vector3(0, 0.66, 0.16)
 	_rest_head = _head.position
 	_torso.add_child(_head)
 	# glowing eyes — orbs + additive flare halo quads behind them
@@ -63,17 +82,17 @@ func build(top: float, seat_z := -1.10) -> void:
 		hq.size = Vector2(0.085, 0.085)
 		h.mesh = hq
 		h.material_override = _halo_mat
-		h.position = Vector3(0.042 * side, 0.005, 0.075)
+		h.position = Vector3(0.031 * side, 0.005, 0.08)
 		_head.add_child(h)
 		_halos.append(h)
 		var e := MeshInstance3D.new()
 		var es := SphereMesh.new()
-		es.radius = 0.016
-		es.height = 0.032
+		es.radius = 0.019
+		es.height = 0.038
 		es.radial_segments = 12
 		e.mesh = es
 		e.material_override = _eye_mat
-		e.position = Vector3(0.042 * side, 0.005, 0.078)
+		e.position = Vector3(0.031 * side, 0.005, 0.085)
 		_head.add_child(e)
 		_eyes.append(e)
 	# faint red uplight so the textured face is *just* readable
@@ -85,6 +104,14 @@ func build(top: float, seat_z := -1.10) -> void:
 	face.light_energy = 0.34
 	face.spot_angle = 30.0
 	face.spot_attenuation = 1.2
+	# the wraith's glowing chest throws faint magenta light onto the table
+	var chest := OmniLight3D.new()
+	chest.position = Vector3(0, 0.75, seat_z + 0.35)
+	add_child(chest)
+	chest.light_color = Color(0.75, 0.12, 0.42)
+	chest.light_energy = 0.22
+	chest.omni_range = 1.6
+	chest.omni_attenuation = 2.0
 	# clawed hands resting on the felt edge (kept: they reach mid-table)
 	_hand_r = HandRig.new()
 	add_child(_hand_r)
@@ -100,11 +127,19 @@ func build(top: float, seat_z := -1.10) -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
-	# breathing
+	# breathing + slow whole-body sway so he never reads as a statue
 	if _torso:
-		_torso.scale.y = 1.0 + 0.012 * sin(_t * 1.1)
-	# slow head drift + rare creepy twitch
+		_torso.scale.y = 1.0 + 0.014 * sin(_t * 1.1)
+		_torso.rotation.z = 0.018 * sin(_t * 0.42)
+		_torso.rotation.y = 0.03 * sin(_t * 0.17)
+	# head: watches the cursor (the opponent *sees* you) + creepy twitch
 	if _head:
+		var track := 0.0
+		if _cam != null:
+			var m := get_viewport().get_mouse_position()
+			var p: Vector3 = _cam.project_position(m, 2.2)
+			var d := _head.global_transform.affine_inverse() * p
+			track = clampf(atan2(d.x, d.z), -0.45, 0.45) * 0.6
 		_twitch_in -= delta
 		if _twitch_in <= 0.0:
 			_twitch = 0.5
@@ -114,12 +149,24 @@ func _process(delta: float) -> void:
 		if _twitch > 0.35:
 			snap = 0.22 * (1.0 if randi() % 2 == 0 else -1.0)
 		_head.rotation.y = lerpf(_head.rotation.y,
-			0.06 * sin(_t * 0.23) + snap, delta * 6.0)
+			track + 0.05 * sin(_t * 0.23) + snap, delta * 5.0)
 		_head.rotation.z = lerpf(_head.rotation.z,
 			0.05 * sin(_t * 0.31), delta * 3.0)
+	# blinking — eyes shut for a beat every few seconds
+	_blink_in -= delta
+	if _blink_in <= 0.0:
+		_blink = 0.22
+		_blink_in = 2.5 + randf() * 5.0
+	_blink = maxf(0.0, _blink - delta)
+	var lid := 1.0
+	if _blink > 0.0:
+		lid = 0.08
+	for e in _eyes:
+		e.scale.y = lerpf(e.scale.y, lid, delta * 40.0)
+	var lid_dim := _eyes[0].scale.y if not _eyes.is_empty() else 1.0
 	# eye flicker + flare (orbs glow, halos breathe)
 	_flare = maxf(0.0, _flare - delta * 1.6)
-	var glow := 4.2 + _flare * 9.0 + 0.9 * sin(_t * 9.3) + 0.5 * sin(_t * 17.7)
+	var glow := (4.2 + _flare * 9.0 + 0.9 * sin(_t * 9.3) + 0.5 * sin(_t * 17.7)) * lid_dim
 	_eye_mat.emission_energy_multiplier = glow
 	var hs := 0.085 * (0.7 + 0.22 * sin(_t * 2.9) + _flare * 1.6)
 	for h in _halos:

@@ -46,6 +46,7 @@ func _ready() -> void:
 	_devil = Devil.new()
 	add_child(_devil)
 	_devil.build(top)
+	_devil._cam = _cam
 	_hand = HandRig.new()
 	add_child(_hand)
 	_hand.setup(Color(0.085, 0.055, 0.04), false)
@@ -178,6 +179,72 @@ func _candles(top: float) -> void:
 	hero.shadow_enabled = true
 	add_child(hero)
 	_dust(top)
+	_embers(top)
+	_contact_shadow(top)
+
+## tiny sparks climbing off the candle flames — sells live fire
+func _embers(top: float) -> void:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = Vector3(0.5, 0.02, 0.35)
+	pm.direction = Vector3(0, 1, 0)
+	pm.spread = 12.0
+	pm.initial_velocity_min = 0.05
+	pm.initial_velocity_max = 0.16
+	pm.gravity = Vector3(0, 0.04, 0)
+	pm.damping_min = 0.0
+	pm.damping_max = 0.02
+	pm.scale_min = 0.3
+	pm.scale_max = 0.9
+	var gp := GPUParticles3D.new()
+	gp.amount = 40
+	gp.lifetime = 2.2
+	gp.preprocess = 2.2
+	gp.process_material = pm
+	gp.position = Vector3(0, top + 0.06, 0)
+	var q := QuadMesh.new()
+	q.size = Vector2(0.0028, 0.0028)
+	var dm := StandardMaterial3D.new()
+	dm.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	dm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	dm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	dm.albedo_color = Color(1.0, 0.42, 0.1, 0.5)
+	q.material = dm
+	gp.draw_pass_1 = q
+	add_child(gp)
+
+## radial soft shadow under the devil so he grounds into the floor
+func _contact_shadow(top: float) -> void:
+	var grad := Gradient.new()
+	grad.set_color(0, Color(0, 0, 0, 0.55))
+	grad.set_color(1, Color(0, 0, 0, 0.0))
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.width = 256
+	tex.height = 256
+	var m := StandardMaterial3D.new()
+	m.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_texture = tex
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var q := MeshInstance3D.new()
+	var qm := QuadMesh.new()
+	qm.size = Vector2(1.1, 0.8)
+	q.mesh = qm
+	q.material_override = m
+	q.rotation.x = -PI / 2
+	q.position = Vector3(0, 0.004, -1.05)
+	add_child(q)
+	# and a second smaller blob under the player's near edge
+	var q2 := MeshInstance3D.new()
+	var qm2 := QuadMesh.new()
+	qm2.size = Vector2(1.2, 0.7)
+	q2.mesh = qm2
+	q2.material_override = m
+	q2.rotation.x = -PI / 2
+	q2.position = Vector3(0, top - 0.02, 0.55)
+	add_child(q2)
 
 ## faint motes drifting through the candle pool — sells the stillness
 func _dust(top: float) -> void:
