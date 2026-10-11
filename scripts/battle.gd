@@ -8,11 +8,13 @@ const GameCard := preload("res://scripts/game_card.gd")
 const CardDef := preload("res://scripts/card_def.gd")
 const Sfx := preload("res://scripts/sfx.gd")
 const CARDS_DIR := "res://assets_external/card-art/kenney/boardgame-pack/PNG/Cards/"
-const BLINDS := [1, 2, 3, 5, 8, 13]
 const LANES := 5
-const START_CHIPS := 12
+const CHIPS_YOU := 40          # §2.2: persistent soul pool, run starts at 40
+const CHIPS_DEVIL := 30        # §2.2: standard tier pile (25–40)
 const BLOOD_PER_ROUND := 2
 const HAND_MAX := 6
+const RAISE_MAX := 5           # §2.3: stake 1–5 extra chips once per turn
+const TAUNT_AT := 2.5          # psyche axis level that makes Azrail speak
 
 enum Phase { PLACE, BUSY, OVER }
 
@@ -34,8 +36,20 @@ var _board_e := {}         # lane -> GameCard
 var _phase := Phase.PLACE
 var _round := 1
 var _blood := BLOOD_PER_ROUND
-var _chips_you := START_CHIPS
-var _chips_devil := START_CHIPS
+var _chips_you := CHIPS_YOU
+var _chips_devil := CHIPS_DEVIL
+var _pot := 0                  # §2.4: the prize — every chip paid feeds it
+var _debt := 0                 # Final Wager marker
+var _raise_used := 0
+var _placed_this := 0
+var _wager_offered := false
+var _wager_pending := false
+# Azrail psychology (§18.2) — five axes the game feeds; his table manners
+# and his AI both read these.
+var _psyche := {"cruelty": 0.0, "curiosity": 0.0, "anger": 0.0,
+	"respect": 0.0, "boredom": 0.0}
+var _taunted := {}
+var _pot_pile: Array = []
 var _selected = null
 var _hovered_card = null
 var _hovered_pad = null
@@ -43,6 +57,7 @@ var _hovered_pad = null
 var _l_phase: Label
 var _l_chips: Label
 var _l_blood: Label
+var _l_pot: Label
 var _scale: Node3D       # the Scales prop — tips when souls swing
 var _l_hint: Label
 var _l_tool: Label
@@ -110,6 +125,24 @@ func _make_pads() -> void:
 			area.add_child(col)
 			pad.add_child(area)
 			_pad_areas[area] = {"enemy": side == 0, "lane": lane}
+	# the pot — a physical chip pile on the felt's right edge; every chip
+	# the blinds, raises or wounds pay stacks up here
+	for i in range(16):
+		var c := MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = 0.026
+		cyl.bottom_radius = 0.026
+		cyl.height = 0.004
+		c.mesh = cyl
+		var cm := StandardMaterial3D.new()
+		cm.albedo_color = Color(0.55, 0.38, 0.12).darkened(0.12 * (i % 3))
+		cm.roughness = 0.45
+		cm.metallic = 0.65
+		c.material_override = cm
+		c.position = Vector3(0.44, _top + 0.017 + i * 0.0045, -0.02)
+		c.visible = false
+		add_child(c)
+		_pot_pile.append(c)
 
 func _make_hud() -> void:
 	_l_phase = _mk_label(Vector2(16, 46), 15, Color(0.62, 0.45, 0.3))
@@ -121,6 +154,7 @@ func _make_hud() -> void:
 	_l_chips.offset_bottom = 72
 	_l_chips.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_l_blood = _mk_label(Vector2(16, 68), 14, Color(0.65, 0.2, 0.15))
+	_l_pot = _mk_label(Vector2(16, 90), 15, Color(0.78, 0.58, 0.2))
 	_l_tool = _mk_label(Vector2(0, 0), 14, Color(0.7, 0.6, 0.45))
 	_l_tool.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_l_tool.offset_left = 16
@@ -160,10 +194,13 @@ func _mk_label(offset: Vector2, size: int, col: Color) -> Label:
 # ---------------------------------------------------------------- rounds
 
 func _start_round() -> void:
-	var ante: int = BLINDS[mini(_round - 1, BLINDS.size() - 1)]
+	var ante := _blind_for(_round)
 	_chips_you -= ante
 	_chips_devil -= ante
+	_pot += ante * 2
 	_blood = BLOOD_PER_ROUND
+	_raise_used = 0
+	_placed_this = 0
 	_phase = Phase.PLACE
 	if _devil != null:
 		_devil.set_mood(_round)
@@ -177,7 +214,14 @@ func _start_round() -> void:
 	_check_over()
 
 func _draw_hand() -> void:
-	if _deck.is_empty() or _hand.size() >= HAND_MAX:
+	if _hand.size() >= HAND_MAX:
+		return
+	if _deck.is_empty():
+		# Soul Draw (§2.3): thin decks bleed — 2 chips a card, into the pot.
+		_chips_you -= 2
+		_pot += 2
+		_pulse(_l_pot)
+		_update_chips()
 		return
 	var d: CardDef = _deck.pop_back()
 	var card := GameCard.new()
@@ -266,6 +310,7 @@ func _try_place(lane: int) -> void:
 		_sfx.play(Sfx.DENIED, -10.0)
 		return
 	_blood -= card.def.blood_cost
+	_placed_this += 1
 	_select(null)
 	if _hovered_pad != null:
 		_pad_glow(_hovered_pad, 0.0)
@@ -295,6 +340,7 @@ func _sacrifice_card(card) -> void:
 	if card == _selected:
 		_select(null)
 	_blood += card.def.sacrifice_value
+	_bump("respect", 0.3)         # bold commitment — he notices
 	if _devil != null:
 		_devil.feed(card.position)   # he feeds on the offering
 	if _phand != null and not _autoplay:
@@ -354,6 +400,9 @@ func end_turn() -> void:
 		return
 	_phase = Phase.BUSY
 	_select(null)
+	if _placed_this <= 0:
+		_bump("boredom", 0.6)     # stalling bores him
+		_bump("cruelty", 0.3)      # ...and smells like fear
 	await _enemy_place()
 	_l_phase.text = tr("PHASE_RESOLVING")
 	_hint("")
@@ -375,7 +424,8 @@ func _enemy_place() -> void:
 
 	free_lanes.sort_custom(func(a: int, b: int) -> bool:
 		return _lane_score(a, peek) > _lane_score(b, peek))
-	var want := randi_range(1, 2)
+	# a bored devil presses the attack — more bodies on the felt
+	var want := randi_range(1, 2 if _psyche["boredom"] < TAUNT_AT else 3)
 	for i in range(mini(want, free_lanes.size())):
 		if _edeck.is_empty():
 			break
@@ -413,12 +463,20 @@ func _lane_score(lane: int, d: CardDef) -> float:
 	if d == null:
 		return 0.0
 	if p == null:
-		return 10.0 + d.attack * 2.0   # clean line into the player's chips
+		# a clean line into the player's chips — cruelty makes him crave it
+		return 10.0 + d.attack * 2.0 + \
+			(3.0 if _psyche["cruelty"] >= TAUNT_AT else 0.0)
 	if p.def == null:
 		return 0.0
-	# block: prefer lanes where our card outlives theirs
-	var survives: bool = d.health > p.def.attack
-	var kills: bool = d.attack >= (p.hp if p.hp > 0 else p.def.health)
+	# block: prefer lanes where our card outlives theirs. Once respect is
+	# high he plays fair — a concealed card is priced as an average pawn,
+	# not read through the felt.
+	var guessed: bool = _psyche["respect"] >= TAUNT_AT and p.face_down
+	var p_atk := 1.5 if guessed else float(p.def.attack)
+	var p_hp := 1.5 if guessed else float(
+		p.hp if p.hp > 0 else p.def.health)
+	var survives: bool = d.health > p_atk
+	var kills: bool = float(d.attack) >= p_hp
 	var s := 2.0
 	if kills:
 		s += 5.0                      # remove a threat
@@ -426,7 +484,7 @@ func _lane_score(lane: int, d: CardDef) -> float:
 		s += 3.0                      # and keep a wall standing
 	if d.attack > 0 and not survives:
 		s -= 4.0                      # don't throw attackers under a wall
-	s += randf() * 1.5                # he's good, not a machine — keep a tell
+	s += randf() * (3.0 if guessed else 1.5)   # he's good, not a machine
 	return s
 
 func _run_resolution() -> void:
@@ -456,11 +514,17 @@ func _run_resolution() -> void:
 			p.lunge(_pads["e" + str(lane)].position)
 			if e != null and not e.face_down:
 				e.hp -= p.def.attack
+				if e.hp <= 0:
+					_bump("respect", 0.4)   # a clean kill earns a nod
 				e.flash()
 				_burst(e.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
 			else:
+				# §2.4: chip damage bleeds 1:1 — and antes the same into the pot
 				_chips_devil -= p.def.attack
+				_pot += p.def.attack
+				_bump("anger", 0.3)       # losing chips angers him
+				_bump("respect", 0.2)      # ...and impresses him
 				_pulse(_l_chips)
 				_shake(0.022)
 				if _scale != null:
@@ -482,6 +546,8 @@ func _run_resolution() -> void:
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
 			else:
 				_chips_you -= e.def.attack
+				_pot += e.def.attack
+				_bump("cruelty", 0.4)     # he tastes your blood
 				_pulse(_l_chips)
 				_shake(0.028)
 				if _scale != null:
@@ -529,18 +595,102 @@ func _cleanup_dead() -> void:
 func _check_over() -> bool:
 	if _chips_you > 0 and _chips_devil > 0:
 		return false
+	if _chips_you <= 0 and not _wager_offered:
+		# Final Wager (§2.5): the Devil deals you back in — ten chips,
+		# fifteen debt, once per run.
+		_phase = Phase.OVER
+		_wager_pending = true
+		_l_over.text = tr("WAGER_OFFER")
+		_l_phase.text = tr("GAME_OVER")
+		if _devil != null:
+			_devil.lean_in(0.5)
+			_devil.eyes_flare(1.0)
+		_sfx.play(Sfx.LOSE, -10.0)
+		return true
+	_finish_over(_chips_devil <= 0 and _chips_you > 0)
+	return true
+
+func _finish_over(won: bool) -> void:
 	_phase = Phase.OVER
-	var won := _chips_devil <= 0 and _chips_you > 0
+	_wager_pending = false
 	if _devil != null:
 		if won:
 			_devil.defeat()
 		else:
 			_devil.victory()
 	_l_over.text = tr("YOU_WIN") if won else tr("DEVIL_WINS")
+	if won:
+		# §2.4: the pot converts to embers — the fatter the violence,
+		# the fatter the payday.
+		_l_over.text += "\n" + str(_pot) + " " + tr("EMBERS_WON")
+	if _debt > 0:
+		_l_over.text += "\n" + tr("DEBT_LBL") + " " + str(_debt)
 	_l_over.text += "\n" + tr("RESTART")
 	_l_phase.text = tr("GAME_OVER")
 	_sfx.play(Sfx.WIN if won else Sfx.LOSE, -4.0)
-	return true
+
+# ---------------------------------------------------------------- Azrail
+
+## Blinds escalation (§2.6): 1×3, 2×3, 3×3, 5×3, 8×3, then 13 and
+## +5 every round after 15 — the doom clock both sides pay.
+func _blind_for(r: int) -> int:
+	if r <= 3:
+		return 1
+	if r <= 6:
+		return 2
+	if r <= 9:
+		return 3
+	if r <= 12:
+		return 5
+	if r <= 15:
+		return 8
+	return 13 + 5 * (r - 15)
+
+## Azrail psychology feed (§18.2) — every play nudges an axis; the first
+## time an axis crosses the taunt threshold he remarks on it.
+func _bump(axis: String, amt: float) -> void:
+	var before: float = _psyche[axis]
+	_psyche[axis] = before + amt
+	if before < TAUNT_AT and _psyche[axis] >= TAUNT_AT \
+		and not _taunted.has(axis):
+		_taunted[axis] = true
+		_hint(tr("AZRAIL_" + axis.to_upper()))
+		if _devil != null:
+			_devil.eyes_flare(0.8)
+
+## Raise (§2.3): stake extra chips into the pot, up to 5 per round.
+func raise() -> void:
+	if _phase != Phase.PLACE or _raise_used >= RAISE_MAX:
+		return
+	_raise_used += 1
+	_chips_you -= 1
+	_pot += 1
+	_bump("curiosity", 0.5)
+	if _devil != null:
+		_devil.watch(Vector3(0, _top + 0.04, 0.02), 1.2)
+	_hint(tr("RAISED"))
+	_sfx.play(Sfx.CHIP_HANDLE, -8.0)
+	_pulse(_l_pot)
+	_update_chips()
+
+func wager_accept() -> void:
+	if not _wager_pending:
+		return
+	_wager_pending = false
+	_wager_offered = true
+	_chips_you = 10
+	_debt += 15
+	_l_over.text = ""
+	_phase = Phase.BUSY
+	_round += 1
+	_start_round()
+
+func wager_decline() -> void:
+	if not _wager_pending:
+		return
+	_wager_pending = false
+	_wager_offered = true
+	_finish_over(false)
 
 func restart() -> void:
 	# one-shot frame signal — a deferred call on the tree gets queued
@@ -555,6 +705,11 @@ func _update_chips() -> void:
 		tr("CHIPS_DEVIL"), _chips_devil]
 	_l_blood.text = "%s %d   ·   %s %d" % [tr("BLOOD"), _blood,
 		tr("CARDS_LEFT"), _deck.size()]
+	if _debt > 0:
+		_l_blood.text += "   ·   %s %d" % [tr("DEBT_LBL"), _debt]
+	_l_pot.text = "%s %d" % [tr("POT"), _pot]
+	for i in range(_pot_pile.size()):
+		_pot_pile[i].visible = i < mini(_pot, _pot_pile.size())
 
 func _hint(t: String) -> void:
 	_l_hint.text = t
@@ -580,6 +735,7 @@ func _autoplay_run() -> void:
 		_select(_hand[1] if _hand.size() > 1 else _hand[0]); _try_place(3)
 	if _hand.size() >= 1:
 		_sacrifice_card(_hand[0])
+	raise()
 	_phase = Phase.PLACE
 	end_turn_autoplay()
 

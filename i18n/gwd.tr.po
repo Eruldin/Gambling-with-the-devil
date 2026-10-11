@@ -31,7 +31,7 @@ msgid "CHIPS_DEVIL"
 msgstr "ŞEYTAN"
 
 msgid "HINT_PLACE"
-msgstr "Kartları sıraya gizli koy — sağ tık kan için kurban eder — SPACE açar"
+msgstr "Kartları gizli koy — sağ tık kurban — B yükseltme — SPACE aç"
 
 msgid "HINT_PAD"
 msgstr "Kendi sıradan bir şerit seç"
@@ -93,3 +93,33 @@ msgstr "Casus"
 
 msgid "CARD_SEER"
 msgstr "Kahin"
+
+msgid "POT"
+msgstr "pot"
+
+msgid "EMBERS_WON"
+msgstr "kor kazanıldı"
+
+msgid "DEBT_LBL"
+msgstr "borç"
+
+msgid "RAISED"
+msgstr "Yükselttin — Azrail not etti."
+
+msgid "WAGER_OFFER"
+msgstr "AZRAIL: \"Ruhların mı bitti? Sana on çip vereyim — bedeli on beş, borca yazılır.\"\n(Y — anlaşmayı kabul   ·   N — bitir)"
+
+msgid "AZRAIL_CRUELTY"
+msgstr "Azrail gülümsedi — çaresizliğinin kokusunu aldı."
+
+msgid "AZRAIL_CURIOSITY"
+msgstr "Azrail başını eğdi. \"İlginç.\""
+
+msgid "AZRAIL_ANGER"
+msgstr "Azrail'in parmakları koltuğa geçti. \"Yeter.\""
+
+msgid "AZRAIL_RESPECT"
+msgstr "Azrail hafifçe başını eğdi. Saygıdeğer bir rakipsin."
+
+msgid "AZRAIL_BOREDOM"
+msgstr "Azrail masaya vurdu. \"Oyalanıyorsun — sıkıldım. Perdeler sıkılmaz.\""

@@ -485,6 +485,12 @@ func _input(event: InputEvent) -> void:
 			_battle.end_turn()
 		elif event.keycode == KEY_R:
 			_battle.restart()
+		elif event.keycode == KEY_B:
+			_battle.raise()
+		elif event.keycode == KEY_Y:
+			_battle.wager_accept()
+		elif event.keycode == KEY_N:
+			_battle.wager_decline()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:

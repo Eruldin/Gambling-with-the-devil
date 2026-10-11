@@ -31,7 +31,7 @@ msgid "CHIPS_DEVIL"
 msgstr "DEVIL"
 
 msgid "HINT_PLACE"
-msgstr "Place cards concealed on your row — right-click sacrifices for blood — SPACE reveals"
+msgstr "Place cards concealed — right-click sacrifices for blood — B raises the stakes — SPACE reveals"
 
 msgid "HINT_PAD"
 msgstr "Pick a lane pad on your row"
@@ -93,3 +93,33 @@ msgstr "Spy"
 
 msgid "CARD_SEER"
 msgstr "Seer"
+
+msgid "POT"
+msgstr "pot"
+
+msgid "EMBERS_WON"
+msgstr "embers claimed"
+
+msgid "DEBT_LBL"
+msgstr "debt"
+
+msgid "RAISED"
+msgstr "You raise — the Devil notices."
+
+msgid "WAGER_OFFER"
+msgstr "AZRAIL: \"Out of souls? I'll stake you — ten chips. The price is fifteen, owed.\"\n(Y — take his deal   ·   N — end it)"
+
+msgid "AZRAIL_CRUELTY"
+msgstr "Azrail purrs — he can smell desperation."
+
+msgid "AZRAIL_CURIOSITY"
+msgstr "Azrail tilts his head. \"Interesting.\""
+
+msgid "AZRAIL_ANGER"
+msgstr "Azrail's knuckles whiten on the armrests. \"Enough.\""
+
+msgid "AZRAIL_RESPECT"
+msgstr "Azrail inclines his head a degree. A worthy opponent."
+
+msgid "AZRAIL_BOREDOM"
+msgstr "Azrail taps the felt. \"You stall — I grow bored. The blinds do not.\""
