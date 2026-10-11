@@ -89,7 +89,7 @@ var _event_cards: Array = []
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
-	"sin_idx": 0, "sin_name": "", "broken": []}
+	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {}}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _sin_name := ""       # which of the seven is on the throne
@@ -118,6 +118,11 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 		if _deck.size() < 24:
 			var sd: CardDef = CardDef.spoil(sid)
 			if sd != null:
+				# §3.5 taxidermy: a grafted seal rides the spoil it was
+				# stitched onto — survives the reload like everything else
+				var graft: String = str(_run["grafts"].get(sid, ""))
+				if graft != "" and not sd.sigils.has(graft):
+					sd.sigils.append(graft)
 				_deck.append(sd)
 	_edeck = CardDef.devil_deck(_run["depth"])
 	# Azrail palms counterfeits into his deck — Call the Bluff prey;
@@ -920,6 +925,7 @@ func _reset_run() -> void:
 	_run["spoils"] = []
 	_run["sin_name"] = ""
 	_run["broken"] = []
+	_run["grafts"] = {}
 
 # ------------------------------------------------------------ descent (§18)
 
@@ -931,7 +937,8 @@ func _spawn_event_cards() -> void:
 	var faces := {
 		"event_whisper": "face_seer.png", "event_wheel": "face_imp.png",
 		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
-		"event_mirror": "face_acolyte.png", "event_furnace": "face_martyr.png"}
+		"event_mirror": "face_acolyte.png", "event_furnace": "face_martyr.png",
+		"event_taxidermist": "face_cutpurse.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
@@ -940,6 +947,8 @@ func _spawn_event_cards() -> void:
 		pool.append("event_furnace")
 	if _run["depth"] >= 3:
 		pool.append("event_mirror")
+	if _run["depth"] >= 4:
+		pool.append("event_taxidermist")
 	pool.shuffle()
 	# every third descent the sin door is dealt — you may walk around
 	# it, but Azrail marks the cowardice (§18: bosses at depths 3,6,9)
@@ -1054,6 +1063,28 @@ func _resolve_event(card) -> void:
 			else:
 				_run["purse"] += 3
 				_hint(tr("EV_FURNACE_COLD"))
+		"event_taxidermist":
+			# §3.5 the Taxidermist: he stitches a spare seal onto your
+			# newest spoil — venom, haunt, mimic, pierce, revival,
+			# executioner — whatever the back room yields
+			if not _run["spoils"].is_empty():
+				var tgt: String = str(_run["spoils"][_run["spoils"].size() - 1])
+				var tgt_def: CardDef = CardDef.spoil(tgt)
+				var graft_pool: Array = ["venom", "haunt", "mimic",
+					"pierce", "revival", "executioner"]
+				if tgt_def != null:
+					for s in tgt_def.sigils:
+						graft_pool.erase(s)
+				if graft_pool.is_empty():
+					_run["purse"] += 3
+					_hint(tr("EV_TAXI_FULL"))
+				else:
+					var g: String = str(graft_pool[randi() % graft_pool.size()])
+					_run["grafts"][tgt] = g
+					_hint(tr("EV_TAXI") + " " + tr("SIGIL_" + g.to_upper()))
+			else:
+				_run["purse"] += 3
+				_hint(tr("EV_TAXI_EMPTY"))
 		"event_sin":
 			# the sin door: the next table seats one of the seven
 			_run["sin_next"] = true
