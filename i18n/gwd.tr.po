@@ -492,3 +492,6 @@ msgstr "Azrail kendine bir ölçü dolduruyor. \"Seni kaybetmek zoruma gidecek. 
 
 msgid "AZRAIL_BOREDOM_2"
 msgstr "Azrail tavandaki çatlakları sesli sayıyor. \"Eğlendir beni, borçlu.\""
+
+msgid "TRICK_HIS"
+msgstr "Azrail kolundan %s çıkarıyor."

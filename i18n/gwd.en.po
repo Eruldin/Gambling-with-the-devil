@@ -492,3 +492,6 @@ msgstr "Azrail pours himself a measure. \"I will hate to lose you. Almost.\""
 
 msgid "AZRAIL_BOREDOM_2"
 msgstr "Azrail counts the ceiling cracks aloud. \"Entertain me, debtor.\""
+
+msgid "TRICK_HIS"
+msgstr "Azrail slides %s from his sleeve."
