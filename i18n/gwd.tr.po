@@ -222,4 +222,27 @@ msgstr "Borçlunun Çanı"
 
 msgid "EFFIGY_CROUPIER"
 msgstr "Krupiyenin Sol Eli"
+msgid "TRUMP_LOADED_DICE"
+msgstr "Hileli Zar"
+
+msgid "TRUMP_MIRRORED_COIN"
+msgstr "Aynalı Sikke"
+
+msgid "TRUMP_LOADED"
+msgstr "Hileli zar — bir sonraki atışın kaybetmez."
+
+msgid "TRUMP_MIRRORED"
+msgstr "Aynalı sikke — bir kaybeden atış geri gelir."
+
+msgid "COIN_REROLL"
+msgstr "Aynalı sikke atışı yeniden çevirdi."
+
+msgid "PRIESTESS_WON"
+msgstr "Kahin gülümsüyor — yazı: +3 çip."
+
+msgid "PRIESTESS_LOST"
+msgstr "Kahin surat asıyor — tura: −1 çip."
+
+msgid "CARD_PRIESTESS"
+msgstr "Şansın Yüksek Rahibi"
 
