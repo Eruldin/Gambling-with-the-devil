@@ -121,8 +121,11 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 				_deck.append(sd)
 	_edeck = CardDef.devil_deck(_run["depth"])
 	# Azrail palms counterfeits into his deck — Call the Bluff prey;
-	# he palms more of them the deeper the Descent takes you.
-	for i in range(2 + mini(_run["depth"], 3)):
+	# he palms more of them the deeper the Descent takes you, and a
+	# drowning debtor makes him greedy: every 10 souls of debt adds
+	# one more lie to his sleeve (§18: debt has teeth, not just a label)
+	for i in range(2 + mini(_run["depth"], 3)
+			+ int(_run["debt"] / 10)):
 		_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
 	_deck.shuffle()
 	_edeck.shuffle()
