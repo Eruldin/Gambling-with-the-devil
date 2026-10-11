@@ -465,3 +465,15 @@ msgstr "nişinde unutulmuş bir ruh — savaşsız sana katılır"
 
 msgid "EV_RELIC"
 msgstr "Niş açılıyor — bir ruh çıkıp tarafını tutuyor:"
+
+msgid "CARD_HANGMAN"
+msgstr "Cellat"
+
+msgid "CARD_HANGMAN_DESC"
+msgstr "2/4 · ipi adını çoktan biliyor — cellat vuruşu"
+
+msgid "CARD_PENITENT"
+msgstr "Tövbekâr"
+
+msgid "CARD_PENITENT_DESC"
+msgstr "0/4 · yediği her darbe pote bir çip düşürür"

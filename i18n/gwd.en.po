@@ -465,3 +465,15 @@ msgstr "a forgotten soul in its niche — it joins you freely"
 
 msgid "EV_RELIC"
 msgstr "The niche opens — a soul steps out and takes your side:"
+
+msgid "CARD_HANGMAN"
+msgstr "The Hangman"
+
+msgid "CARD_HANGMAN_DESC"
+msgstr "2/4 · his rope already knows your name — executioner's strike"
+
+msgid "CARD_PENITENT"
+msgstr "The Penitent"
+
+msgid "CARD_PENITENT_DESC"
+msgstr "0/4 · each blow he takes pays a chip into the pot"
