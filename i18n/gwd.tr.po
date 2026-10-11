@@ -214,4 +214,12 @@ msgstr "Soğuk deste — elini geri alıp yeniden dağıttı."
 
 msgid "TRUMP_MARKED"
 msgstr "İşaretli kağıtlar — bu savaş tellerin okunamaz."
+msgid "EFFIGY_LBL"
+msgstr "RÖLYEF"
+
+msgid "EFFIGY_BELL"
+msgstr "Borçlunun Çanı"
+
+msgid "EFFIGY_CROUPIER"
+msgstr "Krupiyenin Sol Eli"
 

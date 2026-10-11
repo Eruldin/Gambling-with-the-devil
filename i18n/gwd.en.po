@@ -214,4 +214,12 @@ msgstr "Cold deck — he takes your hand back and redeals."
 
 msgid "TRUMP_MARKED"
 msgstr "Marked cards — your tells are invisible this battle."
+msgid "EFFIGY_LBL"
+msgstr "MANTEL"
+
+msgid "EFFIGY_BELL"
+msgstr "Debtor's Bell"
+
+msgid "EFFIGY_CROUPIER"
+msgstr "Croupier's Left Hand"
 

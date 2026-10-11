@@ -52,7 +52,9 @@ var _trick_armed = null       # razor awaiting a pawn target
 var _dead_p: Array = []       # player defs that died this battle (Tithe fodder)
 var _trumps: Array = ["sleeve_ace", "cold_deck", "marked_cards"]
 var _marked_active := false   # Marked Cards: your tells are unreadable
-var _l_trumps: Label    # opening redeal — once per battle
+var _l_trumps: Label
+var _effigies: Array = []     # mantel objects — passive per-round effects
+var _l_effigies: Label    # opening redeal — once per battle
 # Azrail psychology (§18.2) — five axes the game feeds; his table manners
 # and his AI both read these.
 var _psyche := {"cruelty": 0.0, "curiosity": 0.0, "anger": 0.0,
@@ -92,6 +94,7 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_autoplay = OS.get_environment("GWD_AUTO") == "1"
 	_make_pads()
 	_make_hud()
+	_spawn_effigies()
 	_deck = CardDef.starter_deck()
 	_edeck = CardDef.starter_deck()
 	# Azrail palms two counterfeits into his deck — Call the Bluff prey
@@ -169,6 +172,7 @@ func _make_hud() -> void:
 	_l_pot = _mk_label(Vector2(16, 90), 15, Color(0.78, 0.58, 0.2))
 	_l_trumps = _mk_label(Vector2(16, 112), 13, Color(0.58, 0.46, 0.26))
 	_update_trumps()
+	_l_effigies = _mk_label(Vector2(16, 134), 13, Color(0.5, 0.32, 0.24))
 	_l_tool = _mk_label(Vector2(0, 0), 14, Color(0.7, 0.6, 0.45))
 	_l_tool.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_l_tool.offset_left = 16
@@ -216,9 +220,15 @@ func _mk_label(offset: Vector2, size: int, col: Color) -> Label:
 
 func _start_round() -> void:
 	var ante := _blind_for(_round)
+	for e in _effigies:
+		if e["id"] == "debtor_bell":
+			ante += 1              # the bell tolls — both antes rise
 	_chips_you -= ante
 	_chips_devil -= ante
 	_pot += ante * 2
+	for e in _effigies:
+		if e["id"] == "croupier":
+			_chips_you += 1        # the House's hand pays your ante back
 	# venom stacks tick — wounded cards rot a little each round
 	for side in [_board_p, _board_e]:
 		for lane in range(LANES):
@@ -1135,6 +1145,36 @@ func _spawn_grub(lane: int, mine: bool) -> void:
 	tw.tween_property(card, "position", dest, 0.35)
 	_burst(dest + Vector3(0, 0.03, 0), Color(0.3, 0.5, 0.2),
 		12, 0.01, 0.4)
+
+## mantel effigies — passive objects lying on the table's back edge;
+## they sit behind Azrail's pads and tick every round (§5 effigy slice)
+func _spawn_effigies() -> void:
+	var defs := [
+		{"id": "debtor_bell", "key": "EFFIGY_BELL",
+			"face": "res://assets_external/card-art/gwd/face_votary.png"},
+		{"id": "croupier", "key": "EFFIGY_CROUPIER",
+			"face": "res://assets_external/card-art/gwd/face_acolyte.png"},
+	]
+	var names: Array[String] = []
+	for i in range(defs.size()):
+		_effigies.append(defs[i])
+		names.append(tr(defs[i]["key"]))
+		var card := GameCard.new()
+		card.def = CardDef.make_effigy(defs[i]["id"], defs[i]["face"])
+		add_child(card)
+		card.setup(load(defs[i]["face"]), _back_tex)
+		card.placed = true
+		card.scale = Vector3.ONE * 0.62
+		var dest := Vector3(-0.42 + i * 0.09, _top + 0.02, -0.30)
+		card.position = dest + Vector3(0, 0.25, -0.15)
+		card.rotation = Vector3(PI, 0, -0.35)
+		var tw := create_tween().set_trans(Tween.TRANS_CUBIC) 			.set_ease(Tween.EASE_OUT)
+		tw.tween_interval(0.8 + i * 0.4)
+		tw.tween_property(card, "position", dest, 0.6)
+		tw.parallel().tween_property(card, "rotation",
+			Vector3(PI, 0, 0), 0.6)
+		card.set_base(dest, Vector3(PI, 0, 0))
+	_l_effigies.text = "%s  %s" % [tr("EFFIGY_LBL"), " · ".join(names)]
 
 func _autoplay_run() -> void:
 	await get_tree().create_timer(1.2).timeout
