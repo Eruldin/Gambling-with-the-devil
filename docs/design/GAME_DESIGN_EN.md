@@ -635,7 +635,7 @@ The eight root archetypes (the "verbs" every template descends from): **Trap · 
 
 ## 18.2 Devil Psychology — the content generator
 
-The Devil's behavior is a separate system, not scripted lines. Five personality axes, mutated by how you play:
+The Devil's behavior is a separate system, not scripted lines. His name is **Azrail** — "the Devil" is what he is; Azrail is who he is, and the personality system is what makes *him* feel personal. Five personality axes, mutated by how you play:
 
 | Axis | Rises when… | Devil's tell |
 |---|---|---|

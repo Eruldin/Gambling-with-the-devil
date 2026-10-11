@@ -635,7 +635,7 @@ Kök arketipler (her şablonun türediği "fiiller"): **Tuzak · Pazarlık · La
 
 ## 18.2 Şeytan Psikolojisi — içerik üreten sistem
 
-Şeytan'ın davranışları yazılmış replikler değil, ayrı bir sistemdir. Nasıl oynadığına göre mutasyona uğrayan beş kişilik ekseni:
+Şeytan'ın davranışları yazılmış replikler değil, ayrı bir sistemdir. Adı **Azrail** — "Şeytan" onun ne olduğu; Azrail kim olduğu ve kişilik sistemi onu *kişisel* hissettiren şeydir. Nasıl oynadığına göre mutasyona uğrayan beş kişilik ekseni:
 
 | Eksen | Ne zaman yükselir | Şeytan'ın tepkisi |
 |---|---|---|
