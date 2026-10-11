@@ -363,16 +363,24 @@ func _enemy_place() -> void:
 	# he reads your row first — a thinking beat, not a random drop
 	if _devil != null and not _autoplay:
 		await _devil.think(Vector3(0, _top + 0.05, 0.12))
-	var want := randi_range(1, 2)
+	# lane scoring: the devil *studies* the felt — every placement is
+	# a decision, not a coin toss. It's his table; he reads even the
+	# face-down cards (he's the devil — thematically a cheat, and it
+	# makes his placements feel predatory, not random).
 	var free_lanes: Array = []
 	for lane in range(LANES):
 		if not _board_e.has(lane):
 			free_lanes.append(lane)
-	free_lanes.shuffle()
+	var peek: CardDef = _edeck.back() if not _edeck.is_empty() else null
+
+	free_lanes.sort_custom(func(a: int, b: int) -> bool:
+		return _lane_score(a, peek) > _lane_score(b, peek))
+	var want := randi_range(1, 2)
 	for i in range(mini(want, free_lanes.size())):
 		if _edeck.is_empty():
 			break
 		var lane: int = free_lanes[i]
+
 		var d: CardDef = _edeck.pop_back()
 		var card := GameCard.new()
 		card.def = d
@@ -396,6 +404,30 @@ func _enemy_place() -> void:
 			card.place_on_pad(_pads["e" + str(lane)].position, true)
 		_sfx.play(Sfx.PLACE_E, -10.0)
 		_sfx.play(Sfx.SLIDE, -14.0, 1.2)   # the arc whoosh
+
+## How good is lane `lane` for the next enemy card `d`?
+## Empty player lane = free chip damage (best). Weak blocker = wall it.
+## Strong blocker = feed it a cheap card to stall (waste nothing strong).
+func _lane_score(lane: int, d: CardDef) -> float:
+	var p = _board_p.get(lane)
+	if d == null:
+		return 0.0
+	if p == null:
+		return 10.0 + d.attack * 2.0   # clean line into the player's chips
+	if p.def == null:
+		return 0.0
+	# block: prefer lanes where our card outlives theirs
+	var survives: bool = d.health > p.def.attack
+	var kills: bool = d.attack >= (p.hp if p.hp > 0 else p.def.health)
+	var s := 2.0
+	if kills:
+		s += 5.0                      # remove a threat
+	if survives:
+		s += 3.0                      # and keep a wall standing
+	if d.attack > 0 and not survives:
+		s -= 4.0                      # don't throw attackers under a wall
+	s += randf() * 1.5                # he's good, not a machine — keep a tell
+	return s
 
 func _run_resolution() -> void:
 	await get_tree().create_timer(0.5).timeout
@@ -511,8 +543,10 @@ func _check_over() -> bool:
 	return true
 
 func restart() -> void:
-	# deferred: direct reload from _input silently fails on the first call
-	get_tree().call_deferred("reload_current_scene")
+	# one-shot frame signal — a deferred call on the tree gets queued
+	# behind the same frame's tail and is swallowed on game-over screens
+	get_tree().process_frame.connect(
+		func(): get_tree().reload_current_scene(), CONNECT_ONE_SHOT)
 
 # ---------------------------------------------------------------- hud bits
 

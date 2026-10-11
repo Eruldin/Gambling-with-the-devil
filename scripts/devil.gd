@@ -98,9 +98,10 @@ func build(top: float, seat_z := -1.10) -> void:
 		if anim != null:
 			anim.loop_mode = Animation.LOOP_LINEAR
 		ap.play(pick)
-	# eye anchor — hood brow ~0.62 torso-local on the 0.32-scale model
+	# eye anchor — hood brow. Reads at chest height under 0.31;
+	# 0.43 landed at the collarbone — 0.53 sits inside the cowl.
 	_head = Node3D.new()
-	_head.position = Vector3(0, 0.31, 0.1)
+	_head.position = Vector3(0, 0.53, 0.13)
 	_rest_head = _head.position
 	_torso.add_child(_head)
 	# glowing eyes — orbs + additive flare halo quads behind them
@@ -306,11 +307,20 @@ func defeat() -> void:
 	tw.tween_property(_torso, "position:y", _torso.position.y - 0.02, 1.1)
 
 ## Devil's reach: the concealed card arcs out of the dark onto the lane.
+## A dark card flying through the dark reads as nothing — the card
+## carries its own ember light for the flight so the arc is visible.
 func play_card(card: Node3D, dest: Vector3, dest_rot: Vector3) -> void:
 	eyes_flare(0.5)
 	watch(dest, 2.0)
 	strike_pose(dest.x, false)
-	# lift from his side, arc, slam — reads as a thrown placement
+	# ember light riding the card — dies when the card lands
+	var glow := OmniLight3D.new()
+	glow.light_color = Color(1.0, 0.45, 0.15)
+	glow.light_energy = 1.4
+	glow.omni_range = 0.35
+	glow.omni_attenuation = 1.2
+	card.add_child(glow)
+	glow.position = Vector3(0, 0.03, 0)
 	var from := card.global_position
 	var mid := from.lerp(dest, 0.5) + Vector3(0, 0.16, 0)
 	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -320,3 +330,7 @@ func play_card(card: Node3D, dest: Vector3, dest_rot: Vector3) -> void:
 	tw.tween_property(card, "global_position", dest + Vector3(0, 0.002, 0), 0.16)
 	tw.parallel().tween_property(card, "rotation", dest_rot, 0.16)
 	await tw.finished
+	# ember dies with a soft fade instead of a pop
+	var dt := create_tween()
+	dt.tween_property(glow, "light_energy", 0.0, 0.4)
+	dt.tween_callback(glow.queue_free)

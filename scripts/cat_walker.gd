@@ -12,10 +12,10 @@ var _t := 0.0
 func build() -> void:
 	_model = load(CAT).instantiate()
 	add_child(_model)
-	# stained black — only the rim of candlelight reads on its back
+	# near-black but readable — pure black vanished against the floor
 	var dm := StandardMaterial3D.new()
-	dm.albedo_color = Color(0.018, 0.014, 0.013)
-	dm.roughness = 0.9
+	dm.albedo_color = Color(0.06, 0.045, 0.038)
+	dm.roughness = 0.85
 	for mi: MeshInstance3D in _model.find_children(
 			"*", "MeshInstance3D", true, false):
 		mi.material_override = dm
@@ -40,6 +40,21 @@ func _cross() -> void:
 	var z := -0.75 if behind else 0.15
 	var from := Vector3(-1.7, y, z - (0.2 if behind else 0.0))
 	var to := Vector3(1.7, y, z + (0.15 if behind else 0.1))
+	# a pair of faint amber eyes — the black cat's signature in the dark
+	for side in [-1.0, 1.0]:
+		var e := MeshInstance3D.new()
+		var es := SphereMesh.new()
+		es.radius = 0.006
+		es.height = 0.012
+		e.mesh = es
+		var em := StandardMaterial3D.new()
+		em.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+		em.emission_enabled = true
+		em.emission = Color(1.0, 0.75, 0.2)
+		em.emission_energy_multiplier = 4.0
+		e.material_override = em
+		_model.add_child(e)
+		e.position = Vector3(0.02 * side, 0.11, 0.09)
 	if randf() < 0.5:
 		var tmp := from; from = to; to = tmp
 	_model.global_position = from
