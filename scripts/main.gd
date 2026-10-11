@@ -115,15 +115,13 @@ func _floor_props() -> void:
 	_place(PH + "GothicCabinet_01/GothicCabinet_01_1k.gltf", "cabinet", Vector3(0.95, 0, -0.9), 1.35, -0.3)
 	_place(PH + "gothic_statue/gothic_statue_1k.gltf", "statue", Vector3(-1.25, 0, -1.0), 1.0, 0.45)
 	_place(PH + "vintage_grandfather_clock_01/vintage_grandfather_clock_01_1k.gltf", "clock", Vector3(0.72, 0, -1.25), 1.55)
-	_place(PH + "treasure_chest/treasure_chest_1k.gltf", "chest", Vector3(0.82, 0, 0.72), 0.32, -0.6)
-	_place(PH + "wooden_crate_01/wooden_crate_01_1k.gltf", "crate", Vector3(-0.88, 0, 0.45), 0.36, 0.3)
-	_place(PH + "wooden_lantern_01/wooden_lantern_01_1k.gltf", "lantern", Vector3(0.98, 0, 0.4), 0.28)
+	_place(PH + "treasure_chest/treasure_chest_1k.gltf", "chest", Vector3(1.25, 0, 0.9), 0.32, -0.6)
+	_place(PH + "wooden_crate_01/wooden_crate_01_1k.gltf", "crate", Vector3(-1.3, 0, 0.55), 0.36, 0.3)
+	_place(PH + "wooden_lantern_01/wooden_lantern_01_1k.gltf", "lantern", Vector3(1.35, 0, 0.35), 0.28)
 
 func _table_props(top: float) -> void:
-	_place(PH + "book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf", "books", Vector3(0.52, top, -0.12), 0.09, 0.35)
-	_place(PH + "jug_01/jug_01_1k.gltf", "jug", Vector3(-0.55, top, -0.1), 0.14)
-	_place(PH + "wooden_bowl_01/wooden_bowl_01_1k.gltf", "bowl", Vector3(-0.5, top, 0.15), 0.07)
-	_place(PH + "wine_bottles_01/wine_bottles_01_1k.gltf", "bottles", Vector3(0.6, top, 0.1), 0.16)
+	# spare, occult only — Inscryption keeps the felt clean
+	_place(PH + "book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf", "books", Vector3(0.72, top, -0.28), 0.09, 0.35)
 	_place(PH + "ornate_medieval_dagger/ornate_medieval_dagger_1k.gltf", "dagger", Vector3(-0.18, top, -0.33), 0.05, 0.9)
 
 func _flame_frames() -> Array[Texture2D]:
@@ -155,11 +153,43 @@ func _candles(top: float) -> void:
 	var hero := OmniLight3D.new()
 	hero.position = Vector3(0, top + 0.38, -0.02)
 	hero.light_color = Color(1.0, 0.58, 0.26)
-	hero.light_energy = 1.05
-	hero.omni_range = 1.6
-	hero.omni_attenuation = 2.4
+	hero.light_energy = 1.0
+	hero.omni_range = 1.35
+	hero.omni_attenuation = 2.6
 	hero.shadow_enabled = true
 	add_child(hero)
+	_dust(top)
+
+## faint motes drifting through the candle pool — sells the stillness
+func _dust(top: float) -> void:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = Vector3(0.55, 0.28, 0.35)
+	pm.direction = Vector3(0.15, -0.35, 0.05)
+	pm.spread = 25.0
+	pm.initial_velocity_min = 0.004
+	pm.initial_velocity_max = 0.02
+	pm.gravity = Vector3.ZERO
+	pm.linear_accel_min = 0.001
+	pm.linear_accel_max = 0.006
+	pm.scale_min = 0.4
+	pm.scale_max = 1.0
+	var gp := GPUParticles3D.new()
+	gp.amount = 90
+	gp.lifetime = 9.0
+	gp.preprocess = 9.0
+	gp.process_material = pm
+	gp.position = Vector3(0, top + 0.25, -0.05)
+	var q := QuadMesh.new()
+	q.size = Vector2(0.0022, 0.0022)
+	var dm := StandardMaterial3D.new()
+	dm.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	dm.albedo_color = Color(0.95, 0.7, 0.4, 0.13)
+	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	dm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	q.material = dm
+	gp.draw_pass_1 = q
+	add_child(gp)
 
 func _chandelier(top: float) -> void:
 	var ch := _place(PH + "lantern_chandelier_01/lantern_chandelier_01_1k.gltf",

@@ -361,6 +361,7 @@ func _run_resolution() -> void:
 			else:
 				_chips_devil -= p.def.attack
 				_pulse(_l_chips)
+				_shake(0.012)
 				if _devil != null:
 					_devil.eyes_flare(0.7)
 			await get_tree().create_timer(0.42).timeout
@@ -373,6 +374,7 @@ func _run_resolution() -> void:
 			else:
 				_chips_you -= e.def.attack
 				_pulse(_l_chips)
+				_shake(0.016)
 				if _devil != null:
 					_devil.lean_in(0.3)
 			await get_tree().create_timer(0.42).timeout
@@ -383,6 +385,18 @@ func _run_resolution() -> void:
 		return
 	_round += 1
 	_start_round()
+
+## impact shake: quick camera offset jitter, settles in ~0.25s
+func _shake(amt: float) -> void:
+	if _cam == null:
+		return
+	var tw := create_tween()
+	tw.tween_property(_cam, "h_offset",
+		randf_range(-amt, amt), 0.05)
+	tw.parallel().tween_property(_cam, "v_offset",
+		randf_range(-amt, amt), 0.05)
+	tw.tween_property(_cam, "h_offset", 0.0, 0.2)
+	tw.parallel().tween_property(_cam, "v_offset", 0.0, 0.2)
 
 func _cleanup_dead() -> void:
 	for lane in range(LANES):
@@ -414,7 +428,8 @@ func _check_over() -> bool:
 	return true
 
 func restart() -> void:
-	get_tree().reload_current_scene()
+	# deferred: direct reload from _input silently fails on the first call
+	get_tree().call_deferred("reload_current_scene")
 
 # ---------------------------------------------------------------- hud bits
 

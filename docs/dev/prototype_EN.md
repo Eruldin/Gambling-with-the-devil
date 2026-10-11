@@ -48,3 +48,8 @@ Round loop per the design doc: both sides ante the current Blind (1/2/3/5/8/13 c
 - `devil.gd`: procedural opponent — near-black silhouette in the far chair: hunched torso, neck, elongated horned skull, glowing unshaded eyes (flicker + flare on player damage / victory), clawed hand-rigs resting on the felt; idle breathing, head-twitch snaps, finger-drumming; `play_card()` slides enemy concealed cards onto lanes with the right claw; `lean_in()` on hits/game over.
 - `hand_rig.gd`: shared articulated hand (palm + thumb + 4 two-segment fingers, curl pose). Player glove version: `pick_and_place()` carries cards to lane pads, `grab_and_pull()` drags sacrificed cards into the dark before they burn.
 - Lighting: near-black room (ambient 0.22), fog, tight omni pool over the felt, ACES + contrast, screen-space vignette (CanvasItem shader), faint red uplight on the Devil's face; camera raised and tilted so the Devil's head holds the top of frame.
+
+## Real devil model + atmosphere pass (feat/real-devil-model)
+- `devil.gd` now instances `assets_external/devil-model/demon_sorcerer.glb` (CC0, rigged, textured) instead of primitives — seated hunched over the felt on the far armchair; glowing-eye orbs + additive flare halos, red uplight on the face, same API (`eyes_flare`, `lean_in`, `play_card`, finger drum).
+- Atmosphere: fewer props on the felt (Inscryption's clean table), props pushed to the edges, tighter hero light pool, dust motes drifting through the light (`GPUParticles3D`), card backs emit their texture so concealed cards read red.
+- Feel: camera shake on chip strikes (`h_offset`/`v_offset` jitter); `restart()` deferred so the first R reloads.

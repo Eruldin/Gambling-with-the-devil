@@ -1,15 +1,19 @@
 extends Node3D
-## The Devil: a mostly-silhouette figure hunched across the table —
-## horned skull, glowing eyes, clawed hands resting on the felt edge.
-## Inscryption-style: you see shape and eyes, not detail.
+## The Devil: a real textured demon model (CC0 demon sorcerer — ram horns,
+## skull face, claws, tattered robe) looming across the table.
+## Inscryption-style: warm uplight on the face, glowing eyes, clawed hands
+## resting on the felt edge.
 
 const HandRig := preload("res://scripts/hand_rig.gd")
+const DEMON := "res://assets_external/devil-model/demon_sorcerer.glb"
 
-var _mat: StandardMaterial3D
 var _eye_mat: StandardMaterial3D
-var _torso: Node3D
-var _head: Node3D
+var _halo_mat: StandardMaterial3D
+var _torso: Node3D          # pivot at the hips — lean/breath act on it
+var _model: Node3D
+var _head: Node3D           # eye/halo anchor at skull height
 var _eyes: Array[MeshInstance3D] = []
+var _halos: Array[MeshInstance3D] = []
 var _rest_head := Vector3.ZERO
 var _rest_lean := 0.0
 var _hand_r: Node3D
@@ -21,83 +25,67 @@ var _twitch := 0.0
 var _drum_in := 8.0 + randf() * 8.0
 
 ## seat_z: z of the far chair; top: table surface height.
-func build(top: float, seat_z := -1.18) -> void:
-	_mat = StandardMaterial3D.new()
-	_mat.albedo_color = Color(0.016, 0.011, 0.010)
-	_mat.roughness = 0.98
-	_mat.metallic = 0.0
-	# silhouette torso: hunched capsule + shoulder mass, looming over the felt
+func build(top: float, seat_z := -1.10) -> void:
+	# real model: ~2.0m tall, faces +Z (toward the player — correct as-is).
+	# seated: waist dropped to chair-seat height, torso pitched forward
+	# over the felt edge — Inscryption's hunched opponent silhouette.
 	_torso = Node3D.new()
-	_torso.position = Vector3(0, 0, seat_z + 0.08)
+	_torso.position = Vector3(0, 0.38, seat_z)
 	_torso.rotation.x = 0.22
 	add_child(_torso)
-	var chest := _mi(_capsule(0.13, 0.4), Vector3(0, 0.52, 0),
-		Vector3(1.0, 0.9, 0.62), Vector3(0.24, 0, 0))
-	_torso.add_child(chest)
-	var shoulders := _mi(_sphere(0.1),
-		Vector3(0, 0.68, 0.03), Vector3(1.7, 0.45, 0.6))
-	_torso.add_child(shoulders)
-	# thin neck so the head reads as its own silhouette
-	_torso.add_child(_mi(_capsule(0.035, 0.14),
-		Vector3(0, 0.82, 0.10), Vector3(1, 1, 1), Vector3(0.35, 0, 0)))
-	# head: elongated skull + jaw + back-swept horns + brow ridge
+	_model = load(DEMON).instantiate()
+	var s := 0.62
+	_model.scale = Vector3.ONE * s
+	_model.position.y = -0.42       # waist at pivot → lean bends torso
+	_torso.add_child(_model)
+	# eye anchor: skull face height ≈ 1.72m * s above feet → ~0.77 over pivot
 	_head = Node3D.new()
-	_head.position = Vector3(0, 0.98, 0.17)
+	_head.position = Vector3(0, 0.65, 0.12)
 	_rest_head = _head.position
 	_torso.add_child(_head)
-	_head.add_child(_mi(_sphere(0.085),
-		Vector3(0, 0.02, 0.02), Vector3(0.92, 1.12, 1.0)))
-	_head.add_child(_mi(_box(0.085, 0.045, 0.09),
-		Vector3(0, -0.035, 0.055), Vector3(1, 1, 1)))
-	_head.add_child(_mi(_box(0.15, 0.025, 0.03),
-		Vector3(0, 0.045, 0.075), Vector3(1, 1, 1)))
-	for side in [-1.0, 1.0]:
-		var horn := _mi(_cone(0.020, 0.17),
-			Vector3(0.055 * side, 0.10, 0.0), Vector3(1, 1, 1),
-			Vector3(-0.62, 0, 0.42 * side))
-		_head.add_child(horn)
-		var horn2 := _mi(_cone(0.013, 0.10),
-			Vector3(0.085 * side, 0.13, -0.03), Vector3(1, 1, 1),
-			Vector3(-1.05, 0, 0.55 * side))
-		_head.add_child(horn2)
-		# ears: thin spikes, kept close to the skull
-		_head.add_child(_mi(_cone(0.008, 0.05),
-			Vector3(0.088 * side, 0.005, 0.0), Vector3(1, 1, 1),
-			Vector3(0, 0, 1.5 * side)))
-	# glowing eyes
+	# glowing eyes — orbs + additive flare halo quads behind them
 	_eye_mat = StandardMaterial3D.new()
 	_eye_mat.albedo_color = Color(1.0, 0.3, 0.06)
 	_eye_mat.emission_enabled = true
 	_eye_mat.emission = Color(1.0, 0.28, 0.05)
 	_eye_mat.emission_energy_multiplier = 8.0
 	_eye_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	_halo_mat = StandardMaterial3D.new()
+	_halo_mat.albedo_texture = load(
+		"res://assets_external/anim-vfx/kenney/particle-pack/PNG (Transparent)/flare_01.png")
+	_halo_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_halo_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_halo_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	_halo_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	for side in [-1.0, 1.0]:
+		var h := MeshInstance3D.new()
+		var hq := QuadMesh.new()
+		hq.size = Vector2(0.085, 0.085)
+		h.mesh = hq
+		h.material_override = _halo_mat
+		h.position = Vector3(0.042 * side, 0.005, 0.075)
+		_head.add_child(h)
+		_halos.append(h)
 		var e := MeshInstance3D.new()
 		var es := SphereMesh.new()
-		es.radius = 0.019
-		es.height = 0.038
+		es.radius = 0.016
+		es.height = 0.032
 		es.radial_segments = 12
 		e.mesh = es
 		e.material_override = _eye_mat
-		e.position = Vector3(0.036 * side, 0.030, 0.11)
+		e.position = Vector3(0.042 * side, 0.005, 0.078)
 		_head.add_child(e)
 		_eyes.append(e)
-	# faint red uplight so the face is *just* readable
+	# faint red uplight so the textured face is *just* readable
 	var face := SpotLight3D.new()
-	face.position = Vector3(0, 0.52, seat_z + 0.55)
+	face.position = Vector3(0, 0.5, seat_z + 0.55)
 	add_child(face)
-	face.look_at(Vector3(0, 1.12, seat_z + 0.2), Vector3.UP)
+	face.look_at(Vector3(0, 1.05, seat_z + 0.15), Vector3.UP)
 	face.light_color = Color(0.9, 0.2, 0.08)
-	face.light_energy = 0.4
-	face.spot_angle = 26.0
+	face.light_energy = 0.55
+	face.spot_angle = 30.0
 	face.spot_attenuation = 1.2
-	# clawed hands resting on the felt edge, fingers reaching mid-table,
-	# with forearm stubs trailing back into the dark
-	for side in [-1.0, 1.0]:
-		var arm := _mi(_capsule(0.035, 0.55),
-			Vector3(0.26 * side, top + 0.05, seat_z + 0.52),
-			Vector3(1, 1, 1), Vector3(PI / 2.0 - 0.3, 0.1 * side, 0.06 * side))
-		add_child(arm)
+	# clawed hands resting on the felt edge (kept: they reach mid-table)
 	_hand_r = HandRig.new()
 	add_child(_hand_r)
 	_hand_r.setup(Color(0.02, 0.013, 0.011), true)
@@ -109,43 +97,6 @@ func build(top: float, seat_z := -1.18) -> void:
 	_hand_l.home_pos(Vector3(0.27, top + 0.028, seat_z + 0.72))
 	_hand_l.rotation = Vector3(-0.12, PI + 0.45, 0.08)
 	_hand_l.scale = Vector3(-1, 1, 1)  # mirrored
-
-func _mi(mesh: Mesh, pos: Vector3, scale: Vector3,
-		rot := Vector3.ZERO) -> MeshInstance3D:
-	var m := MeshInstance3D.new()
-	m.mesh = mesh
-	m.position = pos
-	m.scale = scale
-	m.rotation = rot
-	m.material_override = _mat
-	return m
-
-func _capsule(r: float, h: float) -> CapsuleMesh:
-	var c := CapsuleMesh.new()
-	c.radius = r
-	c.height = h
-	c.radial_segments = 20
-	return c
-
-func _sphere(r: float) -> SphereMesh:
-	var s := SphereMesh.new()
-	s.radius = r
-	s.height = r * 2.0
-	s.radial_segments = 20
-	return s
-
-func _box(x: float, y: float, z: float) -> BoxMesh:
-	var b := BoxMesh.new()
-	b.size = Vector3(x, y, z)
-	return b
-
-func _cone(r: float, h: float) -> CylinderMesh:
-	var c := CylinderMesh.new()
-	c.top_radius = 0.001
-	c.bottom_radius = r
-	c.height = h
-	c.radial_segments = 12
-	return c
 
 func _process(delta: float) -> void:
 	_t += delta
@@ -166,10 +117,14 @@ func _process(delta: float) -> void:
 			0.06 * sin(_t * 0.23) + snap, delta * 6.0)
 		_head.rotation.z = lerpf(_head.rotation.z,
 			0.05 * sin(_t * 0.31), delta * 3.0)
-	# eye flicker + flare
+	# eye flicker + flare (orbs glow, halos breathe)
 	_flare = maxf(0.0, _flare - delta * 1.6)
-	_eye_mat.emission_energy_multiplier = 4.2 + _flare * 9.0 \
-		+ 0.9 * sin(_t * 9.3) + 0.5 * sin(_t * 17.7)
+	var glow := 4.2 + _flare * 9.0 + 0.9 * sin(_t * 9.3) + 0.5 * sin(_t * 17.7)
+	_eye_mat.emission_energy_multiplier = glow
+	var hs := 0.085 * (0.7 + 0.22 * sin(_t * 2.9) + _flare * 1.6)
+	for h in _halos:
+		var q: QuadMesh = h.mesh
+		q.size = Vector2(hs, hs)
 	# occasional finger drum on the felt
 	_drum_in -= delta
 	if _drum_in <= 0.0:
