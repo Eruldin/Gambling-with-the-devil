@@ -90,7 +90,7 @@ static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
 	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {},
-	"pact": false}
+	"pact": false, "confessed": false}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _anger_lies := false  # §18.2: carried anger packs his sleeve
@@ -138,12 +138,16 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 					sd.sigils.append(graft)
 				_deck.append(sd)
 	_edeck = CardDef.devil_deck(_run["depth"])
+	# §18 the Confessional: kneeling forgave debt but let him read
+	# you deeper — his memory of you carries at 90% this table
+	var carry: float = 0.9 if bool(_run["confessed"]) else 0.7
+	_run["confessed"] = false
 	# Azrail palms counterfeits into his deck — Call the Bluff prey;
 	# he palms more of them the deeper the Descent takes you, a
 	# drowning debtor makes him greedy, and a carried-over temper
 	# makes him cheat: anger crossing the run also packs one more
 	# lie into his sleeve (§18: he changes the rules when angry)
-	_anger_lies = float(_run["psyche"].get("anger", 0.0)) * 0.7 \
+	_anger_lies = float(_run["psyche"].get("anger", 0.0)) * carry \
 		>= TAUNT_AT
 	for i in range(2 + mini(_run["depth"], 3)
 			+ int(_run["debt"] / 10) + (1 if _anger_lies else 0)):
@@ -162,7 +166,7 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# he remembers — the five axes carry across tables at 70% strength,
 	# and a taunt he already said stays said for the whole run
 	for axis in _psyche:
-		_psyche[axis] = float(_run["psyche"].get(axis, 0.0)) * 0.7
+		_psyche[axis] = float(_run["psyche"].get(axis, 0.0)) * carry
 	for t in _run["taunted"]:
 		_taunted[t] = true
 	_chips_you += _run["purse"]
@@ -209,9 +213,9 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 				break
 	# §18.2 psyche bends the rules: cruelty carried across tables seats
 	# him one extra ambush pawn; boredom walks the ante one step higher
-	_cruel_seats = float(_run["psyche"].get("cruelty", 0.0)) * 0.7 \
+	_cruel_seats = float(_run["psyche"].get("cruelty", 0.0)) * carry \
 		>= TAUNT_AT
-	_bored_ante = float(_run["psyche"].get("boredom", 0.0)) * 0.7 \
+	_bored_ante = float(_run["psyche"].get("boredom", 0.0)) * carry \
 		>= TAUNT_AT
 	# §18 Pact: debt bought at the last door makes his tells shout
 	# for this whole table — the information you paid for
@@ -985,6 +989,7 @@ func _reset_run() -> void:
 	_run["broken"] = []
 	_run["grafts"] = {}
 	_run["pact"] = false
+	_run["confessed"] = false
 
 # ------------------------------------------------------------ descent (§18)
 
@@ -997,13 +1002,15 @@ func _spawn_event_cards() -> void:
 		"event_whisper": "face_seer.png", "event_wheel": "face_imp.png",
 		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
 		"event_mirror": "face_acolyte.png", "event_furnace": "face_furnace.png",
-		"event_taxidermist": "face_taxidermist.png", "event_pact": "face_votary.png"}
+		"event_taxidermist": "face_taxidermist.png", "event_pact": "face_votary.png",
+		"event_confessor": "face_confessor.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
 		pool.append("event_ledger")
 	if _run["depth"] >= 2:
 		pool.append("event_furnace")
+		pool.append("event_confessor")
 	if _run["depth"] >= 3:
 		pool.append("event_mirror")
 	if _run["depth"] >= 4:
@@ -1151,6 +1158,13 @@ func _resolve_event(card) -> void:
 			_run["debt"] += 8
 			_run["pact"] = true
 			_hint(tr("EV_PACT"))
+		"event_confessor":
+			# §18 the Confessional: he absolves a little debt — but
+			# kneeling lets him read you deeper; next table his
+			# memory of you carries at 90% instead of 70%
+			_run["debt"] = maxi(int(_run["debt"]) - 3, 0)
+			_run["confessed"] = true
+			_hint(tr("EV_CONFESS"))
 		"event_sin":
 			# the sin door: the next table seats one of the seven
 			_run["sin_next"] = true

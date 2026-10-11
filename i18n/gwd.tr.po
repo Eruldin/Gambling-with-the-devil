@@ -438,3 +438,12 @@ msgid "SIN_RULE_5"
 msgstr "Öfke tüm hattını biler — ve bir piyon derine oturtur."
 msgid "SIN_RULE_6"
 msgstr "Tembellik tur başına tek kart oynar — ama yığını boldur."
+
+msgid "CARD_EVENT_CONFESSOR"
+msgstr "Günah Çıkarma"
+
+msgid "CARD_EVENT_CONFESSOR_DESC"
+msgstr "diz çök — üç ruh borç affedilir, ama seni daha derin okur"
+
+msgid "EV_CONFESS"
+msgstr "Bağışlandın — üç ruh hafifledin, ama seni eskisinden iyi tanıyor."
