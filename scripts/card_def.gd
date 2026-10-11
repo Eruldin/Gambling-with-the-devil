@@ -115,6 +115,10 @@ static func spoil(sid: String) -> RefCounted:
 		"plague_votary":
 			return make("votary", "chalices", 1, 0, 5, 2,
 				g + "face_votary.png", ["brood", "venom"])
+		"fused_abomination":
+			# §3.4 Furnace product — never dealt as a spoil, only melted
+			return make("fused_abomination", "blades", 3, 5, 6, 2,
+				g + "face_martyr.png", ["executioner", "haunt"])
 	return null
 
 ## §18.4 scenario breakers — a spoil soul whose presence in your deck

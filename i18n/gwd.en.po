@@ -357,3 +357,18 @@ msgstr "tables"
 
 msgid "EP_DEPTH"
 msgstr "depth"
+
+msgid "CARD_EVENT_FURNACE"
+msgstr "The Furnace"
+
+msgid "CARD_EVENT_FURNACE_DESC"
+msgstr "melts two of your spoils into one fused thing"
+
+msgid "EV_FURNACE"
+msgstr "The Furnace roars — two souls go in, one abomination crawls out."
+
+msgid "EV_FURNACE_COLD"
+msgstr "Nothing to melt — it warms your purse instead (+3 souls)."
+
+msgid "CARD_FUSED_ABOMINATION"
+msgstr "Fused Abomination"

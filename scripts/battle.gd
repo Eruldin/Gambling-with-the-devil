@@ -931,11 +931,13 @@ func _spawn_event_cards() -> void:
 	var faces := {
 		"event_whisper": "face_seer.png", "event_wheel": "face_imp.png",
 		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
-		"event_mirror": "face_acolyte.png"}
+		"event_mirror": "face_acolyte.png", "event_furnace": "face_martyr.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
 		pool.append("event_ledger")
+	if _run["depth"] >= 2:
+		pool.append("event_furnace")
 	if _run["depth"] >= 3:
 		pool.append("event_mirror")
 	pool.shuffle()
@@ -1041,6 +1043,17 @@ func _resolve_event(card) -> void:
 			else:
 				_run["luck"] = -_run["luck"]
 				_hint(tr("EV_MIRROR"))
+		"event_furnace":
+			# §3.4 the Furnace: it eats two of your spoils and coughs up
+			# one fused monstrosity — or, empty-handed, just warms you
+			if _run["spoils"].size() >= 2:
+				_run["spoils"].pop_back()
+				_run["spoils"].pop_back()
+				_run["spoils"].append("fused_abomination")
+				_hint(tr("EV_FURNACE"))
+			else:
+				_run["purse"] += 3
+				_hint(tr("EV_FURNACE_COLD"))
 		"event_sin":
 			# the sin door: the next table seats one of the seven
 			_run["sin_next"] = true

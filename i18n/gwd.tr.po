@@ -357,3 +357,18 @@ msgstr "masa"
 
 msgid "EP_DEPTH"
 msgstr "derinlik"
+
+msgid "CARD_EVENT_FURNACE"
+msgstr "Ocak"
+
+msgid "CARD_EVENT_FURNACE_DESC"
+msgstr "iki ganimetini eritip tek bir yaratık çıkarır"
+
+msgid "EV_FURNACE"
+msgstr "Ocak kükriyor — iki ruh giriyor, bir ucube dışarı sürünüyor."
+
+msgid "EV_FURNACE_COLD"
+msgstr "Eritecek bir şey yok — bunun yerine keseni ısıtıyor (+3 ruh)."
+
+msgid "CARD_FUSED_ABOMINATION"
+msgstr "Kaynaşmış Ucube"
