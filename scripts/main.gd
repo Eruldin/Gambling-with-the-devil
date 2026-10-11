@@ -39,13 +39,19 @@ func _ready() -> void:
 	_room()
 	var table := _place(PH + "WoodenTable_02/WoodenTable_02_1k.gltf", "table", Vector3.ZERO, 0.56)
 	var top := _world_aabb(table).end.y
-	# stain the tabletop nearly black — Inscryption's table is dark carved wood,
-	# not bright blonde timber; the candle pool will do the warming
-	var stain := StandardMaterial3D.new()
-	stain.albedo_color = Color(0.05, 0.032, 0.02)
-	stain.roughness = 0.9
+	# keep the model's real wood diffuse/normal/ARM — darken via the
+	# albedo multiplier only, so the grain reads in candlelight
 	for mi: MeshInstance3D in table.find_children("*", "MeshInstance3D", true, false):
-		mi.material_override = stain
+		var mesh := mi.mesh
+		if mesh == null:
+			continue
+		for si in range(mesh.get_surface_count()):
+			var om := mi.get_active_material(si)
+			if om is StandardMaterial3D:
+				var dm: StandardMaterial3D = om.duplicate()
+				dm.albedo_color = om.albedo_color * Color(0.34, 0.24, 0.16)
+				dm.roughness = 0.82
+				mi.set_surface_override_material(si, dm)
 	_felt(top)
 	_floor_props()
 	_table_props(top)
@@ -135,8 +141,11 @@ func _felt(top: float) -> void:
 	bm.size = Vector3(0.95, 0.012, 0.5)
 	felt.mesh = bm
 	var m := StandardMaterial3D.new()
-	# near-black worn felt, cold tint — the candle pool warms it
-	m.albedo_color = Color(0.012, 0.022, 0.016)
+	# woven cloth texture (generated) — worn, stained, cold; the candle
+	# pool warms it. texture makes the felt read as fabric, not paint
+	m.albedo_texture = load("res://assets_external/gwd-textures/felt.png")
+	m.albedo_color = Color(0.55, 0.62, 0.5)
+	m.uv1_scale = Vector3(2, 2, 2)
 	m.roughness = 0.98
 	felt.material_override = m
 	felt.position = Vector3(0, top + 0.006, 0)

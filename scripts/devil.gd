@@ -7,21 +7,19 @@ extends Node3D
 const HandRig := preload("res://scripts/hand_rig.gd")
 const DEMON := "res://assets_external/devil-model/hooded_inquisitor.glb"
 
-var _eye_mat: StandardMaterial3D
-var _halo_mat: StandardMaterial3D
 var _torso: Node3D          # pivot at the hips — lean/breath act on it
 var _model: Node3D
-var _head: Node3D           # eye/halo anchor at skull height
-var _eyes: Array[MeshInstance3D] = []
-var _halos: Array[MeshInstance3D] = []
+var _head: Node3D           # gaze anchor at skull height (no eye meshes)
+var _face_light: SpotLight3D
+var _hood_light: OmniLight3D
+var _face_base := 1.5
+var _hood_base := 1.1
 var _rest_head := Vector3.ZERO
 var _rest_lean := 0.0
 var _hand_r: Node3D
 var _hand_l: Node3D
 var _t := 0.0
 var _flare := 0.0
-var _twitch_in := 5.0 + randf() * 6.0
-var _twitch := 0.0
 var _drum_in := 8.0 + randf() * 8.0
 var _blink_in := 3.0 + randf() * 4.0
 var _blink := 0.0
@@ -98,62 +96,34 @@ func build(top: float, seat_z := -1.10) -> void:
 		if anim != null:
 			anim.loop_mode = Animation.LOOP_LINEAR
 		ap.play(pick)
-	# eye anchor — hood brow. Reads at chest height under 0.31;
-	# 0.43 landed at the collarbone — 0.53 sits inside the cowl.
+		ap.speed_scale = 0.55   # slowed for weight — a devil never hurries
+	# gaze anchor — inside the cowl; head turns only for game events
 	_head = Node3D.new()
 	_head.position = Vector3(0, 0.53, 0.13)
 	_rest_head = _head.position
 	_torso.add_child(_head)
-	# glowing eyes — orbs + additive flare halo quads behind them
-	_eye_mat = StandardMaterial3D.new()
-	_eye_mat.albedo_color = Color(1.0, 0.3, 0.06)
-	_eye_mat.emission_enabled = true
-	_eye_mat.emission = Color(1.0, 0.28, 0.05)
-	_eye_mat.emission_energy_multiplier = 8.0
-	_eye_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	_halo_mat = StandardMaterial3D.new()
-	_halo_mat.albedo_texture = load(
-		"res://assets_external/anim-vfx/kenney/particle-pack/PNG (Transparent)/flare_01.png")
-	_halo_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_halo_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	_halo_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	_halo_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	for side in [-1.0, 1.0]:
-		var h := MeshInstance3D.new()
-		var hq := QuadMesh.new()
-		hq.size = Vector2(0.085, 0.085)
-		h.mesh = hq
-		h.material_override = _halo_mat
-		h.position = Vector3(0.027 * side, 0.0, 0.07)
-		_head.add_child(h)
-		_halos.append(h)
-		var e := MeshInstance3D.new()
-		var es := SphereMesh.new()
-		es.radius = 0.014
-		es.height = 0.028
-		es.radial_segments = 12
-		e.mesh = es
-		e.material_override = _eye_mat
-		e.position = Vector3(0.027 * side, 0.0, 0.075)
-		_head.add_child(e)
-		_eyes.append(e)
-	# faint red uplight so the textured face is *just* readable
+	# NO glowing eye orbs — his real face texture reads in the hood light.
+	# "Eye flare" is the face light surging, not dots floating off the face.
 	var face := SpotLight3D.new()
 	face.position = Vector3(0, 0.42, seat_z + 0.5)
 	add_child(face)
 	face.look_at(Vector3(0, 0.66, seat_z + 0.15), Vector3.UP)
-	face.light_color = Color(0.9, 0.2, 0.08)
-	face.light_energy = 0.85
-	face.spot_angle = 36.0
-	face.spot_attenuation = 1.2
+	# warm candle tone — the pale inquisitor face must actually read
+	# out of the cowl dark (a red light on a dark face reads as void)
+	face.light_color = Color(1.0, 0.58, 0.3)
+	face.light_energy = _face_base
+	face.spot_angle = 30.0
+	face.spot_attenuation = 1.4
+	_face_light = face
 	# tiny warm orb inside the hood — the pale face glows out of the dark
 	var hood := OmniLight3D.new()
 	hood.position = Vector3(0, 0.7, seat_z + 0.34)
 	add_child(hood)
-	hood.light_color = Color(1.0, 0.55, 0.3)
-	hood.light_energy = 0.8
-	hood.omni_range = 0.55
+	hood.light_color = Color(1.0, 0.6, 0.34)
+	hood.light_energy = _hood_base
+	hood.omni_range = 0.6
 	hood.omni_attenuation = 1.8
+	_hood_light = hood
 	# faint cold rim light so the robed silhouette reads against the dark
 	var chest := OmniLight3D.new()
 	chest.position = Vector3(0, 0.85, seat_z - 0.15)
@@ -180,62 +150,42 @@ func build(top: float, seat_z := -1.10) -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
-	# breathing + slow whole-body sway so he never reads as a statue
+	# breathing only — no sway noise, no random twitch. Stillness with weight.
 	if _torso:
 		_torso.scale.y = 1.0 + 0.014 * sin(_t * 1.1)
-		_torso.rotation.z = 0.018 * sin(_t * 0.42)
-		_torso.rotation.y = 0.03 * sin(_t * 0.17)
-	# head: locks onto game events (_gaze), else stalks the cursor
+	# head: turns ONLY for game events (_gaze). At rest he faces the
+	# player dead-on — a stare, not a wandering head.
 	if _head:
-		var track := 0.0
 		_gaze_t = maxf(0.0, _gaze_t - delta)
-		var d: Vector3
-		var has_d := false
+		var target_y := 0.0
+		var speed := 1.6
 		if _gaze_t > 0.0 and _gaze.is_finite():
-			d = _head.global_transform.affine_inverse() * _gaze
-			has_d = true
-		elif _cam != null:
-			var m := get_viewport().get_mouse_position()
-			var p: Vector3 = _cam.project_position(m, 2.2)
-			d = _head.global_transform.affine_inverse() * p
-			has_d = true
-		if has_d and d.is_finite():
-			track = clampf(atan2(d.x, d.z), -0.55, 0.55) * 0.9
-		_twitch_in -= delta * (1.0 + 0.6 * _mood)
-		if _twitch_in <= 0.0:
-			_twitch = 0.5
-			_twitch_in = 6.0 + randf() * 9.0
-		_twitch = maxf(0.0, _twitch - delta)
-		var snap := 0.0
-		if _twitch > 0.35:
-			snap = 0.22 * (1.0 if randi() % 2 == 0 else -1.0)
-		var target_y := track + 0.05 * sin(_t * 0.23) + snap
-		_head.rotation.y = lerpf(_head.rotation.y,
-			target_y, minf(delta * 5.0, 1.0))
-		_head.rotation.z = lerpf(_head.rotation.z,
-			0.05 * sin(_t * 0.31), minf(delta * 3.0, 1.0))
-	# blinking — rarer when he's locked in (higher blinds → longer stares)
+			var d: Vector3 = _head.global_transform.affine_inverse() * _gaze
+			if d.is_finite():
+				target_y = clampf(atan2(d.x, d.z), -0.5, 0.5)
+				speed = 2.4
+		_head.rotation.y = lerpf(_head.rotation.y, target_y,
+			minf(delta * speed, 1.0))
+		# mood still reads: at high blinds his stare hardens a touch
+		_head.rotation.x = lerpf(_head.rotation.x,
+			0.02 * _mood, minf(delta * 1.2, 1.0))
+	# blinking lives in the hood light now — a brief dip of the face
+	# glow, like a flicker crossing his eyes (no eye meshes to scale)
 	_blink_in -= delta
 	if _blink_in <= 0.0:
-		_blink = 0.22
-		_blink_in = (2.5 + randf() * 5.0) * (1.0 + 0.5 * _mood)
+		_blink = 0.16
+		_blink_in = (3.5 + randf() * 6.0) * (1.0 + 0.5 * _mood)
 	_blink = maxf(0.0, _blink - delta)
-	var lid := 1.0
+	var lid_dim := 1.0
 	if _blink > 0.0:
-		lid = 0.08
-	for e in _eyes:
-		# clamp the lerp weight — a delta hitch otherwise overshoots scale
-		# negative, then blows up to inf/NaN inside a few frames
-		e.scale.y = lerpf(e.scale.y, lid, minf(delta * 40.0, 1.0))
-	var lid_dim := _eyes[0].scale.y if not _eyes.is_empty() else 1.0
-	# eye flicker + flare (orbs glow, halos breathe)
+		lid_dim = 0.55
+	# face-light flare — events surge the hood glow, then it settles
 	_flare = maxf(0.0, _flare - delta * 1.6)
-	var glow := (4.2 + _flare * 9.0 + 0.9 * sin(_t * 9.3) + 0.5 * sin(_t * 17.7)) * lid_dim
-	_eye_mat.emission_energy_multiplier = glow
-	var hs := 0.085 * (0.7 + 0.22 * sin(_t * 2.9) + _flare * 1.6)
-	for h in _halos:
-		var q: QuadMesh = h.mesh
-		q.size = Vector2(hs, hs)
+	var flick := 1.0 + 0.05 * sin(_t * 9.3) + 0.03 * sin(_t * 17.7)
+	if _face_light:
+		_face_light.light_energy = (_face_base + _flare * 1.6) * flick * lid_dim
+	if _hood_light:
+		_hood_light.light_energy = (_hood_base + _flare * 1.2) * lid_dim
 	# occasional finger drum — faster when the stakes climb
 	_drum_in -= delta * (1.0 + 0.5 * _mood)
 	if _drum_in <= 0.0:
