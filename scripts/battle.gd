@@ -962,6 +962,22 @@ func _spawn_event_cards() -> void:
 		card.set_base(pos, Vector3.ZERO)
 	if _devil != null:
 		_devil.watch(Vector3(0, _top + 0.05, 0.03), 1.4)
+	# §18 Azrail event: at the doors he speaks to the strongest thing
+	# he has learned about you — once per axis per run, run-wide memory
+	var top_axis := ""
+	var top_val := TAUNT_AT
+	for axis in _psyche:
+		if _psyche[axis] > top_val and not _taunted.has("door_" + axis):
+			top_axis = axis
+			top_val = _psyche[axis]
+	if top_axis != "":
+		_taunted["door_" + top_axis] = true
+		_run["taunted"] = _taunted.keys()
+		await get_tree().create_timer(1.0).timeout
+		if _phase == Phase.EVENT:   # a fast pick already resolved it
+			_hint(tr("DOOR_" + top_axis.to_upper()))
+			if _devil != null:
+				_devil.eyes_flare(0.7)
 
 func _resolve_event(card) -> void:
 	_phase = Phase.BUSY
