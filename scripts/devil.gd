@@ -12,8 +12,8 @@ var _model: Node3D
 var _head: Node3D           # gaze anchor at skull height (no eye meshes)
 var _face_light: SpotLight3D
 var _hood_light: OmniLight3D
-var _face_base := 1.5
-var _hood_base := 1.1
+var _face_base := 2.3
+var _hood_base := 1.6
 var _rest_head := Vector3.ZERO
 var _rest_lean := 0.0
 var _hand_r: Node3D
@@ -112,7 +112,7 @@ func build(top: float, seat_z := -1.10) -> void:
 	# out of the cowl dark (a red light on a dark face reads as void)
 	face.light_color = Color(1.0, 0.58, 0.3)
 	face.light_energy = _face_base
-	face.spot_angle = 30.0
+	face.spot_angle = 34.0
 	face.spot_attenuation = 1.4
 	_face_light = face
 	# tiny warm orb inside the hood — the pale face glows out of the dark
