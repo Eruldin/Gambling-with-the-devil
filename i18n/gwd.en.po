@@ -591,3 +591,21 @@ msgstr "Mimic — on reveal, wears the opposing card's stats and seals"
 
 msgid "HINT_OWED_PIG"
 msgstr "The pig feeds the ledger — debt +3."
+
+msgid "SIGIL_PROTECTION"
+msgstr "Protection — enemy tricks cannot touch it"
+
+msgid "CARD_BLUFFER"
+msgstr "The Bluffer"
+
+msgid "CARD_BLUFFER_DESC"
+msgstr "Nothing on the felt — but if an enemy read sees it, it bursts and the reader pays 2 chips"
+
+msgid "CARD_HOT_IRON_T"
+msgstr "Hot Iron"
+
+msgid "HINT_IRON_WARDED"
+msgstr "The iron finds nothing it can sear — his trick returns unspent."
+
+msgid "HINT_BLUFFER_CAUGHT"
+msgstr "Caught looking — the Bluffer bursts and he pays 2 chips for the read."

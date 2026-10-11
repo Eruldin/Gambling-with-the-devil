@@ -1805,6 +1805,24 @@ func _resolve_his_trick(d: CardDef) -> void:
 			else:
 				_edeck.insert(randi() % (_edeck.size() + 1), d)
 				return
+		"hot_iron_t":
+			# doc §2.3: the iron sears one of your concealed cards off
+			# the felt — Koruma wards it; if every hidden card is warded
+			# the trick goes back up his sleeve unspent
+			var prey := []
+			for c in _all_p():
+				if c.face_down and c.def != null \
+					and not "protection" in c.def.sigils:
+					prey.append(c)
+			if prey.is_empty():
+				_edeck.insert(randi() % (_edeck.size() + 1), d)
+				_hint(tr("HINT_IRON_WARDED"))
+				return
+			var victim = prey[randi() % prey.size()]
+			_prow(victim.row).erase(victim.lane)
+			_area_to_card.erase(victim.get_area())
+			_dead_p.append(victim.def)
+			victim.burn()
 	_hint(tr("TRICK_HIS") % tr(d.name_key))
 	_sfx.play(Sfx.CONFIRM, -10.0, 0.8)
 
@@ -1916,8 +1934,18 @@ func _on_reveal_his(card, opposing) -> void:
 				yours.append(c)
 		if not yours.is_empty():
 			var seen = yours[randi() % yours.size()]
-			seen.peeked = true
-			_hint(tr("HINT_EYECORNER_HIS"))
+			if seen.def.id == "bluffer":
+				# doc §6 Blöfcü: the moment it's *seen* it bursts and the
+				# reader pays — his own Eyecorner springs the trap
+				_prow(seen.row).erase(seen.lane)
+				_area_to_card.erase(seen.get_area())
+				_chips_devil -= 2
+				_bump("anger", 0.5)
+				seen.burn()
+				_hint(tr("HINT_BLUFFER_CAUGHT"))
+			else:
+				seen.peeked = true
+				_hint(tr("HINT_EYECORNER_HIS"))
 
 func _spawn_grub(lane: int, mine: bool, row := 0) -> void:
 	var d: CardDef = CardDef.make("grub", "chalices", 0, 0, 1, 0,
