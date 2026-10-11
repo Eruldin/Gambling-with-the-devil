@@ -178,7 +178,7 @@ msgid "TRICK_TITHE"
 msgstr "The grave gives back %s."
 
 msgid "TRICK_RAZOR"
-msgstr "Sharp edge — %s gains +2 attack."
+msgstr "Sharp edge — %s strikes first in its lane."
 
 msgid "CARD_USURER_T"
 msgstr "Pale Usurer"

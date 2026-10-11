@@ -786,7 +786,13 @@ func _run_resolution() -> void:
 	for lane in range(LANES):
 		var p = _board_p.get(lane)
 		var e = _board_e.get(lane)
-		if p != null and not p.face_down and p.def.attack > 0 			and p.hp > 0:
+		# §3.3: clashes are simultaneous — a defender answers even in
+		# death, unless the attacker's Sharp seal slew it first
+		var e_answer: bool = e != null and not e.face_down \
+			and e.def != null and e.hp > 0 and e.def.attack > 0
+		var sharp_kill := false
+		if p != null and not p.face_down and p.def.attack > 0 \
+			and p.hp > 0:
 			p.lunge(_pads["e" + str(lane)].position)
 			if e != null and not e.face_down:
 				var atk: float = float(p.def.attack) + (3.0 					if "executioner" in p.def.sigils 					and e.hp < float(e.def.health) else 0.0)
@@ -802,6 +808,7 @@ func _run_resolution() -> void:
 					e.venom = mini(e.venom + 1, 3)
 				if e.hp <= 0:
 					_bump("respect", 0.4)   # a clean kill earns a nod
+					sharp_kill = "sharp" in p.def.sigils
 				e.flash()
 				_burst(e.position + Vector3(0, 0.03, 0),
 					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
@@ -823,8 +830,8 @@ func _run_resolution() -> void:
 					_devil.eyes_flare(0.7)
 					_devil.strike_pose(_pads["e" + str(lane)].position.x, true)
 			await get_tree().create_timer(0.42).timeout
-		if e != null and not e.face_down and e.def != null and e.hp > 0 \
-			and e.def.attack > 0:
+		if e != null and not e.face_down and e.def != null and e_answer \
+			and not sharp_kill:
 			e.lunge(_pads["p" + str(lane)].position)
 			if p != null and not p.face_down:
 				var eatk: float = float(e.def.attack) + (3.0 					if "executioner" in e.def.sigils 					and p.hp < float(p.def.health) else 0.0)
@@ -1152,7 +1159,7 @@ func _resolve_event(card) -> void:
 				var tgt: String = str(_run["spoils"][_run["spoils"].size() - 1])
 				var tgt_def: CardDef = CardDef.spoil(tgt)
 				var graft_pool: Array = ["venom", "haunt", "mimic",
-					"pierce", "revival", "executioner"]
+					"pierce", "revival", "executioner", "sharp"]
 				if tgt_def != null:
 					for s in tgt_def.sigils:
 						graft_pool.erase(s)
@@ -1576,7 +1583,10 @@ func _resolve_razor(target) -> void:
 	var card = _trick_armed
 	_trick_armed = null
 	card.set_selected(false)
-	target.def.attack += 2
+	# §3.3 the Straight Razor grafts the Sharp seal — strikes first
+	# in its lane's clash for the rest of this battle
+	if not target.def.sigils.has("sharp"):
+		target.def.sigils.append("sharp")
 	target.flash()
 	_burst(target.position + Vector3(0, 0.03, 0),
 		Color(0.75, 0.75, 0.8), 18, 0.01, 0.4)
