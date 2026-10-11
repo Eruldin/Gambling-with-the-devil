@@ -564,3 +564,30 @@ msgstr "You glimpse what lies hidden"
 
 msgid "HINT_EYECORNER_HIS"
 msgstr "He glimpses one of your cards — a learned read."
+
+msgid "CARD_OWED_PIG"
+msgstr "Owed Pig"
+
+msgid "CARD_OWED_PIG_DESC"
+msgstr "A 4/4 wall — but it feeds your debt +3 the moment it lands"
+
+msgid "CARD_CHOIR_LEECH"
+msgstr "Choir Leech"
+
+msgid "CARD_CHOIR_LEECH_DESC"
+msgstr "Sips one chip back to your pile every time it clashes"
+
+msgid "CARD_EYES_SERVANT"
+msgstr "Eyes' Servant"
+
+msgid "CARD_EYES_SERVANT_DESC"
+msgstr "Eyecorner — on reveal, glimpse an enemy concealed card"
+
+msgid "CARD_MIRROR_HOUND"
+msgstr "Mirror Hound"
+
+msgid "CARD_MIRROR_HOUND_DESC"
+msgstr "Mimic — on reveal, wears the opposing card's stats and seals"
+
+msgid "HINT_OWED_PIG"
+msgstr "The pig feeds the ledger — debt +3."

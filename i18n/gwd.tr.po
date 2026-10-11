@@ -564,3 +564,30 @@ msgstr "Gizli olanı gördün"
 
 msgid "HINT_EYECORNER_HIS"
 msgstr "Kartlarından birini gördü — bir şey öğrendi."
+
+msgid "CARD_OWED_PIG"
+msgstr "Ahdili Domuz"
+
+msgid "CARD_OWED_PIG_DESC"
+msgstr "4/4'lük bir duvar — ama masaya indiği an borcun +3 büyür"
+
+msgid "CARD_CHOIR_LEECH"
+msgstr "Koro Sülüğü"
+
+msgid "CARD_CHOIR_LEECH_DESC"
+msgstr "Çatıştığı her seferde kasana 1 çip geri yalar"
+
+msgid "CARD_EYES_SERVANT"
+msgstr "Gözlerin Uşağı"
+
+msgid "CARD_EYES_SERVANT_DESC"
+msgstr "Gözucu — açılışta bir düşman kapalı kartını görürsün"
+
+msgid "CARD_MIRROR_HOUND"
+msgstr "Ayna Tazısı"
+
+msgid "CARD_MIRROR_HOUND_DESC"
+msgstr "Taklit — açılışta karşı kartın statlarını ve mühürlerini giyer"
+
+msgid "HINT_OWED_PIG"
+msgstr "Domuz defteri besliyor — borç +3."
