@@ -607,6 +607,103 @@ Permanent progression widens possibility space; it never raises numbers directly
 - **Bilingual from day one:** all card text, UI, house rules, events, tooltips in **TR + EN** via Godot translation (.po/.csv) — design text keys now, not later.
 - **Data-driven cards:** card = data (anatomy fields) + seal scripts; the full card pool is content-addressable and moddable.
 
+
+---
+
+# 18. EVENT & SCENARIO FRAMEWORK — "THE DEVIL WRITES THE ROOM"
+
+> **Production doctrine.** This game's strength is not how many stories exist — it is that *the same event produces different outcomes and the Devil makes it personal*. We do not write hundreds of scenarios. We build a small mechanical language and let combinations do the work (the Inscryption lesson: few authored pieces, endless discovered combos).
+> **1 scenario card = a parameterized event engine, not 1 piece of content.**
+
+## 18.1 The Event Template
+
+Every scenario is a **template**: a skeleton plus parameter pools. Runtime fills the slots, so one authored template surfaces to the player as many different events.
+
+| Slot | Pool | Examples |
+|---|---|---|
+| **Danger type** | 5 | Physical · Mental · Spiritual · Social · Temporal |
+| **Threat** | ~20 | Fall · Poison · Curse · Betrayal · Memory loss |
+| **Cost** | ~20 | Chip loss · Card loss · Sin gain · Next-turn penalty |
+| **Escape path** | ~20 | Power card · Sacrifice · Bluff · Risk it · Special combo |
+| **Outcome/Twist** | ~20 | Clean escape · Pyrrhic escape · Devil's mercy · Double-or-nothing |
+
+One skeleton — "Broken Bridge" — becomes: *Misty Bridge* (mental: bluff the gap), *Hell Bridge* (spiritual: pay sin), *Soul Bridge* (cost: a card), *Time Bridge* (temporal: beat the blind). The player perceives four different events; we authored one.
+
+**Production math:** 50 templates × ~20 variations per slot = 1000+ events that *feel* distinct — from 50 pieces of writing.
+
+The eight root archetypes (the "verbs" every template descends from): **Trap · Bargain · Curse · Test · Sacrifice · Betrayal · Gamble · Deadline**.
+
+## 18.2 Devil Psychology — the content generator
+
+The Devil's behavior is a separate system, not scripted lines. Five personality axes, mutated by how you play:
+
+| Axis | Rises when… | Devil's tell |
+|---|---|---|
+| **Cruelty** | you hesitate, fold, show fear | *"I knew you wouldn't."* — presses advantages, names your cowardice |
+| **Curiosity** | you play unusual lines | *"Interesting…"* — probes you with odd house rules |
+| **Anger** | you cheat, use Trumps, break flavor | steals a card, changes a rule mid-battle, antes illegally |
+| **Respect** | you play well / risk cleanly | *"Hm."* — plays harder but fair; offers better bargains |
+| **Boredom** | you stall, turtle, repeat | shuffles the pot, spikes the blinds early, taunts |
+
+**Implementation:** ~20 base behaviors (steal card, re-ante, mock a fold, reward a bluff, fake mercy…) × the five-axis state × the current template = thousands of personalized moments. We author ~50 personality rules + ~30 bespoke Devil events; the variation engine (and, on platforms that allow it, an LLM voice layer) supplies the rest. No 1000-line dialogue tree.
+
+## 18.3 The Seven Sins — staged bosses, not chapters
+
+Each Sin is a 3-act arc, not 50 unique events:
+
+| Act | Contents | Job |
+|---|---|---|
+| **Intro** | 5 events | Teaches the Sin's mechanic |
+| **Depth** | 5 events | Pushes it hard, forces adaptation |
+| **Finale** | 1 bespoke boss event | The Sin incarnate — authored, unique |
+
+7 sins × 11 = **77 authored contents** covering the entire boss spine.
+
+## 18.4 Card–scenario coupling — the real variety engine
+
+Events **read the deck, hand and field**. Generic penalties become personal:
+
+- Event "Loneliness": normally blocks card draw — but if you hold **Loyal Spirit**, the event *breaks*: the spirit keeps you company, the Devil frowns. The player feels: *"This is why I kept that card."*
+- A **Threat** slot resolves differently vs. Blades (pay with blood), Pentacles (pay with embers), Eyes (see it coming — reduce cost), Chalices (convert to sacrifice fuel).
+- Rules: every template declares **breaker cards** (cards that hard-counter its outcome) and **lever cards** (cards that discount its cost). This is what produces "Azrail mocked me / I escaped at the last second" memories — not scenario count.
+
+## 18.5 Production budget (full release)
+
+| Layer | Authored | Effective variety |
+|---|---|---|
+| Event templates | 50 | 1000+ via parameter pools |
+| Unique special events | 70 | — |
+| Boss events (sin finales + devil set-pieces) | 20 | — |
+| Devil bespoke events | 30 | × personality axes |
+| **Total event content** | **~170** | **thousands** |
+| Cards | 120 main + 30 special + 20 cursed + 20 joker = **190** | via seals/grafts |
+| Devil AI | 50 personality rules | 1000+ variations |
+
+## 18.6 The architecture
+
+```
+                 THE DEVIL (AI)
+                       |
+        --------------------------------
+        |                              |
+   Event Generator             Psychology System
+   (templates × pools)         (5 axes, 50 rules)
+        |                              |
+  Scenario Template            taunts, moods,
+        |                      rule-bends
+   Threat·Reward·Cost·Twist
+        |
+      reads Cards (breaker/lever)
+        |
+     Outcome → remembered moment
+```
+
+**The litmus test:** a player should never say *"I saw 350 events."* They should say *"the Devil laughed at me — and then I got out by one chip."*
+
+---
+
+*Event nodes on the Descent map (§7.1 — Covenant, Whisper, Wheel) are all served by this engine: a Covenant is a Bargain archetype with Cost = Debt; a Whisper is a Test archetype unlocked by Luck.*
+
 ---
 
 *End of design document.*
