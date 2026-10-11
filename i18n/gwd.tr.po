@@ -528,3 +528,24 @@ msgstr "Mezar Kazıcı"
 
 msgid "CARD_GRAVEDIGGER_DESC"
 msgstr "1/2 · şeridindeki her dost ceset onu biler: +1 saldırı"
+
+msgid "SIGIL_WAXHIDE"
+msgstr "Mum Derisi — her tur ilk yarayı yok sayar"
+
+msgid "SIGIL_SHELL"
+msgstr "Kabuk — kurbanı +1 fazla kan verir"
+
+msgid "SIGIL_VEIL"
+msgstr "Peçe — blöf çağrısı yapılamaz"
+
+msgid "SIGIL_ANCHOR"
+msgstr "Çapa — taşınamaz, değiştirilemez"
+
+msgid "SIGIL_POT_CUT"
+msgstr "Pot Payı — açılışta, pottaki her 5 için +1 çip"
+
+msgid "HINT_VEIL"
+msgstr "O kart peçeli — blöf çağrısı yapılamaz."
+
+msgid "HINT_ANCHOR"
+msgstr "Çapalı — bu kart yerinden oynayamaz."

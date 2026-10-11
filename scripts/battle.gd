@@ -443,6 +443,8 @@ func _start_round() -> void:
 	for side in [_board_p, _board_pb, _board_e, _board_eb]:
 		for lane in range(LANES):
 			var c = side.get(lane)
+			if c != null:
+				c.wax_used = false    # waxhide reforms each round
 			if c != null and c.venom > 0 and not c.face_down:
 				c.hp -= c.venom
 				c.flash()
@@ -561,7 +563,12 @@ func click(collider) -> void:
 	if _call_armed:
 		if card != null and card.placed and card.face_down \
 			and _all_e().has(card):
-			_call_bluff(card)
+			if card.def != null and "veil" in card.def.sigils:
+				# §3.3 Veil: a veiled card can't be Called
+				_hint(tr("HINT_VEIL"))
+				_sfx.play(Sfx.DENIED, -10.0)
+			else:
+				_call_bluff(card)
 		else:
 			_hint(tr("HINT_CALL"))
 		return
@@ -595,6 +602,10 @@ func click(collider) -> void:
 			_hint(tr("HINT_REPOS_DOWN"))
 		elif card.moved_once:
 			_hint(tr("HINT_NOREPOS"))
+		elif "anchor" in card.def.sigils:
+			# §3.3 Anchor: rooted — no reposition, no swap
+			_hint(tr("HINT_ANCHOR"))
+			_sfx.play(Sfx.DENIED, -10.0)
 		else:
 			_repos_arm(card)
 		return
@@ -663,7 +674,8 @@ func _sacrifice_card(card) -> void:
 	_area_to_card.erase(card.get_area())
 	if card == _selected:
 		_select(null)
-	_blood += card.def.sacrifice_value
+	_blood += card.def.sacrifice_value \
+		+ (1 if "shell" in card.def.sigils else 0)  # §3.3 Shell: thicker offering
 	_bump("respect", 0.3)         # bold commitment — he notices
 	if _devil != null:
 		_devil.feed(card.position)   # he feeds on the offering
@@ -674,7 +686,8 @@ func _sacrifice_card(card) -> void:
 		card.burn()
 	_reflow_hand()
 	_update_chips()
-	_hint("%s +%d %s" % [tr("SACRIFICED"), card.def.sacrifice_value, tr("BLOOD")])
+	_hint("%s +%d %s" % [tr("SACRIFICED"), card.def.sacrifice_value \
+		+ (1 if "shell" in card.def.sigils else 0), tr("BLOOD")])
 	_burst(card.position + Vector3(0, 0.02, 0), Color(0.45, 0.02, 0.02),
 		26, 0.012, 0.55)
 	_sfx.play(Sfx.SHOVE, -6.0)
@@ -841,6 +854,7 @@ func _run_resolution() -> void:
 		for e in [_board_e.get(lane), _board_eb.get(lane)]:
 			if e != null and e.face_down:
 				e.reveal_enemy()
+				_on_reveal_his(e, _board_p.get(lane))
 				if _devil != null:
 					_devil.watch(e.position, 1.4)
 				_burst(e.position + Vector3(0, 0.03, 0),
@@ -872,6 +886,11 @@ func _run_resolution() -> void:
 				var atk: float = float(p.def.attack) + (3.0 \
 					if "executioner" in p.def.sigils \
 						and e2.hp < float(e2.def.health) else 0.0)
+				# §3.3 Waxhide: shrugs off the first wound each round
+				if "waxhide" in e2.def.sigils and not e2.wax_used \
+					and atk > 0:
+					e2.wax_used = true
+					atk = 0.0
 				var hp_before: float = e2.hp
 				e2.hp -= atk
 				if "pierce" in p.def.sigils and e2.hp <= 0:
@@ -921,6 +940,10 @@ func _run_resolution() -> void:
 				var eatk: float = float(e.def.attack) + (3.0 \
 					if "executioner" in e.def.sigils \
 						and ptgt.hp < float(ptgt.def.health) else 0.0)
+				if "waxhide" in ptgt.def.sigils and not ptgt.wax_used \
+					and eatk > 0:
+					ptgt.wax_used = true
+					eatk = 0.0
 				var php_before: float = ptgt.hp
 				ptgt.hp -= eatk
 				if "pierce" in e.def.sigils and ptgt.hp <= 0:
@@ -1260,7 +1283,8 @@ func _resolve_event(card) -> void:
 				var tgt: String = str(_run["spoils"][_run["spoils"].size() - 1])
 				var tgt_def: CardDef = CardDef.spoil(tgt)
 				var graft_pool: Array = ["venom", "haunt", "mimic",
-					"pierce", "revival", "executioner", "sharp", "reach"]
+					"pierce", "revival", "executioner", "sharp", "reach",
+				"waxhide", "shell", "veil", "anchor", "pot_cut"]
 				if tgt_def != null:
 					for s in tgt_def.sigils:
 						graft_pool.erase(s)
@@ -1752,11 +1776,20 @@ func _on_reveal(card, opposing) -> void:
 		_chips_you += 2
 		_debt += 1
 		_pulse(_l_chips)
+	if "pot_cut" in sig:
+		# §3.3 Pot Cut: on reveal, skim a chip per five in the pot
+		var cut: int = int(_pot / 5)
+		if cut > 0:
+			_chips_you += cut
+			_pulse(_l_chips)
+			_burst(card.position + Vector3(0, 0.03, 0),
+				Color(0.9, 0.7, 0.2), 12, 0.01, 0.4)
 	if "mimic" in sig and opposing != null and opposing.def != null:
 		for sg in opposing.def.sigils:
 			if not sig.has(sg):
 				sig.append(sg)
-	if "swap" in sig:
+	# §3.3 Anchor: an anchored card can't be moved — Swap can't lift it
+	if "swap" in sig and not "anchor" in sig:
 		var empty: Array = []
 		for l in range(LANES):
 			for r in 2:
@@ -1766,6 +1799,24 @@ func _on_reveal(card, opposing) -> void:
 			_repos_armed = card
 			var pick = empty[randi() % empty.size()]
 			_do_repos(int(pick[0]), int(pick[1]))
+
+## his side's on-reveal seals — the table is symmetric (§3.3):
+## loan shark pays him into debt owed to *you*, pot cut skims his way,
+## mimic mirrors your lane's front card.
+func _on_reveal_his(card, opposing) -> void:
+	var sig: Array = card.def.sigils
+	if "loan_shark" in sig:
+		_chips_devil += 2
+		_debt += 1
+	if "pot_cut" in sig:
+		var cut: int = int(_pot / 5)
+		if cut > 0:
+			_chips_devil += cut
+			_pulse(_l_chips)
+	if "mimic" in sig and opposing != null and opposing.def != null:
+		for sg in opposing.def.sigils:
+			if not sig.has(sg):
+				sig.append(sg)
 
 func _spawn_grub(lane: int, mine: bool, row := 0) -> void:
 	var d: CardDef = CardDef.make("grub", "chalices", 0, 0, 1, 0,

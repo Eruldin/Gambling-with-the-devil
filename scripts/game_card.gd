@@ -31,6 +31,7 @@ var _idle_phase := 0.0
 var _dead := false
 var moved_once := false       # §2.3 reposition: one lane move per battle
 var venom := 0                # seal: takes +1 per stack at round start
+var wax_used := false         # §3.3 Waxhide: this round's first wound spent
 var revived := false          # revival seal fires once per battle
 
 func setup(front_tex: Texture2D, back_tex: Texture2D) -> void:
