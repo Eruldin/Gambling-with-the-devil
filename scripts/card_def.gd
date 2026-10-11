@@ -116,3 +116,15 @@ static func spoil(sid: String) -> RefCounted:
 			return make("votary", "chalices", 1, 0, 5, 2,
 				g + "face_votary.png", ["brood", "venom"])
 	return null
+
+## §18.4 scenario breakers — a spoil soul whose presence in your deck
+## snaps a door's harm once per run. The Duelist duels the Whisper,
+## the Warden wards the Wheel, the Reaper collects the Ledger,
+## the Seer sees through the Mirror. "I kept this card for this."
+static func breaker_of(event_id: String) -> String:
+	match event_id:
+		"event_whisper": return "grave_duelist"
+		"event_wheel": return "hell_warden"
+		"event_ledger": return "debt_reaper"
+		"event_mirror": return "choir_seer"
+	return ""

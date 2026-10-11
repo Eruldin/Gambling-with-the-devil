@@ -333,3 +333,6 @@ msgstr "— the sin is beaten"
 
 msgid "SIN_GATE"
 msgstr "SIN"
+
+msgid "EV_BROKEN"
+msgstr "The card you kept snaps the bargain —"
