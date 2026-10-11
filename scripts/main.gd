@@ -119,6 +119,15 @@ func _environment() -> void:
 	env.fog_height = 0.4
 	env.fog_height_density = 0.12
 	env.fog_sky_affect = 0.0
+	# the room remembers your depth — every table lower, the candles
+	# matter more, the air thickens, and the light leans toward hell
+	var depth: float = float(Battle._run.get("depth", 0))
+	var hell := clampf(depth / 8.0, 0.0, 1.0)
+	env.ambient_light_energy = maxf(env.ambient_light_energy - depth * 0.018, 0.08)
+	env.ambient_light_color += Color(hell * 0.02, -hell * 0.014, -hell * 0.016)
+	env.adjustment_brightness = maxf(env.adjustment_brightness - depth * 0.03, 0.62)
+	env.fog_density = minf(env.fog_density + depth * 0.045, 0.6)
+	env.fog_light_color += Color(hell * 0.05, -hell * 0.015, -hell * 0.014)
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
