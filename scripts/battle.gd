@@ -88,7 +88,11 @@ var _event_cards: Array = []
 # debt follows you, luck keeps its tilt, carried souls ride in extra.
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
-	"psyche": {}, "taunted": [], "spoils": []}
+	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
+	"sin_idx": 0}
+var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
+var _sin_offered := false # a sin door was dealt at the last event
+var _sin_name := ""       # which of the seven is on the throne
 
 # ---------------------------------------------------------------- setup
 
@@ -142,6 +146,14 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# his soul pile fattens a few chips per door passed — deeper tables,
 	# deeper pockets (§18 stakes)
 	_chips_devil += mini(_run["depth"] * 3, 15)
+	# §18 sin-boss: every third door the table sits a sin on the throne —
+	# his pile fattens again and his line sharpens one step deeper
+	_sin_table = _run["sin_next"]
+	_run["sin_next"] = false
+	if _sin_table:
+		_chips_devil += 5
+		for d in _edeck:
+			d.attack += 1
 	_wager_offered = _run["wager_used"]
 	# embers spent at the last door burn his counterfeits out of the deck
 	for i in range(_run["cleanse"]):
@@ -289,6 +301,8 @@ func _mk_label(offset: Vector2, size: int, col: Color) -> Label:
 func _start_round() -> void:
 	var ante := _blind_for(_round)
 	ante += _run["depth"]          # the Descent taxes every hand deeper
+	if _sin_table:
+		ante += 2                  # a sin at the table raises the tithe
 	for e in _effigies:
 		if e["id"] == "debtor_bell":
 			ante += 1              # the bell tolls — both antes rise
@@ -849,14 +863,20 @@ func _finish_over(won: bool) -> void:
 		_phase = Phase.EVENT
 		_run["won"] += 1
 		_run["embers"] += _pot   # §2.4: the pot converts to embers
+		if _sin_table:
+			# beating a sin pays its own tithe on top of the pot
+			_run["embers"] += 10
+			_l_over.text = tr("YOU_WIN") + " " + tr("SIN_BEATEN") + "\n" \
+				+ str(_pot + 10) + " " + tr("EMBERS_WON")
+		else:
+			_l_over.text = tr("YOU_WIN") + "\n" + str(_pot) + " " \
+				+ tr("EMBERS_WON")
 		_run["debt"] = _debt
 		_run["luck"] = _luck
 		_run["psyche"] = _psyche.duplicate()
 		_run["taunted"] = _taunted.keys()
 		var spoil_ids: Array = CardDef.spoil_ids()
 		_run["spoils"].append(spoil_ids[randi() % spoil_ids.size()])
-		_l_over.text = tr("YOU_WIN") + "\n" + str(_pot) + " " \
-			+ tr("EMBERS_WON")
 		_l_phase.text = tr("GAME_OVER")
 		_sfx.play(Sfx.WIN, -4.0)
 		_hint(tr("HINT_EVENT") + (" " + tr("HINT_EMBER")
@@ -894,15 +914,21 @@ func _spawn_event_cards() -> void:
 		"event_whisper": "face_seer.png", "event_wheel": "face_imp.png",
 		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
 		"event_mirror": "face_acolyte.png"}
+	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
 		pool.append("event_ledger")
 	if _run["depth"] >= 3:
 		pool.append("event_mirror")
 	pool.shuffle()
+	# every third descent the sin door is dealt — you may walk around
+	# it, but Azrail marks the cowardice (§18: bosses at depths 3,6,9)
+	_sin_offered = ((_run["depth"] + 1) % 3) == 0
 	var defs: Array = []
 	for i in range(3):
 		var id: String = pool[i]
+		if _sin_offered and i == 0:
+			id = "event_sin"
 		defs.append(CardDef.make(id, "eyes", 0, 0, 1, 0,
 			"res://assets_external/card-art/gwd/" + faces[id]))
 	for i in range(3):
@@ -931,6 +957,9 @@ func _resolve_event(card) -> void:
 		if c != card:
 			c.burn()
 	card.flash(Color(0.9, 0.7, 0.2))
+	# walking around a dealt sin door reads as cowardice — he notes it
+	if _sin_offered and card.def.id != "event_sin":
+		_psyche["cruelty"] = minf(_psyche["cruelty"] + 0.2, 3.0)
 	var gamble: bool = ["event_whisper", "event_wheel"].has(card.def.id)
 	var won_roll := true
 	if gamble:
@@ -960,6 +989,13 @@ func _resolve_event(card) -> void:
 			# cursed becomes blessed (§4.7 tilts invert)
 			_run["luck"] = -_run["luck"]
 			_hint(tr("EV_MIRROR"))
+		"event_sin":
+			# the sin door: the next table seats one of the seven
+			_run["sin_next"] = true
+			var sins: Array = tr("SIN_NAMES").split(",")
+			_run["sin_idx"] = (_run["won"] / 3) % sins.size()
+			_sin_name = sins[int(_run["sin_idx"])].strip_edges()
+			_hint(tr("EV_SIN") + " " + _sin_name)
 		_:
 			_run["purse"] += 5
 			_run["luck"] = minf(_run["luck"] + 0.2, 3.0)
