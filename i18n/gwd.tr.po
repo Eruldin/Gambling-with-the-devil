@@ -477,3 +477,18 @@ msgstr "Tövbekâr"
 
 msgid "CARD_PENITENT_DESC"
 msgstr "0/4 · yediği her darbe pote bir çip düşürür"
+
+msgid "AZRAIL_CRUELTY_2"
+msgstr "Azrail zevkle izliyor. \"Güzel kanıyorsun — bir daha.\""
+
+msgid "AZRAIL_CURIOSITY_2"
+msgstr "Azrail seni süzüyor. \"Her hamlen çoktan okuduğum bir sayfa.\""
+
+msgid "AZRAIL_ANGER_2"
+msgstr "Azrail koltuğundan doğruluyor. \"Masa artık sana karşı.\""
+
+msgid "AZRAIL_RESPECT_2"
+msgstr "Azrail kendine bir ölçü dolduruyor. \"Seni kaybetmek zoruma gidecek. Neredeyse.\""
+
+msgid "AZRAIL_BOREDOM_2"
+msgstr "Azrail tavandaki çatlakları sesli sayıyor. \"Eğlendir beni, borçlu.\""
