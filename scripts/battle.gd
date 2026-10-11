@@ -16,6 +16,9 @@ const HAND_MAX := 6
 const RAISE_MAX := 5           # §2.3: stake 1–5 extra chips once per turn
 const TAUNT_AT := 2.5          # psyche axis level that makes Azrail speak
 const EMBER_CLEANSE := 15      # embers to burn one of his counterfeits
+# §7.1 Ev Kuralları — house rules hung over each table
+const HOUSE_RULES := ["candle_watch", "open_table", "passage_toll",
+	"sabbath", "high_stakes", "blood_price"]
 
 enum Phase { PLACE, BUSY, OVER, EVENT }
 
@@ -102,6 +105,7 @@ var _cruel_seats := false  # carried cruelty seats an extra ambush
 var _bored_ante := false   # carried boredom hurries the blinds
 var _pact := false         # the Pact: debt bought louder tells
 var _toll := false         # the Tollgate: paid up front, taxes waived
+var _rule := ""            # §7.1 the house rule hanging over this table
 var _sin_name := ""       # which of the seven is on the throne
 var _sin_idx := -1        # its seat in SIN_NAMES (-1 = no sin table)
 var _sin_ante := 0        # Greed's extra tithe per hand
@@ -252,6 +256,15 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# depth-tax on every hand of this table
 	_toll = bool(_run["toll"])
 	_run["toll"] = false
+	# §7.1 Ev Kuralları — a house rule hangs over every table and
+	# bends its rules for the whole fight; the Descent picks the
+	# poison (rotates by depth and tables won)
+	_rule = HOUSE_RULES[(_run["depth"] * 2 + _run["won"]) % HOUSE_RULES.size()]
+	if _rule == "blood_price":
+		# wounds carry between tables — the deck enters battered
+		for d in _deck:
+			if d.kind == "pawn":
+				d.health = maxi(1, int(d.health * 0.75))
 	# §18 ambush: from the third door down he's already seated pawns
 	# face-down — deeper tables start rigged against you
 	var ambush := mini(maxi(_run["depth"] - 2, 0)
@@ -407,9 +420,12 @@ func _start_round() -> void:
 	if _bored_ante:
 		ante += 1                  # boredom hurries the blinds (§18.2)
 	ante += _sin_ante            # Greed's tithe (§18.3)
-	for e in _effigies:
-		if e["id"] == "debtor_bell":
-			ante += 1              # the bell tolls — both antes rise
+	if _rule != "sabbath":
+		for e in _effigies:
+			if e["id"] == "debtor_bell":
+				ante += 1              # the bell tolls — both antes rise
+	if _rule == "high_stakes":
+		ante *= 2              # Yüksek Bahis — the blinds double
 	# High Priestess of Chance: each round she flips — heads +3, tails −1
 	# she flips from either rank — sheltered behind a wall she keeps
 	# turning the coin (§2.2 back rank is where she belongs)
@@ -436,9 +452,10 @@ func _start_round() -> void:
 		var bite := mini(2, _pot)  # Gluttony eats from the pot (§18.3)
 		_pot -= bite
 		_chips_devil += bite
-	for e in _effigies:
-		if e["id"] == "croupier":
-			_chips_you += 1        # the House's hand pays your ante back
+	if _rule != "sabbath":
+		for e in _effigies:
+			if e["id"] == "croupier":
+				_chips_you += 1        # the House's hand pays your ante back
 	# venom stacks tick — wounded cards rot a little each round
 	for side in [_board_p, _board_pb, _board_e, _board_eb]:
 		for lane in range(LANES):
@@ -475,8 +492,9 @@ func _start_round() -> void:
 		if _sfx != null:
 			_devil._sfx_ref = _sfx
 	_draw_hand()
-	_l_phase.text = "%s %d  ·  %s %d  ·  %s %d" % [tr("DEPTH"),
-		_run["depth"] + 1, tr("ROUND"), _round, tr("BLIND"), ante]
+	_l_phase.text = "%s %d  ·  %s %d  ·  %s %d  ·  %s" % [tr("DEPTH"),
+		_run["depth"] + 1, tr("ROUND"), _round, tr("BLIND"), ante,
+		tr("RULE_" + _rule.to_upper())]
 	# a sin at the table announces itself on the first hand only —
 	# the throne name rides the phase line until the fight is done
 	if _sin_table and _round == 1:
@@ -499,6 +517,11 @@ func _draw_hand() -> void:
 		_pulse(_l_pot)
 		_update_chips()
 		return
+	if _rule == "passage_toll":
+		# §7.1 Geçiş Resmi — every draw pays a chip into the pot
+		_chips_you -= 1
+		_pot += 1
+		_pulse(_l_pot)
 	var d: CardDef = _deck.pop_back()
 	var card := GameCard.new()
 	card.def = d
@@ -652,13 +675,16 @@ func _try_place(lane: int, row := 0) -> void:
 		+ Vector3(0, 0.002, 0)
 	var rot := Vector3(PI, 0, PI * randf() * 0.06)
 	card.placed = true
-	card.set_face_down(true)
+	card.set_face_down(_rule != "open_table")
 	if _phand != null and not _autoplay:
 		card.set_base(dest, rot)
 		await _phand.pick_and_place(card, dest, rot)
 		card.scale = Vector3.ONE * 0.72
 	else:
 		card.place_on_pad(_pads[_pad_key("p", lane, row)].position, false)
+	if _rule == "open_table":
+		# Açık Masa — everything lands face-up; on-reveal seals fire now
+		_on_reveal(card, _board_e.get(lane))
 	if "tithe" in card.def.sigils:
 		_chips_you += 2
 		_pulse(_l_chips)
@@ -675,6 +701,10 @@ func _try_place(lane: int, row := 0) -> void:
 	_sfx.play(Sfx.PLACE_P, -6.0)
 
 func _sacrifice_card(card) -> void:
+	if _rule == "candle_watch":
+		# §7.1 Mum Nöbeti — no blood may be drawn at this table
+		_hint(tr("HINT_RULE_CANDLE"))
+		return
 	_hand.erase(card)
 	_area_to_card.erase(card.get_area())
 	if card == _selected:
@@ -803,12 +833,14 @@ func _enemy_place() -> void:
 		var rot := Vector3(PI, 0, PI * randf() * 0.06)
 		if _devil != null and not _autoplay:
 			card.placed = true
-			card.set_face_down(true)
+			card.set_face_down(_rule != "open_table")
 			card.scale = Vector3.ONE * 0.72
 			card.set_base(dest, rot)
 			await _devil.play_card(card, dest, rot)
 		else:
 			card.place_on_pad(_pads[_pad_key("e", lane, row)].position, true)
+		if _rule == "open_table":
+			_on_reveal_his(card, _board_p.get(lane))
 		if card.def.id == "owed_pig":
 			_debt += 3    # his pig feeds the same ledger
 		_sfx.play(Sfx.PLACE_E, -10.0)
@@ -1152,14 +1184,16 @@ func _finish_over(won: bool) -> void:
 		# the felt and the run continues a chamber deeper.
 		_phase = Phase.EVENT
 		_run["won"] += 1
-		_run["embers"] += _pot   # §2.4: the pot converts to embers
+		var emb: int = _pot * (2 if _rule == "high_stakes" else 1)
+		_run["embers"] += emb
+		# §2.4: the pot converts to embers (doubled at High Stakes)
 		if _sin_table:
 			# beating a sin pays its own tithe on top of the pot
 			_run["embers"] += 10
 			_l_over.text = tr("YOU_WIN") + " " + tr("SIN_BEATEN") + "\n" \
-				+ str(_pot + 10) + " " + tr("EMBERS_WON")
+				+ str(emb + 10) + " " + tr("EMBERS_WON")
 		else:
-			_l_over.text = tr("YOU_WIN") + "\n" + str(_pot) + " " \
+			_l_over.text = tr("YOU_WIN") + "\n" + str(emb) + " " \
 				+ tr("EMBERS_WON")
 		_run["debt"] = _debt
 		_run["luck"] = _luck

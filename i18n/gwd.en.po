@@ -609,3 +609,24 @@ msgstr "The iron finds nothing it can sear — his trick returns unspent."
 
 msgid "HINT_BLUFFER_CAUGHT"
 msgstr "Caught looking — the Bluffer bursts and he pays 2 chips for the read."
+
+msgid "RULE_CANDLE_WATCH"
+msgstr "Candle Watch — no sacrifices"
+
+msgid "RULE_OPEN_TABLE"
+msgstr "Open Table — all cards face-up"
+
+msgid "RULE_PASSAGE_TOLL"
+msgstr "Passage Toll — every draw costs 1 chip"
+
+msgid "RULE_SABBATH"
+msgstr "Sabbath — the mantel is silent"
+
+msgid "RULE_HIGH_STAKES"
+msgstr "High Stakes — blinds ×2, pot pays ×2"
+
+msgid "RULE_BLOOD_PRICE"
+msgstr "Blood Price — your deck enters wounded"
+
+msgid "HINT_RULE_CANDLE"
+msgstr "Candle Watch — no blood may be drawn at this table."

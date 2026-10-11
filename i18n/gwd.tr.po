@@ -609,3 +609,24 @@ msgstr "Demir dağlayacak hiçbir şey bulamadı — hilesi geri döndü."
 
 msgid "HINT_BLUFFER_CAUGHT"
 msgstr "Bakarken yakalandı — Blöfcü patlıyor ve okuma için 2 çip ödüyor."
+
+msgid "RULE_CANDLE_WATCH"
+msgstr "Mum Nöbeti — kurban yasak"
+
+msgid "RULE_OPEN_TABLE"
+msgstr "Açık Masa — tüm kartlar açık konur"
+
+msgid "RULE_PASSAGE_TOLL"
+msgstr "Geçiş Resmi — her çekim 1 çip"
+
+msgid "RULE_SABBATH"
+msgstr "Sebt — raf putları sessiz"
+
+msgid "RULE_HIGH_STAKES"
+msgstr "Yüksek Bahis — ante ×2, pot ×2"
+
+msgid "RULE_BLOOD_PRICE"
+msgstr "Kan Bedeli — desten yaralı girer"
+
+msgid "HINT_RULE_CANDLE"
+msgstr "Mum Nöbeti — bu masada kan dökülemez."
