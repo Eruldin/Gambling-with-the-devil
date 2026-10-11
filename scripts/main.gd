@@ -513,6 +513,12 @@ func _input(event: InputEvent) -> void:
 			_battle.wager_accept()
 		elif event.keycode == KEY_N:
 			_battle.wager_decline()
+		elif event.keycode == KEY_1:
+			_battle.use_trump(0)
+		elif event.keycode == KEY_2:
+			_battle.use_trump(1)
+		elif event.keycode == KEY_3:
+			_battle.use_trump(2)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
