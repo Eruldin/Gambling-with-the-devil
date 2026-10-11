@@ -28,6 +28,7 @@ var _base_rot := Vector3.ZERO
 var _t := 0.0
 var _idle_phase := 0.0
 var _dead := false
+var moved_once := false       # §2.3 reposition: one lane move per battle
 
 func setup(front_tex: Texture2D, back_tex: Texture2D) -> void:
 	_emat = StandardMaterial3D.new()

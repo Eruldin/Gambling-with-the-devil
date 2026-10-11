@@ -46,7 +46,10 @@ var _wager_offered := false
 var _wager_pending := false
 var _bluff_used := false       # Call the Bluff — once per battle
 var _call_armed := false
-var _mulligan_used := false    # opening redeal — once per battle
+var _mulligan_used := false
+var _repos_armed = null       # board card selected for reposition (§2.3)
+var _trick_armed = null       # razor awaiting a pawn target
+var _dead_p: Array = []       # player defs that died this battle (Tithe fodder)    # opening redeal — once per battle
 # Azrail psychology (§18.2) — five axes the game feeds; his table manners
 # and his AI both read these.
 var _psyche := {"cruelty": 0.0, "curiosity": 0.0, "anger": 0.0,
@@ -292,8 +295,36 @@ func click(collider) -> void:
 			_hint(tr("HINT_CALL"))
 		return
 	var pad = _pad_areas.get(collider)
+	# razor target mode — one revealed pawn of yours takes the edge
+	if _trick_armed != null:
+		if card != null and _board_p.values().has(card) 			and not card.face_down:
+			_resolve_razor(card)
+		else:
+			_trick_cancel()
+		return
+	# reposition armed — an empty lane takes the card, another card swaps
+	if _repos_armed != null:
+		if pad != null and not pad["enemy"] 			and not _board_p.has(pad["lane"]):
+			_do_repos(pad["lane"])
+		elif card != null and _board_p.values().has(card) 			and card != _repos_armed and not card.face_down:
+			_swap_lanes(_repos_armed, card)
+		else:
+			_repos_cancel()
+		return
 	if card != null and _hand.has(card):
-		_select(card if card != _selected else null)
+		if card.def.kind == "trick":
+			_play_trick(card)
+		else:
+			_select(card if card != _selected else null)
+		return
+	# a revealed pawn on the board can be picked up for reposition
+	if card != null and card.placed and _board_p.values().has(card):
+		if card.face_down:
+			_hint(tr("HINT_REPOS_DOWN"))
+		elif card.moved_once:
+			_hint(tr("HINT_NOREPOS"))
+		else:
+			_repos_arm(card)
 		return
 	if pad != null and not pad["enemy"] and _selected != null:
 		_try_place(pad["lane"])
@@ -610,6 +641,7 @@ func _cleanup_dead() -> void:
 		if p != null and p.hp <= 0:
 			_board_p.erase(lane)
 			_area_to_card.erase(p.get_area())
+			_dead_p.append(p.def)
 			p.die()
 		var e = _board_e.get(lane)
 		if e != null and e.hp <= 0:
@@ -822,6 +854,136 @@ func _pulse(l: Label) -> void:
 
 # ---------------------------------------------------------------- autoplay probe
 
+## §2.3 Reposition: one revealed card moves lanes (or swaps) once per battle.
+func _repos_arm(card) -> void:
+	_repos_armed = card
+	card.set_selected(true)
+	_hint(tr("HINT_REPOS"))
+
+func _repos_cancel() -> void:
+	if _repos_armed != null and is_instance_valid(_repos_armed):
+		_repos_armed.set_selected(false)
+	_repos_armed = null
+	_hint(tr("HINT_PLACE"))
+
+func _repos_dest(lane: int) -> Vector3:
+	return _pads["p" + str(lane)].position + Vector3(0, 0.002, 0)
+
+func _do_repos(lane: int) -> void:
+	var card = _repos_armed
+	_repos_cancel()
+	_board_p.erase(card.lane)
+	_board_p[lane] = card
+	card.lane = lane
+	card.moved_once = true
+	var dest := _repos_dest(lane)
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(card, "position", dest, 0.35)
+	card.set_base(dest, card.rotation)
+	_hint(tr("REPOS_DONE") % tr(card.def.name_key))
+	_bump("curiosity", 0.15)   # he watches how you think
+	_sfx.play(Sfx.SLIDE, -7.0)
+
+func _swap_lanes(a, b) -> void:
+	_repos_cancel()
+	var la: int = a.lane
+	var lb: int = b.lane
+	_board_p[la] = b
+	_board_p[lb] = a
+	a.lane = lb
+	b.lane = la
+	a.moved_once = true
+	var da := _repos_dest(lb)
+	var db := _repos_dest(la)
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(a, "position", da, 0.35)
+	tw.parallel().tween_property(b, "position", db, 0.35)
+	a.set_base(da, a.rotation)
+	b.set_base(db, b.rotation)
+	_hint(tr("REPOS_SWAP"))
+	_bump("curiosity", 0.15)
+	_sfx.play(Sfx.SLIDE, -7.0)
+
+## §2.3/§5 Tricks: one-shots — they resolve on the spot and burn away.
+func _play_trick(card) -> void:
+	if card.def.blood_cost > _blood:
+		_hint(tr("HINT_NOBLOOD"))
+		_sfx.play(Sfx.DENIED, -10.0)
+		return
+	match card.def.id:
+		"tithe":
+			if _dead_p.is_empty():
+				_hint(tr("TRICK_TITHE_NONE"))
+				_sfx.play(Sfx.DENIED, -10.0)
+				return
+		"razor":
+			_trick_arm(card)
+			return
+	_blood -= card.def.blood_cost
+	_hand.erase(card)
+	_burn_trick(card)
+	match card.def.id:
+		"usurer_t":
+			_chips_you += 4
+			_debt += 2
+			_hint(tr("TRICK_USURER"))
+			_bump("curiosity", 0.25)
+		"tithe":
+			var d: CardDef = _dead_p.pop_back()
+			_dead_to_hand(d)
+			_hint(tr("TRICK_TITHE") % tr(d.name_key))
+			_bump("respect", 0.2)
+	_reflow_hand()
+	_update_chips()
+	_sfx.play(Sfx.CONFIRM, -8.0)
+
+func _burn_trick(card) -> void:
+	_area_to_card.erase(card.get_area())
+	_burst(card.position + Vector3(0, 0.02, 0),
+		Color(0.5, 0.3, 0.08), 16, 0.01, 0.5)
+	card.burn()
+
+func _dead_to_hand(d: CardDef) -> void:
+	var card := GameCard.new()
+	card.def = d
+	add_child(card)
+	card.setup(load(d.face_file), _back_tex)
+	card.set_idle_phase(randf() * 3.0)
+	_area_to_card[card.get_area()] = card
+	_hand.append(card)
+	_reflow_hand()
+
+func _trick_arm(card) -> void:
+	_blood -= card.def.blood_cost
+	_trick_armed = card
+	_hand.erase(card)
+	card.set_selected(true)
+	_reflow_hand()
+	_hint(tr("HINT_TRICK_TARGET"))
+
+func _trick_cancel() -> void:
+	var card = _trick_armed
+	_trick_armed = null
+	if card != null and is_instance_valid(card):
+		card.set_selected(false)
+		_blood += card.def.blood_cost   # the edge goes back, unpaid
+		_hand.append(card)
+		_reflow_hand()
+	_hint(tr("HINT_PLACE"))
+
+func _resolve_razor(target) -> void:
+	var card = _trick_armed
+	_trick_armed = null
+	card.set_selected(false)
+	target.def.attack += 2
+	target.flash()
+	_burst(target.position + Vector3(0, 0.03, 0),
+		Color(0.75, 0.75, 0.8), 18, 0.01, 0.4)
+	_hint(tr("TRICK_RAZOR") % tr(target.def.name_key))
+	_burn_trick(card)
+	_bump("respect", 0.15)
+	_sfx.play(Sfx.SLIDE, -8.0)
+
 func _autoplay_run() -> void:
 	await get_tree().create_timer(1.2).timeout
 	# place hand[0] on lane 1, next free on lane 3, sacrifice hand[0]
@@ -829,6 +991,9 @@ func _autoplay_run() -> void:
 		_select(_hand[0]); _try_place(1)
 	if _hand.size() >= 1:
 		_select(_hand[1] if _hand.size() > 1 else _hand[0]); _try_place(3)
+	for c in _hand.duplicate():
+		if c.def.kind == "trick":
+			_play_trick(c)
 	if _hand.size() >= 1:
 		_sacrifice_card(_hand[0])
 	raise()
