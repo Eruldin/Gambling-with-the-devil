@@ -89,12 +89,14 @@ var _event_cards: Array = []
 static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
-	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {}}
+	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {},
+	"pact": false}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _anger_lies := false  # §18.2: carried anger packs his sleeve
 var _cruel_seats := false  # carried cruelty seats an extra ambush
 var _bored_ante := false   # carried boredom hurries the blinds
+var _pact := false         # the Pact: debt bought louder tells
 var _sin_name := ""       # which of the seven is on the throne
 
 # ---------------------------------------------------------------- setup
@@ -182,6 +184,10 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 		>= TAUNT_AT
 	_bored_ante = float(_run["psyche"].get("boredom", 0.0)) * 0.7 \
 		>= TAUNT_AT
+	# §18 Pact: debt bought at the last door makes his tells shout
+	# for this whole table — the information you paid for
+	_pact = bool(_run["pact"])
+	_run["pact"] = false
 	# §18 ambush: from the third door down he's already seated pawns
 	# face-down — deeper tables start rigged against you
 	var ambush := mini(maxi(_run["depth"] - 2, 0)
@@ -941,6 +947,7 @@ func _reset_run() -> void:
 	_run["sin_name"] = ""
 	_run["broken"] = []
 	_run["grafts"] = {}
+	_run["pact"] = false
 
 # ------------------------------------------------------------ descent (§18)
 
@@ -953,7 +960,7 @@ func _spawn_event_cards() -> void:
 		"event_whisper": "face_seer.png", "event_wheel": "face_imp.png",
 		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
 		"event_mirror": "face_acolyte.png", "event_furnace": "face_martyr.png",
-		"event_taxidermist": "face_cutpurse.png"}
+		"event_taxidermist": "face_cutpurse.png", "event_pact": "face_votary.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
@@ -964,6 +971,7 @@ func _spawn_event_cards() -> void:
 		pool.append("event_mirror")
 	if _run["depth"] >= 4:
 		pool.append("event_taxidermist")
+		pool.append("event_pact")
 	pool.shuffle()
 	# every third descent the sin door is dealt — you may walk around
 	# it, but Azrail marks the cowardice (§18: bosses at depths 3,6,9)
@@ -1100,6 +1108,12 @@ func _resolve_event(card) -> void:
 			else:
 				_run["purse"] += 3
 				_hint(tr("EV_TAXI_EMPTY"))
+		"event_pact":
+			# §18 the Pact: souls now for information next table —
+			# his concealed cards shout their weight twice as loud
+			_run["debt"] += 8
+			_run["pact"] = true
+			_hint(tr("EV_PACT"))
 		"event_sin":
 			# the sin door: the next table seats one of the seven
 			_run["sin_next"] = true
@@ -1240,7 +1254,8 @@ func _process(delta: float) -> void:
 	# stop trembling; a palmed bluff lies unnaturally still.
 	for e in _board_e.values():
 		if e.face_down and e.def != null:
-			var restless: float = 0.0012 * float(e.def.attack)
+			var restless: float = 0.0012 * float(e.def.attack) * (
+				2.5 if _pact else 1.0)
 			var shiver: float = pow(maxf(0.0,
 				sin(_tell_t * 1.6 + e.lane * 2.1)), 8.0)
 			e.position = e._base_pos + Vector3(

@@ -411,3 +411,12 @@ msgstr "Brood"
 
 msgid "SIGIL_TITHE"
 msgstr "Tithe"
+
+msgid "CARD_EVENT_PACT"
+msgstr "The Pact"
+
+msgid "CARD_EVENT_PACT_DESC"
+msgstr "eight souls of debt — his tells shout at the next table"
+
+msgid "EV_PACT"
+msgstr "Signed in owed souls — next table, his hands cannot hold still."
