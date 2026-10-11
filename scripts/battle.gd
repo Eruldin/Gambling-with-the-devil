@@ -94,6 +94,7 @@ static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _anger_lies := false  # §18.2: carried anger packs his sleeve
+var _respect_fair := false # carried respect keeps his sleeve honest
 var _cruel_seats := false  # carried cruelty seats an extra ambush
 var _bored_ante := false   # carried boredom hurries the blinds
 var _pact := false         # the Pact: debt bought louder tells
@@ -149,8 +150,11 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# lie into his sleeve (§18: he changes the rules when angry)
 	_anger_lies = float(_run["psyche"].get("anger", 0.0)) * carry \
 		>= TAUNT_AT
-	for i in range(2 + mini(_run["depth"], 3)
-			+ int(_run["debt"] / 10) + (1 if _anger_lies else 0)):
+	_respect_fair = float(_run["psyche"].get("respect", 0.0)) * carry \
+		>= TAUNT_AT
+	for i in range(maxi(2 + mini(_run["depth"], 3)
+			+ int(_run["debt"] / 10) + (1 if _anger_lies else 0)
+			- (1 if _respect_fair else 0), 0)):
 		_edeck.insert(randi() % _edeck.size(), CardDef.bluff_card())
 	_deck.shuffle()
 	_edeck.shuffle()
