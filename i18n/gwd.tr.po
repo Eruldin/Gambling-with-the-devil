@@ -420,3 +420,6 @@ msgstr "sekiz ruh borç — sonraki masada telleri haykırır"
 
 msgid "EV_PACT"
 msgstr "Borçlu ruhlarla imzalandı — sonraki masada elleri duramaz."
+
+msgid "ANGER_STEAL"
+msgstr "Karşıya uzanıyor — bir kart elinde tutuşuyor."
