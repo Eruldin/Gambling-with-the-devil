@@ -13,8 +13,8 @@ var _flames: Array = []
 var _moth: MeshInstance3D
 var _moth_t := 0.0
 var _moth_r := 0.11
-var _storm_in := 30.0 + randf() * 30.0
-var _gust_in := 12.0 + randf() * 15.0
+var _storm_in := 25.0 + randf() * 25.0
+var _gust_in := 10.0 + randf() * 12.0
 var _flash: OmniLight3D
 var _fog: Array = []
 
@@ -27,24 +27,24 @@ func setup(flames: Array, hero: OmniLight3D, table_y: float) -> void:
 	# moth — a speck of brown paper wings orbiting the candle pool
 	_moth = MeshInstance3D.new()
 	var mq := QuadMesh.new()
-	mq.size = Vector2(0.02, 0.014)
+	mq.size = Vector2(0.034, 0.022)
 	_moth.mesh = mq
 	var mm := StandardMaterial3D.new()
 	mm.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	mm.albedo_color = Color(0.85, 0.7, 0.45)
+	mm.albedo_color = Color(0.9, 0.75, 0.5)
 	mm.emission_enabled = true
-	mm.emission = Color(0.8, 0.6, 0.35)
-	mm.emission_energy_multiplier = 0.8
+	mm.emission = Color(0.9, 0.7, 0.4)
+	mm.emission_energy_multiplier = 1.6
 	mm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	_moth.material_override = mm
 	add_child(_moth)
 	# storm flash light above the gothic window (cold, far away)
 	_flash = OmniLight3D.new()
-	_flash.position = Vector3(-0.6, 2.2, -1.4)
-	_flash.light_color = Color(0.55, 0.65, 0.95)
+	_flash.position = Vector3(-0.6, 2.0, -0.9)
+	_flash.light_color = Color(0.6, 0.7, 1.0)
 	_flash.light_energy = 0.0
-	_flash.omni_range = 4.0
-	_flash.omni_attenuation = 0.8
+	_flash.omni_range = 6.0
+	_flash.omni_attenuation = 0.6
 	add_child(_flash)
 	# three fog tendrils drifting under the table
 	var smoke: Texture2D = load(SMOKE)
@@ -99,20 +99,20 @@ func _gust() -> void:
 	var dir := 0.35 if randf() < 0.5 else -0.35
 	for fl in _flames:
 		var tw := create_tween()
-		tw.tween_property(fl, "rotation:z", dir * randf_range(0.9, 1.5), 0.18)
+		tw.tween_property(fl, "rotation:z", dir * randf_range(1.4, 2.2), 0.18)
 		tw.tween_property(fl, "rotation:z", 0.0, 0.5).set_delay(0.15)
 	if _hero != null:
 		var base := _hero.light_energy
 		var tw := create_tween()
-		tw.tween_property(_hero, "light_energy", base * 0.4, 0.12)
+		tw.tween_property(_hero, "light_energy", base * 0.25, 0.12)
 		tw.tween_property(_hero, "light_energy", base, 0.6)
 
 func _storm() -> void:
 	# double-strobe flash then rumble rolls in ~0.5s later
 	var tw := create_tween()
-	tw.tween_property(_flash, "light_energy", 3.2, 0.06)
+	tw.tween_property(_flash, "light_energy", 7.0, 0.06)
 	tw.tween_property(_flash, "light_energy", 0.0, 0.09)
-	tw.tween_property(_flash, "light_energy", 5.0, 0.05).set_delay(0.12)
-	tw.tween_property(_flash, "light_energy", 0.0, 0.5)
+	tw.tween_property(_flash, "light_energy", 10.0, 0.05).set_delay(0.12)
+	tw.tween_property(_flash, "light_energy", 0.0, 0.6)
 	get_tree().create_timer(0.45 + randf() * 0.5).timeout.connect(
 		func(): _sfx.play(THUNDER, -8.0, randf_range(0.8, 1.0)))
