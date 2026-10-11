@@ -85,6 +85,9 @@ func _ready() -> void:
 	amb.setup(_flames, _hero, top)
 	if OS.get_environment("GWD_SHOT") == "1":
 		_shot_frames = 800 if OS.get_environment("GWD_AUTO") == "1" else 150
+		var custom := OS.get_environment("GWD_SHOT_FRAMES")
+		if not custom.is_empty():
+			_shot_frames = int(custom)
 
 func _environment() -> void:
 	var env := Environment.new()
