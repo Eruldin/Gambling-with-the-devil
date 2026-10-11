@@ -51,6 +51,7 @@ var _mulligan_used := false
 var _repos_armed = null       # board card selected for reposition (§2.3)
 var _trick_armed = null       # razor awaiting a pawn target
 var _dead_p: Array = []       # player defs that died this battle (Tithe fodder)
+var _dead_e: Array = []       # his own casualties — the Gravekeeper feeds them back
 var _trump_pool: Array = ["sleeve_ace", "cold_deck", "marked_cards",
 	"loaded_dice", "mirrored_coin"]
 var _trumps: Array = []
@@ -707,6 +708,9 @@ func _enemy_place() -> void:
 		var lane: int = free_lanes[i]
 
 		var d: CardDef = _edeck.pop_back()
+		if d.kind == "trick":
+			_resolve_his_trick(d)
+			continue
 		var card := GameCard.new()
 		card.def = d
 		add_child(card)
@@ -924,6 +928,8 @@ func _cleanup_dead() -> void:
 					Color(0.4, 0.1, 0.5), 12, 0.01, 0.5)
 			elif "brood" in e.def.sigils:
 				_spawn_grub(lane, false)
+			else:
+				_dead_e.append(e.def)
 			e.die()
 
 func _check_over() -> bool:
@@ -1569,6 +1575,37 @@ func _dead_to_hand(d: CardDef) -> void:
 	_area_to_card[card.get_area()] = card
 	_hand.append(card)
 	_reflow_hand()
+
+## Azrail resolves his own tricks rather than seating them as bodies:
+## razor grafts Sharp onto a revealed pawn, the usurer feeds his pile,
+## the tithe shuffles his freshest casualty back into the deck.
+func _resolve_his_trick(d: CardDef) -> void:
+	match d.id:
+		"razor":
+			var cands: Array = []
+			for l in _board_e.keys():
+				var c = _board_e[l]
+				if c != null and not c.face_down and c.hp > 0 \
+					and not c.def.sigils.has("sharp"):
+					cands.append(c)
+			if cands.is_empty():
+				_edeck.insert(randi() % (_edeck.size() + 1), d)
+				return
+			var t = cands[randi() % cands.size()]
+			t.def.sigils.append("sharp")
+			t.flash()
+		"usurer_t":
+			_chips_devil += 4
+			_pot += 2          # the usurer's cut lands in the pot
+		"tithe":
+			if not _dead_e.is_empty():
+				_edeck.insert(randi() % (_edeck.size() + 1),
+					_dead_e.pop_back())
+			else:
+				_edeck.insert(randi() % (_edeck.size() + 1), d)
+				return
+	_hint(tr("TRICK_HIS") % tr(d.name_key))
+	_sfx.play(Sfx.CONFIRM, -10.0, 0.8)
 
 func _trick_arm(card) -> void:
 	_blood -= card.def.blood_cost
