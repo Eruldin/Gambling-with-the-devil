@@ -104,7 +104,7 @@ func _make_pads() -> void:
 			area.collision_mask = 0
 			var col := CollisionShape3D.new()
 			var sb := BoxShape3D.new()
-			sb.size = Vector3(0.155, 0.02, 0.2)
+			sb.size = Vector3(0.175, 0.02, 0.22)
 			col.shape = sb
 			area.add_child(col)
 			pad.add_child(area)
@@ -178,7 +178,7 @@ func _draw_hand() -> void:
 	var card := GameCard.new()
 	card.def = d
 	add_child(card)
-	card.setup(load(CARDS_DIR + d.face_file), _back_tex)
+	card.setup(load(d.face_file), _back_tex)
 	card.set_idle_phase(randf() * 3.0)
 	_area_to_card[card.get_area()] = card
 	_hand.append(card)
@@ -328,7 +328,7 @@ func _enemy_place() -> void:
 		var card := GameCard.new()
 		card.def = d
 		add_child(card)
-		card.setup(load(CARDS_DIR + d.face_file), _back_tex)
+		card.setup(load(d.face_file), _back_tex)
 		card.position = Vector3(-0.44, _top + 0.15, -0.14)
 		card.rotation = Vector3(PI, 0, 0)
 		card.lane = lane

@@ -195,10 +195,10 @@ func _dust(top: float) -> void:
 	gp.process_material = pm
 	gp.position = Vector3(0, top + 0.25, -0.05)
 	var q := QuadMesh.new()
-	q.size = Vector2(0.0022, 0.0022)
+	q.size = Vector2(0.0032, 0.0032)
 	var dm := StandardMaterial3D.new()
 	dm.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	dm.albedo_color = Color(0.95, 0.7, 0.4, 0.13)
+	dm.albedo_color = Color(0.95, 0.7, 0.4, 0.22)
 	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	dm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	q.material = dm
