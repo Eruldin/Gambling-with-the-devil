@@ -65,9 +65,9 @@ static func starter_deck() -> Array:
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic"]),
 		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
-		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_usurer.png"),
-		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_martyr.png"),
-		make_trick("razor", "blades", 1, "res://assets_external/card-art/gwd/face_duelist.png"),
+		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_pale_usurer.png"),
+		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_tithe.png"),
+		make_trick("razor", "blades", 1, "res://assets_external/card-art/gwd/face_razor.png"),
 	]
 
 ## §18: Azrail's deck hardens down the Descent — his pawns sharpen one
@@ -81,7 +81,7 @@ static func devil_deck(depth: int) -> Array:
 				c.attack += sharpen
 	if depth >= 1:
 		d.append(make_trick("razor", "blades", 1,
-			"res://assets_external/card-art/gwd/face_duelist.png"))
+			"res://assets_external/card-art/gwd/face_razor.png"))
 	if depth >= 2:
 		d.append(make("reaper", "blades", 1, 3, 1, 1,
 			"res://assets_external/card-art/gwd/face_reaper.png",
