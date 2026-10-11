@@ -150,3 +150,42 @@ msgstr "Bu savaşta yeni el hakkın kalmadı"
 
 msgid "INTRO_SUB"
 msgstr "Onun yerini aldın — bahis ruhun."
+msgid "HINT_REPOS"
+msgstr "Bir şerit seç — kart bu savaşta bir kez yer değiştirir."
+
+msgid "HINT_REPOS_DOWN"
+msgstr "Kapalı kartlar yer değiştiremez."
+
+msgid "HINT_NOREPOS"
+msgstr "O kart zaten yer değiştirdi."
+
+msgid "REPOS_DONE"
+msgstr "%s yeni şeride kaydı."
+
+msgid "REPOS_SWAP"
+msgstr "Piyonlar şerit değiştirdi."
+
+msgid "HINT_TRICK_TARGET"
+msgstr "Açık piyonlarından birini seç."
+
+msgid "TRICK_USURER"
+msgstr "+4 çip — borç 2 arttı."
+
+msgid "TRICK_TITHE_NONE"
+msgstr "Geri alınacak ölü piyon yok."
+
+msgid "TRICK_TITHE"
+msgstr "Mezar %s geri verdi."
+
+msgid "TRICK_RAZOR"
+msgstr "Keskin kenar — %s +2 saldırı kazandı."
+
+msgid "CARD_USURER_T"
+msgstr "Solgun Tefeci"
+
+msgid "CARD_TITHE"
+msgstr "Mezarcının Öşrü"
+
+msgid "CARD_RAZOR"
+msgstr "Ustura"
+

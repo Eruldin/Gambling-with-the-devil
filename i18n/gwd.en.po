@@ -150,3 +150,42 @@ msgstr "No mulligan left in this battle"
 
 msgid "INTRO_SUB"
 msgstr "You took his seat. The wager is your soul."
+msgid "HINT_REPOS"
+msgstr "Choose a lane — the card moves once this battle."
+
+msgid "HINT_REPOS_DOWN"
+msgstr "Concealed cards can't reposition."
+
+msgid "HINT_NOREPOS"
+msgstr "That card already moved."
+
+msgid "REPOS_DONE"
+msgstr "%s slips to a new lane."
+
+msgid "REPOS_SWAP"
+msgstr "The pawns trade lanes."
+
+msgid "HINT_TRICK_TARGET"
+msgstr "Choose one of your revealed pawns."
+
+msgid "TRICK_USURER"
+msgstr "+4 chips — the debt grows by 2."
+
+msgid "TRICK_TITHE_NONE"
+msgstr "No dead pawn to dig up."
+
+msgid "TRICK_TITHE"
+msgstr "The grave gives back %s."
+
+msgid "TRICK_RAZOR"
+msgstr "Sharp edge — %s gains +2 attack."
+
+msgid "CARD_USURER_T"
+msgstr "Pale Usurer"
+
+msgid "CARD_TITHE"
+msgstr "Gravedigger's Tithe"
+
+msgid "CARD_RAZOR"
+msgstr "Straight Razor"
+
