@@ -26,6 +26,13 @@ var _drum_in := 8.0 + randf() * 8.0
 var _blink_in := 3.0 + randf() * 4.0
 var _blink := 0.0
 var _cam: Camera3D
+# game-driven attention: when set, the head locks onto this world point
+# (played lanes, struck chips, the scale) instead of idly tracking the cursor
+var _gaze := Vector3.ZERO
+var _gaze_t := 0.0
+var _mood := 0            # 0 calm · 1 tense (mid blinds) · 2 furious (deep blinds)
+var _sfx_ref = null       # set by battle — growls/breath live on his thread
+const BREATH := "res://assets_external/audio/gwd/breath.wav"
 
 func _model_aabb(root: Node3D) -> AABB:
 	var inv := root.global_transform.affine_inverse()
@@ -177,15 +184,23 @@ func _process(delta: float) -> void:
 		_torso.scale.y = 1.0 + 0.014 * sin(_t * 1.1)
 		_torso.rotation.z = 0.018 * sin(_t * 0.42)
 		_torso.rotation.y = 0.03 * sin(_t * 0.17)
-	# head: watches the cursor (the opponent *sees* you) + creepy twitch
+	# head: locks onto game events (_gaze), else stalks the cursor
 	if _head:
 		var track := 0.0
-		if _cam != null:
+		_gaze_t = maxf(0.0, _gaze_t - delta)
+		var d: Vector3
+		var has_d := false
+		if _gaze_t > 0.0 and _gaze.is_finite():
+			d = _head.global_transform.affine_inverse() * _gaze
+			has_d = true
+		elif _cam != null:
 			var m := get_viewport().get_mouse_position()
 			var p: Vector3 = _cam.project_position(m, 2.2)
-			var d := _head.global_transform.affine_inverse() * p
-			track = clampf(atan2(d.x, d.z), -0.45, 0.45) * 0.6
-		_twitch_in -= delta
+			d = _head.global_transform.affine_inverse() * p
+			has_d = true
+		if has_d and d.is_finite():
+			track = clampf(atan2(d.x, d.z), -0.55, 0.55) * 0.9
+		_twitch_in -= delta * (1.0 + 0.6 * _mood)
 		if _twitch_in <= 0.0:
 			_twitch = 0.5
 			_twitch_in = 6.0 + randf() * 9.0
@@ -193,21 +208,24 @@ func _process(delta: float) -> void:
 		var snap := 0.0
 		if _twitch > 0.35:
 			snap = 0.22 * (1.0 if randi() % 2 == 0 else -1.0)
+		var target_y := track + 0.05 * sin(_t * 0.23) + snap
 		_head.rotation.y = lerpf(_head.rotation.y,
-			track + 0.05 * sin(_t * 0.23) + snap, delta * 5.0)
+			target_y, minf(delta * 5.0, 1.0))
 		_head.rotation.z = lerpf(_head.rotation.z,
-			0.05 * sin(_t * 0.31), delta * 3.0)
-	# blinking — eyes shut for a beat every few seconds
+			0.05 * sin(_t * 0.31), minf(delta * 3.0, 1.0))
+	# blinking — rarer when he's locked in (higher blinds → longer stares)
 	_blink_in -= delta
 	if _blink_in <= 0.0:
 		_blink = 0.22
-		_blink_in = 2.5 + randf() * 5.0
+		_blink_in = (2.5 + randf() * 5.0) * (1.0 + 0.5 * _mood)
 	_blink = maxf(0.0, _blink - delta)
 	var lid := 1.0
 	if _blink > 0.0:
 		lid = 0.08
 	for e in _eyes:
-		e.scale.y = lerpf(e.scale.y, lid, delta * 40.0)
+		# clamp the lerp weight — a delta hitch otherwise overshoots scale
+		# negative, then blows up to inf/NaN inside a few frames
+		e.scale.y = lerpf(e.scale.y, lid, minf(delta * 40.0, 1.0))
 	var lid_dim := _eyes[0].scale.y if not _eyes.is_empty() else 1.0
 	# eye flicker + flare (orbs glow, halos breathe)
 	_flare = maxf(0.0, _flare - delta * 1.6)
@@ -217,8 +235,8 @@ func _process(delta: float) -> void:
 	for h in _halos:
 		var q: QuadMesh = h.mesh
 		q.size = Vector2(hs, hs)
-	# occasional finger drum on the felt
-	_drum_in -= delta
+	# occasional finger drum — faster when the stakes climb
+	_drum_in -= delta * (1.0 + 0.5 * _mood)
 	if _drum_in <= 0.0:
 		_drum_in = 9.0 + randf() * 10.0
 		_drum()
@@ -242,7 +260,63 @@ func lean_in(amount := 0.4, dur := 0.6) -> void:
 	tw.tween_property(_torso, "rotation:x", amount, dur)
 	tw.tween_property(_torso, "rotation:x", _rest_lean, dur * 1.4)
 
-## Devil's right claw slides a concealed card onto a lane.
+## Lock the head onto a world point for `secs` (played lane, chip hit,
+## the scale tipping). This is what kills the "random" feel — every
+## glance now has a reason.
+func watch(pos: Vector3, secs := 2.2) -> void:
+	_gaze = pos
+	_gaze_t = secs
+
+## Thinking beat before he commits: reads your row, breathes, then plays.
+func think(player_felt: Vector3) -> void:
+	watch(player_felt, 2.0)
+	lean_in(0.24, 0.5)
+	_drum()
+	if _sfx_ref != null:
+		_sfx_ref.play(BREATH, -12.0, randf_range(0.8, 0.95))
+	await get_tree().create_timer(0.85).timeout
+
+## He notices every sacrifice — a small feeding reaction.
+func feed(pos: Vector3) -> void:
+	eyes_flare(0.45)
+	watch(pos + Vector3(0, 0.05, 0), 1.6)
+	lean_in(0.18, 0.4)
+
+## Snap a glance + shoulder lean toward a lane that just connected.
+func strike_pose(lane_x: float, hit_him := true) -> void:
+	eyes_flare(0.4 if hit_him else 0.25)
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(_torso, "rotation:y",
+		clampf(lane_x, -0.3, 0.3) * (0.7 if hit_him else -0.7), 0.18)
+	tw.tween_property(_torso, "rotation:y", 0.0, 0.6)
+
+## Blinds climb → agitation: twitchier, stares longer, drums faster.
+func set_mood(round_no: int) -> void:
+	_mood = 0 if round_no < 3 else (1 if round_no < 5 else 2)
+
+func victory() -> void:
+	eyes_flare(2.2)
+	lean_in(0.6, 1.0)
+
+func defeat() -> void:
+	_flare = 0.0
+	# slump back into the chair — shoulders drop, light dies
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(_torso, "rotation:x", -0.06, 1.1)
+	tw.tween_property(_torso, "position:y", _torso.position.y - 0.02, 1.1)
+
+## Devil's reach: the concealed card arcs out of the dark onto the lane.
 func play_card(card: Node3D, dest: Vector3, dest_rot: Vector3) -> void:
 	eyes_flare(0.5)
-	await _hand_r.hand_play(card, dest, dest_rot)
+	watch(dest, 2.0)
+	strike_pose(dest.x, false)
+	# lift from his side, arc, slam — reads as a thrown placement
+	var from := card.global_position
+	var mid := from.lerp(dest, 0.5) + Vector3(0, 0.16, 0)
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(card, "global_position", mid, 0.28)
+	tw.parallel().tween_property(card, "rotation", dest_rot + Vector3(0.25, 0.5, 0), 0.28)
+	tw.set_ease(Tween.EASE_IN)
+	tw.tween_property(card, "global_position", dest + Vector3(0, 0.002, 0), 0.16)
+	tw.parallel().tween_property(card, "rotation", dest_rot, 0.16)
+	await tw.finished
