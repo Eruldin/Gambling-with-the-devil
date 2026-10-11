@@ -288,3 +288,15 @@ msgstr "Fifteen embers burn one of his counterfeits out of the next deck."
 
 msgid "HINT_EMBER"
 msgstr "— or press E: 15 embers burn one of his counterfeits."
+
+msgid "CARD_EVENT_LEDGER"
+msgstr "The Ledger"
+
+msgid "CARD_EVENT_MIRROR"
+msgstr "The Mirror"
+
+msgid "EV_LEDGER"
+msgstr "The Usurer strikes five debts — for four souls up front."
+
+msgid "EV_MIRROR"
+msgstr "The mirror shows your luck backwards — it is flipped."

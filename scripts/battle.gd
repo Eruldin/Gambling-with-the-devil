@@ -867,14 +867,23 @@ func _reset_run() -> void:
 ## Three door cards drop face-up on the felt — the Whisper (small
 ## gamble), the Wheel (big gamble), the Covenant (safe passage).
 func _spawn_event_cards() -> void:
-	var defs: Array = [
-		CardDef.make("event_whisper", "eyes", 0, 0, 1, 0,
-			"res://assets_external/card-art/gwd/face_seer.png"),
-		CardDef.make("event_wheel", "pentacles", 0, 0, 1, 0,
-			"res://assets_external/card-art/gwd/face_imp.png"),
-		CardDef.make("event_covenant", "chalices", 0, 0, 1, 0,
-			"res://assets_external/card-art/gwd/face_warden.png"),
-	]
+	# §18 event-template pool: doors dealt depend on how deep the run
+	# has gone — the Ledger and the Mirror only open deeper down.
+	var faces := {
+		"event_whisper": "face_seer.png", "event_wheel": "face_imp.png",
+		"event_covenant": "face_warden.png", "event_ledger": "face_usurer.png",
+		"event_mirror": "face_acolyte.png"}
+	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
+	if _run["depth"] >= 1:
+		pool.append("event_ledger")
+	if _run["depth"] >= 3:
+		pool.append("event_mirror")
+	pool.shuffle()
+	var defs: Array = []
+	for i in range(3):
+		var id: String = pool[i]
+		defs.append(CardDef.make(id, "eyes", 0, 0, 1, 0,
+			"res://assets_external/card-art/gwd/" + faces[id]))
 	for i in range(3):
 		var card := GameCard.new()
 		card.def = defs[i]
@@ -901,7 +910,7 @@ func _resolve_event(card) -> void:
 		if c != card:
 			c.burn()
 	card.flash(Color(0.9, 0.7, 0.2))
-	var gamble: bool = card.def.id != "event_covenant"
+	var gamble: bool = ["event_whisper", "event_wheel"].has(card.def.id)
 	var won_roll := true
 	if gamble:
 		won_roll = _roll_chance()
@@ -920,6 +929,16 @@ func _resolve_event(card) -> void:
 			else:
 				_run["debt"] += 10
 				_hint(tr("EV_WHEEL_LOSE"))
+		"event_ledger":
+			# the Usurer's ledger — pay souls now to strike the debt
+			_run["debt"] = maxi(_run["debt"] - 5, 0)
+			_run["purse"] = maxi(_run["purse"] - 4, 0)
+			_hint(tr("EV_LEDGER"))
+		"event_mirror":
+			# his mirror flips your fortune — lucky becomes cursed,
+			# cursed becomes blessed (§4.7 tilts invert)
+			_run["luck"] = -_run["luck"]
+			_hint(tr("EV_MIRROR"))
 		_:
 			_run["purse"] += 5
 			_run["luck"] = minf(_run["luck"] + 0.2, 3.0)
