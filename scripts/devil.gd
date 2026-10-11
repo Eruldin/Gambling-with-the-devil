@@ -30,8 +30,8 @@ func build(top: float, seat_z := -1.10) -> void:
 	# seated: waist dropped to chair-seat height, torso pitched forward
 	# over the felt edge — Inscryption's hunched opponent silhouette.
 	_torso = Node3D.new()
-	_torso.position = Vector3(0, 0.38, seat_z)
-	_torso.rotation.x = 0.22
+	_torso.position = Vector3(0, 0.34, seat_z)
+	_torso.rotation.x = 0.18
 	add_child(_torso)
 	_model = load(DEMON).instantiate()
 	var s := 0.62

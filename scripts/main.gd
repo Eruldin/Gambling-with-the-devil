@@ -82,12 +82,15 @@ func _environment() -> void:
 	add_child(we)
 
 func _room() -> void:
+	var planks: Texture2D = load("res://assets_external/gwd-textures/wood_planks.png")
 	var floor_mi := MeshInstance3D.new()
 	var fp := PlaneMesh.new()
 	fp.size = Vector2(9, 9)
 	floor_mi.mesh = fp
 	var fm := StandardMaterial3D.new()
-	fm.albedo_color = Color(0.05, 0.032, 0.024)
+	fm.albedo_texture = planks
+	fm.albedo_color = Color(0.09, 0.06, 0.045)
+	fm.uv1_scale = Vector3(3, 3, 3)
 	fm.roughness = 1.0
 	floor_mi.material_override = fm
 	add_child(floor_mi)
@@ -98,7 +101,9 @@ func _room() -> void:
 	wall.mesh = wp
 	wall.position = Vector3(0, 2, -1.9)
 	var wm := StandardMaterial3D.new()
-	wm.albedo_color = Color(0.035, 0.022, 0.02)
+	wm.albedo_texture = planks
+	wm.albedo_color = Color(0.11, 0.07, 0.05)
+	wm.uv1_scale = Vector3(4, 2, 4)
 	wm.roughness = 1.0
 	wall.material_override = wm
 	add_child(wall)
