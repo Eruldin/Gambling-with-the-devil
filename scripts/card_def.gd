@@ -91,6 +91,11 @@ static func devil_deck(depth: int) -> Array:
 	if depth >= 3:
 		d.append(make("priestess", "eyes", 1, 3, 4, 1,
 			"res://assets_external/card-art/gwd/face_priestess.png"))
+		d.append(make_trick("usurer_t", "pentacles", 0,
+			"res://assets_external/card-art/gwd/face_pale_usurer.png"))
+	if depth >= 4:
+		d.append(make_trick("tithe", "chalices", 1,
+			"res://assets_external/card-art/gwd/face_tithe.png"))
 	return d
 
 ## §18 spoils: cards a won table pays into your deck — slightly better
