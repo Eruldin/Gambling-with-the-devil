@@ -298,8 +298,47 @@ func _sacrifice_card(card) -> void:
 	_reflow_hand()
 	_update_chips()
 	_hint("%s +%d %s" % [tr("SACRIFICED"), card.def.sacrifice_value, tr("BLOOD")])
+	_burst(card.position + Vector3(0, 0.02, 0), Color(0.45, 0.02, 0.02),
+		26, 0.012, 0.55)
 	_sfx.play(Sfx.SHOVE, -6.0)
 	_sfx.play(Sfx.CHIP_HANDLE, -10.0)
+
+## one-shot particle burst — blood splashes, spark hits, reveal wisps
+func _burst(pos: Vector3, color: Color, amount: int,
+		size: float, lifetime: float) -> void:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 0.015
+	pm.direction = Vector3(0, 1, 0)
+	pm.spread = 65.0
+	pm.initial_velocity_min = 0.12
+	pm.initial_velocity_max = 0.4
+	pm.gravity = Vector3(0, -0.5, 0)
+	pm.damping_min = 0.3
+	pm.damping_max = 0.6
+	pm.scale_min = size * 0.5
+	pm.scale_max = size
+	pm.color = color
+	var gp := GPUParticles3D.new()
+	gp.amount = amount
+	gp.lifetime = lifetime
+	gp.one_shot = true
+	gp.explosiveness = 0.85
+	gp.process_material = pm
+	gp.position = pos
+	var q := QuadMesh.new()
+	q.size = Vector2(0.006, 0.006)
+	var dm := StandardMaterial3D.new()
+	dm.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	dm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	dm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	dm.albedo_color = color
+	q.material = dm
+	gp.draw_pass_1 = q
+	add_child(gp)
+	gp.emitting = true
+	get_tree().create_timer(lifetime + 0.4).timeout.connect(gp.queue_free)
 
 # ---------------------------------------------------------------- reveal/strike
 
@@ -356,8 +395,12 @@ func _run_resolution() -> void:
 		var e = _board_e.get(lane)
 		if p != null and p.face_down:
 			p.reveal()
+			_burst(p.position + Vector3(0, 0.03, 0),
+				Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
 		if e != null and e.face_down:
 			e.reveal_enemy()
+			_burst(e.position + Vector3(0, 0.03, 0),
+				Color(0.16, 0.14, 0.11), 14, 0.02, 0.8)
 		await get_tree().create_timer(0.18).timeout
 	await get_tree().create_timer(0.5).timeout
 	# strikes lane by lane: player hits first, then the Devil answers
@@ -369,10 +412,14 @@ func _run_resolution() -> void:
 			if e != null and not e.face_down:
 				e.hp -= p.def.attack
 				e.flash()
+				_burst(e.position + Vector3(0, 0.03, 0),
+					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
 			else:
 				_chips_devil -= p.def.attack
 				_pulse(_l_chips)
-				_shake(0.012)
+				_shake(0.022)
+				_burst(_pads["e" + str(lane)].position + Vector3(0, 0.05, 0),
+					Color(1.0, 0.55, 0.15), 22, 0.014, 0.5)
 				_sfx.play(Sfx.CHIP_HIT, -5.0)
 				if _devil != null:
 					_devil.eyes_flare(0.7)
@@ -383,10 +430,14 @@ func _run_resolution() -> void:
 			if p != null and not p.face_down:
 				p.hp -= e.def.attack
 				p.flash()
+				_burst(p.position + Vector3(0, 0.03, 0),
+					Color(1.0, 0.5, 0.12), 18, 0.01, 0.4)
 			else:
 				_chips_you -= e.def.attack
 				_pulse(_l_chips)
-				_shake(0.016)
+				_shake(0.028)
+				_burst(_pads["p" + str(lane)].position + Vector3(0, 0.05, 0),
+					Color(1.0, 0.55, 0.15), 22, 0.014, 0.5)
 				_sfx.play(Sfx.CHIP_HIT, -5.0, 0.85)
 				if _devil != null:
 					_devil.lean_in(0.3)
