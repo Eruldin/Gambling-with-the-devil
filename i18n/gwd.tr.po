@@ -516,3 +516,15 @@ msgstr "Kaydırma — açıldığında boş bir şeride kayar"
 
 msgid "HINT_BACKROW"
 msgstr "Arka sıra: korunaklı destek — vuramaz, öndeki kartı ayaktayken yara da almaz."
+
+msgid "CARD_DEACON"
+msgstr "Diyakoz"
+
+msgid "CARD_DEACON_DESC"
+msgstr "0/3 · her tur kendi şeridindeki vurucuyu kutsar: +1 saldırı"
+
+msgid "CARD_GRAVEDIGGER"
+msgstr "Mezar Kazıcı"
+
+msgid "CARD_GRAVEDIGGER_DESC"
+msgstr "1/2 · şeridindeki her dost ceset onu biler: +1 saldırı"
