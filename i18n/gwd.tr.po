@@ -549,3 +549,18 @@ msgstr "O kart peçeli — blöf çağrısı yapılamaz."
 
 msgid "HINT_ANCHOR"
 msgstr "Çapalı — bu kart yerinden oynayamaz."
+
+msgid "SIGIL_FRENZIED"
+msgstr "Azgın — öldürme sonrası −2 saldırıyla tekrar vurur"
+
+msgid "SIGIL_BULWARK"
+msgstr "Siper — saldırıya uğrayınca karşılık verilemez"
+
+msgid "SIGIL_EYECORNER"
+msgstr "Gözucu — açılışta bir düşman kapalı kartını görürsün"
+
+msgid "HINT_EYECORNER"
+msgstr "Gizli olanı gördün"
+
+msgid "HINT_EYECORNER_HIS"
+msgstr "Kartlarından birini gördü — bir şey öğrendi."

@@ -549,3 +549,18 @@ msgstr "That one is veiled — it cannot be Called."
 
 msgid "HINT_ANCHOR"
 msgstr "Anchored — this card cannot move."
+
+msgid "SIGIL_FRENZIED"
+msgstr "Frenzied — a kill buys a second strike at −2 attack"
+
+msgid "SIGIL_BULWARK"
+msgstr "Bulwark — once attacked, it cannot be answered"
+
+msgid "SIGIL_EYECORNER"
+msgstr "Eyecorner — on reveal, glimpse an enemy concealed card"
+
+msgid "HINT_EYECORNER"
+msgstr "You glimpse what lies hidden"
+
+msgid "HINT_EYECORNER_HIS"
+msgstr "He glimpses one of your cards — a learned read."
