@@ -660,3 +660,15 @@ msgstr "Mist Page"
 
 msgid "CARD_MIST_PAGE_DESC"
 msgstr "0/2 · a fog courier — slides its own lane free"
+
+msgid "CARD_DISSECTOR"
+msgstr "The Dissector"
+
+msgid "CARD_DISSECTOR_DESC"
+msgstr "2/2 · strikes first — the cut comes before the answer"
+
+msgid "CARD_THURIFER"
+msgstr "The Thurifer"
+
+msgid "CARD_THURIFER_DESC"
+msgstr "0/4 · a smoke wall — its killer inherits the curse"
