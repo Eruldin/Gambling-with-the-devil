@@ -38,8 +38,12 @@ izinlerini vermiştir; sorma.
 - **7 günah boss'u** ayrı kurallı; **Çukur masası** (derin kapı) kuralları
   düşürür, kozlarını aynalayır.
 - **Ev Kuralları (§7.1)**: her masada 6 kural setinden biri.
-- **Kart seti**: ~30+ kart, her id'nin özel gravürü var
+- **Kart seti**: 33 kart (26 piyon + 5 trick), her id'nin özel gravürü var
   (`assets_external/card-art/gwd/face_*.png`, 1024×1536 parşömen/woodcut tarzı).
+  Suit dengesi: kılıç 6, kupa 7, tılsım 7, göz 8, trick 5.
+  Son eklenenler (#79-82): bargainer, mist_page, dissector, thurifer,
+  bondsman, alms_sister + trick'ler salt_circle (koruma aşılar),
+  grave_candle (+2 can, zehir temizler).
 - **Sanat**: film bloom+kromatik sapma+hüzme postfx, sinematik açılış,
   vuruş kamerası, prosedürel drone müzik, gerçek tekir kedi, mumlar/fırtına.
 
