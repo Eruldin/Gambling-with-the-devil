@@ -561,6 +561,16 @@ func _start_round() -> void:
 			_remark("r_struck", "")
 	_snap_you = _chips_you
 	_snap_dev = _chips_devil
+	# milestone remarks (§18.2): the run's scars each earn a cold line,
+	# once per run — deeper floors, heavier books, fatter armies
+	if _round == 1 and _run["depth"] >= 3:
+		_remark("depth_" + str(mini(3 * int(_run["depth"] / 3), 9)))
+	if _debt >= 60:
+		_remark("debt_60")
+	elif _debt >= 30:
+		_remark("debt_30")
+	if _run["spoils"].size() >= 5:
+		_remark("spoils")
 	# debug: GWD_DOORS=1 jumps straight to the door pick for visual checks
 	if _round == 1 and OS.get_environment("GWD_DOORS") == "1":
 		_phase = Phase.EVENT
@@ -1354,6 +1364,7 @@ func _spawn_event_cards() -> void:
 		"event_confessor": "face_confessor.png",
 		"event_toll": "face_tollgate.png", "event_reliquary": "face_reliquary.png",
 		"event_altar": "face_altar.png", "event_duel": "face_duel.png",
+		"event_turncoat": "face_turncoat.png",
 		"event_pit": "face_pit.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
@@ -1372,6 +1383,7 @@ func _spawn_event_cards() -> void:
 		pool.append("event_taxidermist")
 		pool.append("event_pact")
 		pool.append("event_duel")
+		pool.append("event_turncoat")
 	if _run["depth"] >= 5:
 		pool.append("event_pit")        # §8: the Pit can answer the deep doors
 	pool.shuffle()
@@ -1618,6 +1630,17 @@ func _resolve_event(card) -> void:
 			_run["purse"] += prize
 			_run["ordeal"] = true
 			_hint(tr("EV_DUEL") % prize)
+		"event_turncoat":
+			# §18 the Turncoat (Betrayal): one of his souls deserts to
+			# your pile — free, but he hates a deserter; the temper and
+			# the cruelty you stoke ride into the next table with him
+			var tsids: Array = CardDef.spoil_ids()
+			var deserter: String = str(tsids[randi() % tsids.size()])
+			_run["spoils"].append(deserter)
+			_hint(tr("EV_TURNCOAT") + " "
+				+ tr(CardDef.spoil(deserter).name_key))
+			_bump("anger", 0.6)
+			_bump("cruelty", 0.3)
 		"event_reliquary":
 			# §18 the Reliquary: a forgotten soul waits in its niche —
 			# it joins your spoils without a fight

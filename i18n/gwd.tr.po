@@ -942,3 +942,33 @@ msgstr "%d ruh sayıyor — ve sana mal olacaklarına gülümsüyor."
 
 msgid "AZRAIL_DOOR_DUEL"
 msgstr "Peşin ödenen de ödenmiş sayılır. Faizi hep ben alırım."
+
+msgid "CARD_EVENT_TURNCOAT"
+msgstr "Hain"
+
+msgid "CARD_EVENT_TURNCOAT_DESC"
+msgstr "onun bir ruhu sana kaçıyor — unutmuyor"
+
+msgid "EV_TURNCOAT"
+msgstr "Bir ruh keçenin onun tarafından sıvışıyor — artık senin:"
+
+msgid "AZRAIL_DOOR_TURNCOAT"
+msgstr "Kaçak, bacaklı bir borçtur. Tahsilini hep yaparım."
+
+msgid "AZRAIL_DEPTH_3"
+msgstr "Üçüncü kat aşağıda. Merdiveni hep sen seçiyorsun — not ettim."
+
+msgid "AZRAIL_DEPTH_6"
+msgstr "Altı kapı geride. Çoğu borçlu dörtten döner."
+
+msgid "AZRAIL_DEPTH_9"
+msgstr "Dokuz. Ya kazanıyorsun ya açlıktan ölüyorsun — ikisi de eğlenceli."
+
+msgid "AZRAIL_DEBT_30"
+msgstr "Defter artık koltuğundan ağır."
+
+msgid "AZRAIL_DEBT_60"
+msgstr "Altmış ruh. Oynamayı bıraksam bile seninim."
+
+msgid "AZRAIL_SPOILS"
+msgstr "Küçük bir ordu taşıyorsun — her başı tek tek saydım."
