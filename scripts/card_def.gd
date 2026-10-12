@@ -64,6 +64,9 @@ static func starter_deck() -> Array:
 		make("dissector", "blades", 2, 2, 2, 1, "res://assets_external/card-art/gwd/face_dissector.png", ["sharp", "venom"]),
 		# a writhing cheap striker — venom on the tooth, frenzy in the coil
 		make("graveworm", "blades", 1, 2, 1, 1, "res://assets_external/card-art/gwd/face_graveworm.png", ["venom", "frenzied"]),
+		# a headsman's heavier brother — slow, certain, and the blade
+		# remembers: what it kills stays killed (executioner + anchor)
+		make("pallbearer", "blades", 2, 1, 5, 1, "res://assets_external/card-art/gwd/face_pallbearer.png", ["executioner", "bulwark"]),
 		make("warden", "chalices", 0, 1, 3, 1, "res://assets_external/card-art/gwd/face_warden.png", ["revival", "bulwark"]),
 		# §2.2 support pair: the Deacon blesses its lane's striker from
 		# the sheltered rank; the Gravedigger feeds on friendly deaths
@@ -81,6 +84,9 @@ static func starter_deck() -> Array:
 		# he comes for what is owed at night — plated, patient,
 		# and every chip he touches is written down as debt
 		make("night_collector", "pentacles", 2, 1, 3, 1, "res://assets_external/card-art/gwd/face_night_collector.png", ["loan_shark", "shell"]),
+		# a safe that walks — everything it touches skims into the pot,
+		# and wax seals keep the first wound from opening it
+		make("strongbox", "pentacles", 2, 0, 4, 1, "res://assets_external/card-art/gwd/face_strongbox.png", ["pot_cut", "waxhide"]),
 		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap", "veil"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic", "eyecorner"]),
 		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),
@@ -96,6 +102,8 @@ static func starter_deck() -> Array:
 		make("alms_sister", "chalices", 1, 0, 3, 1, "res://assets_external/card-art/gwd/face_alms_sister.png", ["tithe", "shell"]),
 		# a stone saint that weeps real alms — a wall that pays
 		make("weeping_idol", "chalices", 2, 0, 5, 1, "res://assets_external/card-art/gwd/face_weeping_idol.png", ["bulwark", "tithe"]),
+		# a drowned bell-ringer — comes back wet, rings once for the pot
+		make("drowned_bellman", "chalices", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_drowned_bellman.png", ["revival", "tithe"]),
 		make("eyes_servant", "eyes", 2, 1, 3, 1, "res://assets_external/card-art/gwd/face_eyes_servant.png", ["eyecorner"]),
 		make("mirror_hound", "eyes", 2, 1, 1, 1, "res://assets_external/card-art/gwd/face_mirror_hound.png", ["mimic"]),
 		# doc §6 Blöfcü: a concealed trap — it is nothing on the felt,
@@ -107,6 +115,9 @@ static func starter_deck() -> Array:
 		# it writes the dead's debts in the margin — sees around
 		# its own wall and reaches the sheltered rank behind
 		make("dust_scribe", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_dust_scribe.png", ["eyecorner", "reach"]),
+		# a moth-winged oracle — flits lanes, and whatever reads it
+		# pays for the look (veil + swap)
+		make("moth_oracle", "eyes", 1, 0, 2, 1, "res://assets_external/card-art/gwd/face_moth_oracle.png", ["veil", "swap"]),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_pale_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_tithe.png"),
