@@ -819,3 +819,42 @@ msgstr "Güve Kahini"
 
 msgid "CARD_MOTH_ORACLE_DESC"
 msgstr "Tozlu kanatlarla kulvar gezer; okunmaya karşı peçeli."
+
+msgid "AZRAIL_DOOR_WHISPER"
+msgstr "Fısıltılar sattıklarının iki katını alır."
+
+msgid "AZRAIL_DOOR_WHEEL"
+msgstr "Çark bana da borçlu. Hiç ödemez."
+
+msgid "AZRAIL_DOOR_COVENANT"
+msgstr "Masada benimle pazarlık. Kurnaz."
+
+msgid "AZRAIL_DOOR_LEDGER"
+msgstr "Rakamlar dürüsttür. Tefeciyi o yüzden tutarım."
+
+msgid "AZRAIL_DOOR_MIRROR"
+msgstr "O ayna benim. Gördüğün her neyse önce benimdi."
+
+msgid "AZRAIL_DOOR_FURNACE"
+msgstr "İyi besle — hep ikinci porsiyonu ister."
+
+msgid "AZRAIL_DOOR_TAXIDERMIST"
+msgstr "Ölüleri artıklarla doldurur. İştah açıcı."
+
+msgid "AZRAIL_DOOR_PACT"
+msgstr "Borç görüş alır. Seninki benimkinden pahalıya patlar."
+
+msgid "AZRAIL_DOOR_CONFESSOR"
+msgstr "Diz çökenler konuşanlardan fazlasını söyler."
+
+msgid "AZRAIL_DOOR_TOLL"
+msgstr "Peşin ödüyorsun. Ev, planlı olanı sever."
+
+msgid "AZRAIL_DOOR_RELIQUARY"
+msgstr "Bedava bir ruh. Burada hiçbir şey bedava değil — hele o hiç."
+
+msgid "AZRAIL_DOOR_PIT"
+msgstr "Benim masam. Benim kurallarım. Yine de oturdun."
+
+msgid "AZRAIL_DOOR_SIN"
+msgstr "Kapıyı çaldın. Onlar hep açar."

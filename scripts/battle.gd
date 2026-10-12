@@ -1545,6 +1545,13 @@ func _resolve_event(card) -> void:
 	_sfx.play(Sfx.WIN if won_roll else Sfx.LOSE, -12.0)
 	if _devil != null:
 		_devil.watch(card.position, 1.2)
+	# Azrail weighs in on the door you chose — one cold line per door,
+	# appended under the bargain's result so both read together
+	var quip := tr("AZRAIL_DOOR_" + card.def.id.to_upper().trim_prefix("EVENT_"))
+	if not quip.begins_with("AZRAIL_DOOR_"):   # untranslated keys echo back
+		_hint(_l_hint.text + "\n" + quip)
+		if _devil != null:
+			_devil.eyes_flare(0.5)
 	_descend()
 
 ## At the door, embers buy a cleaner deck — 15 burns one counterfeit

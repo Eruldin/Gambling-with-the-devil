@@ -819,3 +819,42 @@ msgstr "Moth Oracle"
 
 msgid "CARD_MOTH_ORACLE_DESC"
 msgstr "Flits lanes on dusty wings; veiled against being read."
+
+msgid "AZRAIL_DOOR_WHISPER"
+msgstr "The whispers charge double what they sell."
+
+msgid "AZRAIL_DOOR_WHEEL"
+msgstr "The wheel owes me too. It never pays."
+
+msgid "AZRAIL_DOOR_COVENANT"
+msgstr "A bargain with me under the table. Shrewd."
+
+msgid "AZRAIL_DOOR_LEDGER"
+msgstr "Numbers are honest. That is why I keep a usurer."
+
+msgid "AZRAIL_DOOR_MIRROR"
+msgstr "I own that mirror. Whatever you saw was mine first."
+
+msgid "AZRAIL_DOOR_FURNACE"
+msgstr "Feed it well — it always asks for seconds."
+
+msgid "AZRAIL_DOOR_TAXIDERMIST"
+msgstr "He stuffs the dead with leftovers. Appetizing."
+
+msgid "AZRAIL_DOOR_PACT"
+msgstr "Debt buys eyesight. Yours costs more than mine."
+
+msgid "AZRAIL_DOOR_CONFESSOR"
+msgstr "Kneelers tell me more than talkers."
+
+msgid "AZRAIL_DOOR_TOLL"
+msgstr "Paying ahead. The house loves a planner."
+
+msgid "AZRAIL_DOOR_RELIQUARY"
+msgstr "A free soul. Nothing here is free — least of all that."
+
+msgid "AZRAIL_DOOR_PIT"
+msgstr "My table. My rules. You sat anyway."
+
+msgid "AZRAIL_DOOR_SIN"
+msgstr "You knocked. They always answer."
