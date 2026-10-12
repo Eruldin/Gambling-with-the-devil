@@ -762,3 +762,27 @@ msgstr "Soğuk demir sahteyi bulur ve yakar. 2 çip öder."
 
 msgid "TRICK_ASH"
 msgstr "%s ateşi besler — pot et kokar."
+
+msgid "CARD_GRAVEWORM"
+msgstr "Mezar Kurdu"
+
+msgid "CARD_GRAVEWORM_DESC"
+msgstr "Ucuz kıvranan bir vurucu — dişinde zehir, halkasında kudurganlık."
+
+msgid "CARD_NIGHT_COLLECTOR"
+msgstr "Gece Tahsildarı"
+
+msgid "CARD_NIGHT_COLLECTOR_DESC"
+msgstr "Zırhlı ve sabırlı; dokunduğu her çip borç diye yazılır."
+
+msgid "CARD_WEEPING_IDOL"
+msgstr "Ağlayan Put"
+
+msgid "CARD_WEEPING_IDOL_DESC"
+msgstr "Gerçek sadaka ağlayan bir taş aziz — ödeyen bir duvar."
+
+msgid "CARD_DUST_SCRIBE"
+msgstr "Toz Katibi"
+
+msgid "CARD_DUST_SCRIBE_DESC"
+msgstr "Kendi duvarının arkasından görür ve korunan sıraya ulaşır."
