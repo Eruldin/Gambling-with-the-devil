@@ -547,6 +547,8 @@ func _draw_hand() -> void:
 		_pot += 2
 		_pulse(_l_pot)
 		_update_chips()
+		# the first bleed gets his voice — thin decks are his favourite
+		_remark("souldraw", "HINT_SOULDRAW")
 		return
 	if _rule == "passage_toll":
 		# §7.1 Geçiş Resmi — every draw pays a chip into the pot
@@ -732,7 +734,7 @@ func _try_place(lane: int, row := 0) -> void:
 		# doc §6 Ahdili Domuz — the wall binds you deeper the moment
 		# it hits the felt, whichever side played it
 		_debt += 3
-		_hint(tr("HINT_OWED_PIG"))
+		_remark("owed_pig", "HINT_OWED_PIG")
 	_reflow_hand()
 	_update_chips()
 	_hint(tr("HINT_PLACE_MORE"))
@@ -1557,6 +1559,19 @@ func _bump(axis: String, amt: float) -> void:
 			_reflow_hand()
 			_hint(tr("ANGER_STEAL"))
 
+## §18.2 situational remarks — one spoken line per named moment, kept for
+## the whole run so he never repeats himself. A key already spent falls
+## back to the generic line instead of silence.
+func _remark(key: String, fallback := "") -> void:
+	if _taunted.has(key):
+		if fallback != "":
+			_hint(tr(fallback))
+		return
+	_taunted[key] = true
+	_hint(tr("AZRAIL_" + key.to_upper()))
+	if _devil != null:
+		_devil.eyes_flare(0.6)
+
 ## Raise (§2.3): stake extra chips into the pot, up to 5 per round.
 func raise() -> void:
 	if _phase != Phase.PLACE or _raise_used >= RAISE_MAX:
@@ -1572,6 +1587,9 @@ func raise() -> void:
 	_sfx.play(Sfx.CHIP_HANDLE, -8.0)
 	_pulse(_l_pot)
 	_update_chips()
+	if _pot >= 30:
+		# the first truly fat pot gets a remark — he appreciates the stakes
+		_remark("big_pot")
 
 func wager_accept() -> void:
 	if not _wager_pending:
@@ -1585,6 +1603,7 @@ func wager_accept() -> void:
 	_phase = Phase.BUSY
 	_round += 1
 	_start_round()
+	_remark("wager_yes")
 
 func wager_decline() -> void:
 	if not _wager_pending:
@@ -1614,7 +1633,7 @@ func _call_bluff(card) -> void:
 		_erow(card.row).erase(card.lane)
 		_area_to_card.erase(card.get_area())
 		card.burn()
-		_hint(tr("CALL_BLUFF"))
+		_remark("bluff_caught", "CALL_BLUFF")
 		if _devil != null:
 			_devil.eyes_flare(1.0)
 			_devil.strike_pose(0.0, true)
@@ -1654,7 +1673,7 @@ func mulligan() -> void:
 	_mulligan_used = true
 	_redeal()
 	_bump("boredom", 0.15)   # hesitation bores him
-	_hint(tr("MULLIGAN"))
+	_remark("mulligan", "MULLIGAN")
 
 func _redeal() -> void:
 	var n := _hand.size()

@@ -702,3 +702,24 @@ msgstr "Sadaka Rahibesi"
 
 msgid "CARD_ALMS_SISTER_DESC"
 msgstr "0/3 · tası iki çip öder — kurbanı kalın"
+
+msgid "AZRAIL_BLUFF_CAUGHT"
+msgstr "Yalanı gördün. İlk gören değilsin — ama en gürültülüsün."
+
+msgid "AZRAIL_MULLIGAN"
+msgstr "Eli beğenmedin. Dağıtan bendim — unutma."
+
+msgid "AZRAIL_OWED_PIG"
+msgstr "Domuzu tanıdın mı? Borcun o suratı taşıyor."
+
+msgid "AZRAIL_WAGER_YES"
+msgstr "İşte benim oyuncum. Benim için biraz daha kan."
+
+msgid "AZRAIL_SOULDRAW"
+msgstr "Desten bitti. Şimdi kanındaki kartları sayıyoruz."
+
+msgid "AZRAIL_BIG_POT"
+msgstr "Güzel yığın. Birisi alana kadar güzel."
+
+msgid "HINT_SOULDRAW"
+msgstr "Deste boş — her çekiş potta 2 çip kanar"
