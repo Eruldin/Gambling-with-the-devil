@@ -539,6 +539,10 @@ func _start_round() -> void:
 	_update_chips()
 	_sfx.play(Sfx.SHUFFLE, -8.0)
 	_check_over()
+	# debug: GWD_DOORS=1 jumps straight to the door pick for visual checks
+	if _round == 1 and OS.get_environment("GWD_DOORS") == "1":
+		_phase = Phase.EVENT
+		_spawn_event_cards()
 
 func _draw_hand() -> void:
 	if _hand.size() >= _hand_cap:
@@ -1345,7 +1349,9 @@ func _spawn_event_cards() -> void:
 		card.def = defs[i]
 		add_child(card)
 		card.setup(load(defs[i].face_file), _back_tex)
-		var pos := Vector3(-0.17 + i * 0.17, _top + 0.028, 0.03)
+		# §18 the doors rise from the felt standing — tall slabs
+		# facing the player, not cards lying flat on the table
+		var pos := Vector3(-0.19 + i * 0.19, _top + 0.082, -0.02)
 		card.position = pos + Vector3(0, 0.5, 0)
 		card.scale = Vector3.ONE * 0.001
 		_area_to_card[card.get_area()] = card
@@ -1353,10 +1359,10 @@ func _spawn_event_cards() -> void:
 		var tw := create_tween().set_trans(Tween.TRANS_CUBIC) \
 			.set_ease(Tween.EASE_OUT)
 		tw.tween_interval(0.14 * i)
-		tw.tween_property(card, "position", pos, 0.5)
+		tw.tween_property(card, "position", pos, 0.55)
 		tw.parallel().tween_property(card, "scale",
-			Vector3.ONE * 0.9, 0.5)
-		card.set_base(pos, Vector3.ZERO)
+			Vector3(1.0, 1.35, 1.0), 0.55)
+		card.set_base(pos, Vector3(PI * 0.5, 0, 0))
 	if _devil != null:
 		_devil.watch(Vector3(0, _top + 0.05, 0.03), 1.4)
 	# §18 Azrail event: at the doors he speaks to the strongest thing
