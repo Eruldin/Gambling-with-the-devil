@@ -672,3 +672,21 @@ msgstr "The Thurifer"
 
 msgid "CARD_THURIFER_DESC"
 msgstr "0/4 · a smoke wall — its killer inherits the curse"
+
+msgid "CARD_SALT_CIRCLE"
+msgstr "Salt Circle"
+
+msgid "CARD_SALT_CIRCLE_DESC"
+msgstr "trick · wards a pawn — grafts Protection onto it"
+
+msgid "CARD_GRAVE_CANDLE"
+msgstr "Grave Candle"
+
+msgid "CARD_GRAVE_CANDLE_DESC"
+msgstr "trick · knits 2 wounds, burns the venom out"
+
+msgid "TRICK_SALT"
+msgstr "Salt seals the circle — %s is warded"
+
+msgid "TRICK_CANDLE"
+msgstr "The grave candle gutters — %s's wounds knit"

@@ -97,6 +97,10 @@ static func starter_deck() -> Array:
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_pale_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_tithe.png"),
 		make_trick("razor", "blades", 1, "res://assets_external/card-art/gwd/face_razor.png"),
+		# warding pair: the Circle grafts Protection, the Candle
+		# knits wounds and burns the venom out of the blood
+		make_trick("salt_circle", "eyes", 1, "res://assets_external/card-art/gwd/face_salt_circle.png"),
+		make_trick("grave_candle", "chalices", 1, "res://assets_external/card-art/gwd/face_grave_candle.png"),
 	]
 
 ## §18: Azrail's deck hardens down the Descent — his pawns sharpen one

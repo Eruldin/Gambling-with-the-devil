@@ -627,10 +627,17 @@ func click(collider) -> void:
 			_hint(tr("HINT_CALL"))
 		return
 	var pad = _pad_areas.get(collider)
-	# razor target mode — one revealed pawn of yours takes the edge
+	# armed-trick target mode — one revealed pawn of yours takes it
 	if _trick_armed != null:
-		if card != null and _board_p.values().has(card) 			and not card.face_down:
-			_resolve_razor(card)
+		if card != null and _board_p.values().has(card) \
+			and not card.face_down:
+			match _trick_armed.def.id:
+				"salt_circle":
+					_resolve_salt(card)
+				"grave_candle":
+					_resolve_candle(card)
+				_:
+					_resolve_razor(card)
 		else:
 			_trick_cancel()
 		return
@@ -1855,7 +1862,7 @@ func _play_trick(card) -> void:
 				_hint(tr("TRICK_TITHE_NONE"))
 				_sfx.play(Sfx.DENIED, -10.0)
 				return
-		"razor":
+		"razor", "salt_circle", "grave_candle":
 			_trick_arm(card)
 			return
 	_blood -= card.def.blood_cost
@@ -1971,6 +1978,34 @@ func _resolve_razor(target) -> void:
 	_burst(target.position + Vector3(0, 0.03, 0),
 		Color(0.75, 0.75, 0.8), 18, 0.01, 0.4)
 	_hint(tr("TRICK_RAZOR") % tr(target.def.name_key))
+	_burn_trick(card)
+
+func _resolve_salt(target) -> void:
+	var card = _trick_armed
+	_trick_armed = null
+	card.set_selected(false)
+	# §5 the Salt Circle wards a pawn — grafted Protection turns the
+	# Hot Iron and his reads aside for the rest of this battle
+	if not target.def.sigils.has("protection"):
+		target.def.sigils.append("protection")
+	target.flash()
+	_burst(target.position + Vector3(0, 0.03, 0),
+		Color(0.9, 0.88, 0.8), 18, 0.01, 0.4)
+	_hint(tr("TRICK_SALT") % tr(target.def.name_key))
+	_burn_trick(card)
+
+func _resolve_candle(target) -> void:
+	var card = _trick_armed
+	_trick_armed = null
+	card.set_selected(false)
+	# §5 the Grave Candle tends the wounds — +2 health (never past
+	# its birth strength) and the venom in its blood burns out
+	target.hp = min(target.hp + 2, float(target.def.health))
+	target.venom = 0
+	target.flash()
+	_burst(target.position + Vector3(0, 0.03, 0),
+		Color(0.9, 0.62, 0.2), 18, 0.01, 0.45)
+	_hint(tr("TRICK_CANDLE") % tr(target.def.name_key))
 	_burn_trick(card)
 	_bump("respect", 0.15)
 	_sfx.play(Sfx.SLIDE, -8.0)
