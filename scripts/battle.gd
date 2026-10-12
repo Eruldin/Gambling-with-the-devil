@@ -72,6 +72,8 @@ var _l_effigies: Label    # opening redeal — once per battle
 var _psyche := {"cruelty": 0.0, "curiosity": 0.0, "anger": 0.0,
 	"respect": 0.0, "boredom": 0.0}
 var _taunted := {}
+var _snap_you := -1            # chip counts at the last round start —
+var _snap_dev := -1           # the delta tells him how the hand went
 var _pot_pile: Array = []
 var _selected = null
 var _hovered_card = null
@@ -539,6 +541,15 @@ func _start_round() -> void:
 	_update_chips()
 	_sfx.play(Sfx.SHUFFLE, -8.0)
 	_check_over()
+	# round-delta remarks: he comments on how the last hand went —
+	# a heavy bleed gets his appetite, a deep strike gets his regard
+	if _snap_you >= 0:
+		if _snap_you - _chips_you >= 8:
+			_remark("r_bled", "")
+		elif _snap_dev - _chips_devil >= 8:
+			_remark("r_struck", "")
+	_snap_you = _chips_you
+	_snap_dev = _chips_devil
 	# debug: GWD_DOORS=1 jumps straight to the door pick for visual checks
 	if _round == 1 and OS.get_environment("GWD_DOORS") == "1":
 		_phase = Phase.EVENT
@@ -798,6 +809,7 @@ func _sacrifice_card(card) -> void:
 	_update_chips()
 	_hint("%s +%d %s" % [tr("SACRIFICED"), card.def.sacrifice_value \
 		+ (1 if "shell" in card.def.sigils else 0), tr("BLOOD")])
+	_remark("sacrifice", "")    # the first offering earns a word
 	_burst(card.position + Vector3(0, 0.02, 0), Color(0.45, 0.02, 0.02),
 		26, 0.012, 0.55)
 	_sfx.play(Sfx.SHOVE, -6.0)
