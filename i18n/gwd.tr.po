@@ -660,3 +660,15 @@ msgstr "Sis Yaveri"
 
 msgid "CARD_MIST_PAGE_DESC"
 msgstr "0/2 · sis ulak — kendi kulvarını boşaltır"
+
+msgid "CARD_DISSECTOR"
+msgstr "Kesici"
+
+msgid "CARD_DISSECTOR_DESC"
+msgstr "2/2 · ilk o vurur — kesik cevaptan önce gelir"
+
+msgid "CARD_THURIFER"
+msgstr "Buhurdan"
+
+msgid "CARD_THURIFER_DESC"
+msgstr "0/4 · bir duman duvarı — katili laneti devralır"

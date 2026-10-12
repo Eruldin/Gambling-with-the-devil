@@ -60,6 +60,8 @@ static func starter_deck() -> Array:
 		# §2.2/§3.3 Reach: the pikeman strikes over his own wall —
 		# a back-rank guard can't hide from the point
 		make("halberd", "blades", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_halberd.png", ["reach"]),
+		# the blades' first-strike pawn — cuts before the answer comes
+		make("dissector", "blades", 2, 2, 2, 1, "res://assets_external/card-art/gwd/face_dissector.png", ["sharp", "venom"]),
 		make("warden", "chalices", 0, 1, 3, 1, "res://assets_external/card-art/gwd/face_warden.png", ["revival", "bulwark"]),
 		# §2.2 support pair: the Deacon blesses its lane's striker from
 		# the sheltered rank; the Gravedigger feeds on friendly deaths
@@ -81,6 +83,8 @@ static func starter_deck() -> Array:
 		# seal proper, and the Mirror Hound wears the foe it meets.
 		make("owed_pig", "pentacles", 1, 4, 4, 1, "res://assets_external/card-art/gwd/face_owed_pig.png"),
 		make("choir_leech", "chalices", 1, 1, 3, 1, "res://assets_external/card-art/gwd/face_choir_leech.png"),
+		# a smoke wall that curses whatever kills it
+		make("thurifer", "chalices", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_thurifer.png", ["haunt", "bulwark"]),
 		make("eyes_servant", "eyes", 2, 1, 3, 1, "res://assets_external/card-art/gwd/face_eyes_servant.png", ["eyecorner"]),
 		make("mirror_hound", "eyes", 2, 1, 1, 1, "res://assets_external/card-art/gwd/face_mirror_hound.png", ["mimic"]),
 		# doc §6 Blöfcü: a concealed trap — it is nothing on the felt,
