@@ -451,6 +451,7 @@ func _start_round() -> void:
 				Color(1.0, 0.8, 0.2) if won else Color(0.5, 0.1, 0.4),
 				14, 0.01, 0.45)
 			_hint((tr("PRIESTESS_WON") if won else tr("PRIESTESS_LOST")))
+			_sfx.play(Sfx.DICE, -10.0)
 	for e in _all_e():
 		if not e.face_down and e.def != null and e.def.id == "priestess":
 			var devil_won := true if _his_loaded else _roll_chance()
@@ -463,6 +464,7 @@ func _start_round() -> void:
 				Color(1.0, 0.8, 0.2) if devil_won else Color(0.5, 0.1, 0.4),
 				14, 0.01, 0.45)
 			_hint(tr("PRIESTESS_DEVIL"))
+			_sfx.play(Sfx.DICE, -10.0)
 	_chips_you -= ante
 	_chips_devil -= ante
 	_pot += ante * 2
@@ -1257,6 +1259,7 @@ func _finish_over(won: bool) -> void:
 		var spoil_ids: Array = CardDef.spoil_ids()
 		_run["spoils"].append(spoil_ids[randi() % spoil_ids.size()])
 		_l_phase.text = tr("GAME_OVER")
+		_sfx.play(Sfx.CHIP_STACK, -6.0)   # the pot counts itself out
 		_sfx.play(Sfx.WIN, -4.0)
 		_hint(tr("HINT_EVENT") + (" " + tr("HINT_EMBER")
 			if _run["embers"] >= EMBER_CLEANSE else ""))
@@ -1299,6 +1302,7 @@ func _reset_run() -> void:
 ## Three door cards drop face-up on the felt — the Whisper (small
 ## gamble), the Wheel (big gamble), the Covenant (safe passage).
 func _spawn_event_cards() -> void:
+	_sfx.play(Sfx.PACK_OPEN, -8.0)      # the doors fan open on the felt
 	# §18 event-template pool: doors dealt depend on how deep the run
 	# has gone — the Ledger and the Mirror only open deeper down.
 	var faces := {
@@ -1599,7 +1603,7 @@ func raise() -> void:
 	_bump("curiosity", 0.5)
 	if _devil != null:
 		_devil.watch(Vector3(0, _top + 0.04, 0.02), 1.2)
-	_sfx.play(Sfx.CHIP_HANDLE, -8.0)
+	_sfx.play(Sfx.CHIP_LAY, -8.0)
 	_pulse(_l_pot)
 	_update_chips()
 	if _pot >= 30:
@@ -1686,6 +1690,7 @@ func mulligan() -> void:
 		_hint(tr("HINT_NOMULL"))
 		return
 	_mulligan_used = true
+	_sfx.play(Sfx.TAKE_OUT, -8.0)   # he sweeps the hand back first
 	_redeal()
 	_bump("boredom", 0.15)   # hesitation bores him
 	_remark("mulligan", "MULLIGAN")
@@ -1725,18 +1730,22 @@ func use_trump(idx: int) -> void:
 				_sfx.play(Sfx.DENIED, -10.0)
 				return
 			_hint(tr("TRUMP_PEEKED"))
+			_sfx.play(Sfx.FAN, -8.0)
 		"cold_deck":
 			_redeal()
 			_hint(tr("TRUMP_COLD"))
 		"marked_cards":
 			_marked_active = true
 			_hint(tr("TRUMP_MARKED"))
+			_sfx.play(Sfx.SLIDE, -10.0)
 		"loaded_dice":
 			_loaded_next = true
 			_hint(tr("TRUMP_LOADED"))
+			_sfx.play(Sfx.DICE, -6.0)
 		"mirrored_coin":
 			_mirrored = true
 			_hint(tr("TRUMP_MIRRORED"))
+			_sfx.play(Sfx.GLASS, -8.0)
 	if _pit_table:
 		_mirror_trump(id)
 	_trumps.remove_at(idx)
@@ -1924,6 +1933,7 @@ func _burn_trick(card) -> void:
 	card.burn()
 
 func _dead_to_hand(d: CardDef) -> void:
+	_sfx.play(Sfx.TAKE_OUT, -10.0)  # the tithe slides it back out
 	var card := GameCard.new()
 	card.def = d
 	add_child(card)
@@ -1998,6 +2008,7 @@ func _trick_cancel() -> void:
 		_blood += card.def.blood_cost   # the edge goes back, unpaid
 		_hand.append(card)
 		_reflow_hand()
+	_sfx.play(Sfx.BACK, -10.0)
 	_hint(tr("HINT_PLACE"))
 
 func _resolve_razor(target) -> void:
