@@ -98,7 +98,8 @@ static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
 	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {},
-	"pact": false, "confessed": false, "toll": false, "pit_next": false}
+	"pact": false, "confessed": false, "toll": false, "pit_next": false,
+	"ordeal": false}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _anger_lies := false  # §18.2: carried anger packs his sleeve
@@ -109,6 +110,7 @@ var _pact := false         # the Pact: debt bought louder tells
 var _toll := false         # the Tollgate: paid up front, taxes waived
 var _rule := ""            # §7.1 the house rule hanging over this table
 var _pit_table := false    # §8 the Pit — his last table, rules dropped
+var _ordeal_table := false # §18 the Ordeal: the Test you sold your ease for
 var _pit_cheated := false  # his one visible cheat already spent
 var _his_loaded := false   # Pit mirror: his next roll wins outright
 var _his_mirrored := false # Pit mirror: one lost roll rerolled
@@ -270,6 +272,12 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	_run["pit_next"] = false
 	if _pit_table:
 		_chips_devil += 25
+	# §18 the Ordeal: you took his purse — this table seats deeper
+	# ambush and a fatter pile, and the blinds open meaner
+	_ordeal_table = bool(_run["ordeal"])
+	_run["ordeal"] = false
+	if _ordeal_table:
+		_chips_devil += 5
 	# §7.1 Ev Kuralları — a house rule hangs over every table and
 	# bends its rules for the whole fight; the Descent picks the
 	# poison (rotates by depth and tables won)
@@ -282,7 +290,8 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# §18 ambush: from the third door down he's already seated pawns
 	# face-down — deeper tables start rigged against you
 	var ambush := mini(maxi(_run["depth"] - 2, 0)
-		+ (1 if _cruel_seats else 0) + (1 if _sin_idx == 5 else 0),
+		+ (1 if _cruel_seats else 0) + (1 if _sin_idx == 5 else 0)
+		+ (1 if _ordeal_table else 0),
 		4 if _sin_idx == 5 else 3)
 	for i in range(ambush):
 		var free_l: Array = []
@@ -433,6 +442,8 @@ func _start_round() -> void:
 		ante += 2                  # a sin at the table raises the tithe
 	if _bored_ante:
 		ante += 1                  # boredom hurries the blinds (§18.2)
+	if _ordeal_table:
+		ante += 2                  # the Ordeal's price on every hand (§18)
 	ante += _sin_ante            # Greed's tithe (§18.3)
 	if _pit_table:
 		ante += 4                  # the Pit bleeds four a hand
@@ -1342,6 +1353,7 @@ func _spawn_event_cards() -> void:
 		"event_taxidermist": "face_taxidermist.png", "event_pact": "face_votary.png",
 		"event_confessor": "face_confessor.png",
 		"event_toll": "face_tollgate.png", "event_reliquary": "face_reliquary.png",
+		"event_altar": "face_altar.png", "event_duel": "face_duel.png",
 		"event_pit": "face_pit.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
@@ -1354,9 +1366,12 @@ func _spawn_event_cards() -> void:
 	if _run["depth"] >= 3:
 		pool.append("event_mirror")
 		pool.append("event_reliquary")
+	if _run["depth"] >= 3:
+		pool.append("event_altar")
 	if _run["depth"] >= 4:
 		pool.append("event_taxidermist")
 		pool.append("event_pact")
+		pool.append("event_duel")
 	if _run["depth"] >= 5:
 		pool.append("event_pit")        # §8: the Pit can answer the deep doors
 	pool.shuffle()
@@ -1436,6 +1451,10 @@ func _roll_event_params(id: String) -> Dictionary:
 			p.stake = 6 + randi() % 5        # owe 6..10
 		"event_confessor":
 			p.prize = 2 + randi() % 3        # absolves 2..4 of debt
+		"event_altar":
+			p.prize = 6 + randi() % 7        # pays 6..12 for the burnt spoil
+		"event_duel":
+			p.prize = 12 + randi() % 7       # 12..18 up front, meaner table
 	return p
 
 ## The promise a door makes on hover — real numbers, not flavor.
@@ -1455,6 +1474,10 @@ func _event_terms(id: String, p: Dictionary) -> String:
 			return tr("TERMS_PACT") % p.stake
 		"event_confessor":
 			return tr("TERMS_CONFESSOR") % p.prize
+		"event_altar":
+			return tr("TERMS_ALTAR") % p.prize
+		"event_duel":
+			return tr("TERMS_DUEL") % p.prize
 	return ""
 
 ## §18 variant lines: an outcome is narrated differently each time —
@@ -1579,6 +1602,22 @@ func _resolve_event(card) -> void:
 			_run["debt"] += stake
 			_run["toll"] = true
 			_hint(tr("EV_TOLL") % stake)
+		"event_altar":
+			# §18 the Altar (Sacrifice): it burns your newest spoil and
+			# pays the rolled purse — empty-handed, it feeds on you instead
+			if not _run["spoils"].is_empty():
+				_run["spoils"].pop_back()
+				_run["purse"] += prize
+				_hint(tr("EV_ALTAR") % prize)
+			else:
+				_run["debt"] += 4
+				_hint(tr("EV_ALTAR_EMPTY"))
+		"event_duel":
+			# §18 the Ordeal (Test): the purse is real and paid now —
+			# but the next table seats deeper ambush and a fatter pile
+			_run["purse"] += prize
+			_run["ordeal"] = true
+			_hint(tr("EV_DUEL") % prize)
 		"event_reliquary":
 			# §18 the Reliquary: a forgotten soul waits in its niche —
 			# it joins your spoils without a fight
