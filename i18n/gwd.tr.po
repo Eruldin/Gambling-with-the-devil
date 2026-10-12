@@ -786,3 +786,12 @@ msgstr "Toz Katibi"
 
 msgid "CARD_DUST_SCRIBE_DESC"
 msgstr "Kendi duvarının arkasından görür ve korunan sıraya ulaşır."
+
+msgid "AZRAIL_R_BLED"
+msgstr "Tek elde o kadar kan. Buradan hissettim."
+
+msgid "AZRAIL_R_STRUCK"
+msgstr "Derin vurdun. Sende bunu olduğunu düşünmemiştim."
+
+msgid "AZRAIL_SACRIFICE"
+msgstr "Kendi ruhlarını bana yediriyorsun. Devam et."

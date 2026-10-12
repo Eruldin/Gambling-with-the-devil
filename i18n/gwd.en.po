@@ -786,3 +786,12 @@ msgstr "Dust Scribe"
 
 msgid "CARD_DUST_SCRIBE_DESC"
 msgstr "Sees around its own wall and reaches the sheltered rank behind."
+
+msgid "AZRAIL_R_BLED"
+msgstr "That much blood in one hand. I felt it from here."
+
+msgid "AZRAIL_R_STRUCK"
+msgstr "You struck deep. I had not thought you had it in you."
+
+msgid "AZRAIL_SACRIFICE"
+msgstr "Feeding me your own souls now. Keep going."
