@@ -738,6 +738,21 @@ func _try_place(lane: int, row := 0) -> void:
 	_reflow_hand()
 	_update_chips()
 	_hint(tr("HINT_PLACE_MORE"))
+	# §18.2 he recognizes faces at his own table — one remark per
+	# soul, remembered for the run; a spent key leaves the hint alone
+	match card.def.id:
+		"reaper":
+			_remark("c_reaper")
+		"priestess":
+			_remark("c_priestess")
+		"usurer":
+			_remark("c_usurer")
+		"martyr":
+			_remark("c_martyr")
+		"mirror_hound":
+			_remark("c_hound")
+		"bluffer":
+			_remark("c_bluffer")
 	_sfx.play(Sfx.PLACE_P, -6.0)
 
 func _sacrifice_card(card) -> void:

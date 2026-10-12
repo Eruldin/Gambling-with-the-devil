@@ -723,3 +723,21 @@ msgstr "Güzel yığın. Birisi alana kadar güzel."
 
 msgid "HINT_SOULDRAW"
 msgstr "Deste boş — her çekiş potta 2 çip kanar"
+
+msgid "AZRAIL_C_REAPER"
+msgstr "Kendi masamda bir Azrail. Cesaretin hoşuma gitti."
+
+msgid "AZRAIL_C_PRIESTESS"
+msgstr "Yüksek Rahibe. Bana hâlâ bir sikke borcu var."
+
+msgid "AZRAIL_C_USURER"
+msgstr "Kendi tefecim, bana karşı oturuyor. Cesur."
+
+msgid "AZRAIL_C_MARTYR"
+msgstr "Bir şehit daha. Hiç öğrenmiyorlar."
+
+msgid "AZRAIL_C_HOUND"
+msgstr "Tazı aynalar. Neyi yakalayacağına dikkat et."
+
+msgid "AZRAIL_C_BLUFFER"
+msgstr "Sen de destende yalancı besliyorsun. Güzel."
