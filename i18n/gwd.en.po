@@ -723,3 +723,21 @@ msgstr "A fine pile. Fine until somebody takes it."
 
 msgid "HINT_SOULDRAW"
 msgstr "Deck empty — each draw bleeds 2 chips into the pot"
+
+msgid "AZRAIL_C_REAPER"
+msgstr "A reaper at my own table. I like your nerve."
+
+msgid "AZRAIL_C_PRIESTESS"
+msgstr "The High Priestess. She still owes me a coin."
+
+msgid "AZRAIL_C_USURER"
+msgstr "My own usurer, seated against me. Bold."
+
+msgid "AZRAIL_C_MARTYR"
+msgstr "Another martyr. They never learn."
+
+msgid "AZRAIL_C_HOUND"
+msgstr "The hound mirrors. Careful what it catches."
+
+msgid "AZRAIL_C_BLUFFER"
+msgstr "You keep liars in your deck as well. Good."
