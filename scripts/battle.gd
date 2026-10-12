@@ -96,7 +96,7 @@ static var _run := {"depth": 0, "debt": 0, "luck": 0.0, "purse": 0,
 	"won": 0, "embers": 0, "wager_used": false, "cleanse": 0,
 	"psyche": {}, "taunted": [], "spoils": [], "sin_next": false,
 	"sin_idx": 0, "sin_name": "", "broken": [], "grafts": {},
-	"pact": false, "confessed": false, "toll": false}
+	"pact": false, "confessed": false, "toll": false, "pit_next": false}
 var _sin_table := false   # this table is a sin-boss fight (§18 arcs)
 var _sin_offered := false # a sin door was dealt at the last event
 var _anger_lies := false  # §18.2: carried anger packs his sleeve
@@ -106,6 +106,11 @@ var _bored_ante := false   # carried boredom hurries the blinds
 var _pact := false         # the Pact: debt bought louder tells
 var _toll := false         # the Tollgate: paid up front, taxes waived
 var _rule := ""            # §7.1 the house rule hanging over this table
+var _pit_table := false    # §8 the Pit — his last table, rules dropped
+var _pit_cheated := false  # his one visible cheat already spent
+var _his_loaded := false   # Pit mirror: his next roll wins outright
+var _his_mirrored := false # Pit mirror: one lost roll rerolled
+var _his_marked := false   # Pit mirror: his tells go unreadable too
 var _sin_name := ""       # which of the seven is on the throne
 var _sin_idx := -1        # its seat in SIN_NAMES (-1 = no sin table)
 var _sin_ante := 0        # Greed's extra tithe per hand
@@ -256,6 +261,13 @@ func setup(top: float, cam: Camera3D, layer: CanvasLayer, font: Font,
 	# depth-tax on every hand of this table
 	_toll = bool(_run["toll"])
 	_run["toll"] = false
+	# §8 the Pit answers a deep door — his pile swells, the rules
+	# of the house stop mattering, and he will cheat where you
+	# can see it
+	_pit_table = bool(_run["pit_next"])
+	_run["pit_next"] = false
+	if _pit_table:
+		_chips_devil += 25
 	# §7.1 Ev Kuralları — a house rule hangs over every table and
 	# bends its rules for the whole fight; the Descent picks the
 	# poison (rotates by depth and tables won)
@@ -420,6 +432,8 @@ func _start_round() -> void:
 	if _bored_ante:
 		ante += 1                  # boredom hurries the blinds (§18.2)
 	ante += _sin_ante            # Greed's tithe (§18.3)
+	if _pit_table:
+		ante += 4                  # the Pit bleeds four a hand
 	if _rule != "sabbath":
 		for e in _effigies:
 			if e["id"] == "debtor_bell":
@@ -439,7 +453,11 @@ func _start_round() -> void:
 			_hint((tr("PRIESTESS_WON") if won else tr("PRIESTESS_LOST")))
 	for e in _all_e():
 		if not e.face_down and e.def != null and e.def.id == "priestess":
-			var devil_won := _roll_chance()
+			var devil_won := true if _his_loaded else _roll_chance()
+			_his_loaded = false
+			if not devil_won and _his_mirrored:
+				_his_mirrored = false
+				devil_won = _roll_chance()   # the Pit banked his reroll
 			_chips_devil += 3 if devil_won else -1
 			_burst(e.position + Vector3(0, 0.03, 0),
 				Color(1.0, 0.8, 0.2) if devil_won else Color(0.5, 0.1, 0.4),
@@ -495,12 +513,25 @@ func _start_round() -> void:
 	_l_phase.text = "%s %d  ·  %s %d  ·  %s %d  ·  %s" % [tr("DEPTH"),
 		_run["depth"] + 1, tr("ROUND"), _round, tr("BLIND"), ante,
 		tr("RULE_" + _rule.to_upper())]
+	# §8 the Pit: from the fourth hand he stops pretending — every
+	# concealed card you hold turns face-up under his stare, once
+	if _pit_table and _round >= 4 and not _pit_cheated:
+		_pit_cheated = true
+		for c in _all_p():
+			if c.face_down:
+				c.reveal()
+		_hint(tr("PIT_CHEAT"))
+		if _devil != null:
+			_devil.eyes_flare(1.0)
+			_devil.lean_in(0.5)
 	# a sin at the table announces itself on the first hand only —
 	# the throne name rides the phase line until the fight is done
 	if _sin_table and _round == 1:
 		_l_phase.text = tr("SIN_GATE") + ": " + _sin_name
 		_hint(tr("EV_SIN") + " " + _sin_name
 			+ " — " + tr("SIN_RULE_" + str(_sin_idx)))
+	elif _pit_table and _round == 1:
+		_hint(tr("EV_PIT_TABLE"))
 	else:
 		_hint(tr("HINT_PLACE_R1") if _round == 1 else tr("HINT_PLACE"))
 	_update_chips()
@@ -1252,7 +1283,8 @@ func _spawn_event_cards() -> void:
 		"event_mirror": "face_acolyte.png", "event_furnace": "face_furnace.png",
 		"event_taxidermist": "face_taxidermist.png", "event_pact": "face_votary.png",
 		"event_confessor": "face_confessor.png",
-		"event_toll": "face_tollgate.png", "event_reliquary": "face_reliquary.png"}
+		"event_toll": "face_tollgate.png", "event_reliquary": "face_reliquary.png",
+		"event_pit": "face_pit.png"}
 	faces["event_sin"] = "face_reaper.png"
 	var pool: Array = ["event_whisper", "event_wheel", "event_covenant"]
 	if _run["depth"] >= 1:
@@ -1267,6 +1299,8 @@ func _spawn_event_cards() -> void:
 	if _run["depth"] >= 4:
 		pool.append("event_taxidermist")
 		pool.append("event_pact")
+	if _run["depth"] >= 5:
+		pool.append("event_pit")        # §8: the Pit can answer the deep doors
 	pool.shuffle()
 	# every third descent the sin door is dealt — you may walk around
 	# it, but Azrail marks the cowardice (§18: bosses at depths 3,6,9)
@@ -1432,6 +1466,11 @@ func _resolve_event(card) -> void:
 			_run["spoils"].append(gift)
 			_hint(tr("EV_RELIC") + " "
 				+ tr(CardDef.spoil(gift).name_key))
+		"event_pit":
+			# §8 the Pit: the next table is his — rules dropped, trumps
+			# mirrored, one visible cheat guaranteed
+			_run["pit_next"] = true
+			_hint(tr("EV_PIT"))
 		"event_sin":
 			# the sin door: the next table seats one of the seven
 			_run["sin_next"] = true
@@ -1590,7 +1629,8 @@ func _process(delta: float) -> void:
 	# §2.3 tells: a concealed card betrays its weight — real violence can't
 	# stop trembling; a palmed bluff lies unnaturally still.
 	for e in _all_e():
-		if e.face_down and e.def != null:
+		# the Pit's mirrored Marked Cards silences his tells too
+		if e.face_down and e.def != null and not _his_marked:
 			var restless: float = 0.0012 * float(e.def.attack) * (
 				2.5 if _pact else 1.0)
 			var shiver: float = pow(maxf(0.0,
@@ -1656,10 +1696,51 @@ func use_trump(idx: int) -> void:
 		"mirrored_coin":
 			_mirrored = true
 			_hint(tr("TRUMP_MIRRORED"))
+	if _pit_table:
+		_mirror_trump(id)
 	_trumps.remove_at(idx)
 	_update_trumps()
 	_bump("anger", 0.35)      # §4.7 — he always notices a cheat
 	_sfx.play(Sfx.CHIP_HANDLE, -8.0)
+
+## §8 the Pit: at his last table every trump you palm comes back
+## mirrored — the same cheat, pointed at you
+func _mirror_trump(id: String) -> void:
+	match id:
+		"sleeve_ace":
+			# he gets the peek too — one of your concealed cards, read
+			var hidden := []
+			for c in _all_p():
+				if c.face_down:
+					hidden.append(c)
+			if not hidden.is_empty():
+				hidden[randi() % hidden.size()].peeked = true
+		"cold_deck":
+			# a redeal pointed at you: your concealed cards swap lanes
+			var mine := []
+			for c in _all_p():
+				if c.face_down:
+					mine.append(c)
+			if mine.size() >= 2:
+				var spots := []
+				for c in mine:
+					_prow(c.row).erase(c.lane)
+					spots.append([c.lane, c.row])
+				spots.shuffle()
+				for i in range(mine.size()):
+					var c = mine[i]
+					c.lane = int(spots[i][0])
+					c.row = int(spots[i][1])
+					_prow(c.row)[c.lane] = c
+					c.position = _pads[_pad_key("p", c.lane,
+						c.row)].position + Vector3(0, 0.002, 0)
+		"marked_cards":
+			_his_marked = true    # his tells go quiet too
+		"loaded_dice":
+			_his_loaded = true    # his next roll wins outright
+		"mirrored_coin":
+			_his_mirrored = true  # he banks a reroll as well
+	_hint(tr("TRUMP_MIRRORED_PIT"))
 
 func _peek_rehide(card) -> void:
 	# the peek lasts a breath — then the card lies down again

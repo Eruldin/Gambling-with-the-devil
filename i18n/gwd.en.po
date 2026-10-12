@@ -630,3 +630,21 @@ msgstr "Blood Price — your deck enters wounded"
 
 msgid "HINT_RULE_CANDLE"
 msgstr "Candle Watch — no blood may be drawn at this table."
+
+msgid "CARD_EVENT_PIT"
+msgstr "The Pit"
+
+msgid "CARD_EVENT_PIT_DESC"
+msgstr "His table — rules dropped, your trumps mirrored back. Fight."
+
+msgid "EV_PIT"
+msgstr "The Pit. He drops the rules and cheats where you can see it. The next table is his."
+
+msgid "EV_PIT_TABLE"
+msgstr "The Pit — his table. Ante +4. Your trumps will be mirrored at you."
+
+msgid "PIT_CHEAT"
+msgstr "He doesn't even look — every concealed card you hold turns face-up. The rules are gone."
+
+msgid "TRUMP_MIRRORED_PIT"
+msgstr "Mirrored — the same cheat turns on you."
