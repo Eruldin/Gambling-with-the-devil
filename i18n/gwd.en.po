@@ -702,3 +702,24 @@ msgstr "Alms Sister"
 
 msgid "CARD_ALMS_SISTER_DESC"
 msgstr "0/3 · her bowl pays two chips — offers thick"
+
+msgid "AZRAIL_BLUFF_CAUGHT"
+msgstr "You saw the lie. Not the first to — but the loudest."
+
+msgid "AZRAIL_MULLIGAN"
+msgstr "Didn't like the hand. I dealt it — remember that."
+
+msgid "AZRAIL_OWED_PIG"
+msgstr "Recognize the pig? Your debt wears that face."
+
+msgid "AZRAIL_WAGER_YES"
+msgstr "That's my player. Bleed a little more for me."
+
+msgid "AZRAIL_SOULDRAW"
+msgstr "Your deck ran dry. Now we count the cards in your blood."
+
+msgid "AZRAIL_BIG_POT"
+msgstr "A fine pile. Fine until somebody takes it."
+
+msgid "HINT_SOULDRAW"
+msgstr "Deck empty — each draw bleeds 2 chips into the pot"
