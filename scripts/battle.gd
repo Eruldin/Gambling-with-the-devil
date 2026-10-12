@@ -1689,8 +1689,76 @@ func spend_embers() -> void:
 
 func _descend() -> void:
 	_run["depth"] += 1
-	await get_tree().create_timer(1.8).timeout
+	_open_doorway()
+	await get_tree().create_timer(3.4).timeout
 	get_tree().reload_current_scene()
+
+## §18 the chosen door manifests in the room — a doorway rises out of
+## the plank wall beside him, ember-light seeping through. The table
+## pushes you toward it; the dark takes over where the next scene's
+## own walk-in picks up.
+func _open_doorway() -> void:
+	var root := Node3D.new()
+	add_child(root)
+	root.position = Vector3(0.58, 0.0, -1.86)   # in the far wall, right of him
+	root.rotation.y = -0.14
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color(0.05, 0.03, 0.02)
+	wood.roughness = 0.85
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.albedo_color = Color(0.0, 0.0, 0.0)
+	glow.emission_enabled = true
+	glow.emission = Color(1.0, 0.3, 0.06)
+	glow.emission_energy_multiplier = 0.0
+	for spec in [["post", -0.115], ["post", 0.115], ["lintel", 0.0]]:
+		var post := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		if spec[0] == "post":
+			bm.size = Vector3(0.05, 0.88, 0.06)
+			post.position = Vector3(spec[1], 0.44, 0)
+		else:
+			bm.size = Vector3(0.29, 0.05, 0.06)
+			post.position = Vector3(0, 0.885, 0)
+		post.mesh = bm
+		post.material_override = wood
+		root.add_child(post)
+	var glowq := MeshInstance3D.new()
+	var qq := QuadMesh.new()
+	qq.size = Vector2(0.185, 0.86)
+	glowq.mesh = qq
+	glowq.material_override = glow
+	glowq.position = Vector3(0, 0.44, 0.012)
+	root.add_child(glowq)
+	var dl := OmniLight3D.new()
+	dl.light_color = Color(1.0, 0.32, 0.06)
+	dl.light_energy = 0.0
+	dl.omni_range = 2.4
+	dl.position = Vector3(0, 0.5, 0.15)
+	root.add_child(dl)
+	# the doorway climbs out of the floor, then the fire inside wakes
+	root.scale.y = 0.001
+	var rise := create_tween().set_trans(Tween.TRANS_CUBIC) \
+		.set_ease(Tween.EASE_OUT)
+	rise.tween_property(root, "scale:y", 1.0, 0.9)
+	rise.tween_property(glow, "emission_energy_multiplier", 2.2, 1.0)
+	rise.parallel().tween_property(dl, "light_energy", 1.6, 1.0)
+	if _devil != null:
+		_devil.watch(root.position + Vector3(0, 0.55, 0), 2.4)
+	# the felt slides you toward it — z is the only axis the sway
+	# doesn't own, so the push survives the idle camera
+	var push := create_tween().set_trans(Tween.TRANS_SINE) \
+		.set_ease(Tween.EASE_IN)
+	push.tween_property(_cam, "position:z", 0.3, 2.8)
+	# and the dark closes over — the next scene's seat-in reads as
+	# stepping through the door you just opened
+	var fade := ColorRect.new()
+	fade.color = Color(0, 0, 0, 0)
+	fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_layer.add_child(fade)
+	var dim := create_tween()
+	dim.tween_interval(2.1)
+	dim.tween_property(fade, "color:a", 1.0, 1.1)
 
 # ---------------------------------------------------------------- Azrail
 
