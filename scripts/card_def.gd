@@ -70,6 +70,8 @@ static func starter_deck() -> Array:
 		make("usurer", "pentacles", 1, 2, 1, 2, "res://assets_external/card-art/gwd/face_usurer.png", ["loan_shark"]),
 		make("penitent", "pentacles", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_penitent.png", ["loan_shark", "waxhide", "protection"]),
 		make("gravedigger", "pentacles", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_gravedigger.png"),
+		# a mid-table usurer — every chip it earns is written as debt
+		make("bargainer", "pentacles", 1, 1, 3, 1, "res://assets_external/card-art/gwd/face_bargainer.png", ["loan_shark"]),
 		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap", "veil"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic", "eyecorner"]),
 		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),
@@ -85,6 +87,8 @@ static func starter_deck() -> Array:
 		# but the instant an enemy read *sees* it, it bursts and the
 		# reader pays two chips for the look
 		make("bluffer", "eyes", 0, 0, 1, 1, "res://assets_external/card-art/gwd/face_bluffer.png"),
+		# a fog courier — cheap body that slides its lane free
+		make("mist_page", "eyes", 0, 0, 2, 1, "res://assets_external/card-art/gwd/face_mist_page.png", ["swap"]),
 		# §4.6-adjacent tricks (design §2.3/§5): instant one-shots, no slot
 		make_trick("usurer_t", "pentacles", 0, "res://assets_external/card-art/gwd/face_pale_usurer.png"),
 		make_trick("tithe", "chalices", 1, "res://assets_external/card-art/gwd/face_tithe.png"),

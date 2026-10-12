@@ -648,3 +648,15 @@ msgstr "Bakmadan bile biliyor — kapalı kartların hepsi açıldı. Kurallar d
 
 msgid "TRUMP_MIRRORED_PIT"
 msgstr "Aynalandı — aynı hile sana da döndü."
+
+msgid "CARD_BARGAINER"
+msgstr "Kara Pazarlıkçı"
+
+msgid "CARD_BARGAINER_DESC"
+msgstr "1/3 · kazandığı her çip borç diye yazılır"
+
+msgid "CARD_MIST_PAGE"
+msgstr "Sis Yaveri"
+
+msgid "CARD_MIST_PAGE_DESC"
+msgstr "0/2 · sis ulak — kendi kulvarını boşaltır"
