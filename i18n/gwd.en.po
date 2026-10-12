@@ -648,3 +648,15 @@ msgstr "He doesn't even look — every concealed card you hold turns face-up. Th
 
 msgid "TRUMP_MIRRORED_PIT"
 msgstr "Mirrored — the same cheat turns on you."
+
+msgid "CARD_BARGAINER"
+msgstr "Dark Bargainer"
+
+msgid "CARD_BARGAINER_DESC"
+msgstr "1/3 · every chip he earns is written as debt"
+
+msgid "CARD_MIST_PAGE"
+msgstr "Mist Page"
+
+msgid "CARD_MIST_PAGE_DESC"
+msgstr "0/2 · a fog courier — slides its own lane free"
