@@ -942,3 +942,33 @@ msgstr "He counts out %d souls — and smiles at what they cost you."
 
 msgid "AZRAIL_DOOR_DUEL"
 msgstr "Paid in advance is still paid. I always collect interest."
+
+msgid "CARD_EVENT_TURNCOAT"
+msgstr "The Turncoat"
+
+msgid "CARD_EVENT_TURNCOAT_DESC"
+msgstr "one of his souls deserts to you — he remembers"
+
+msgid "EV_TURNCOAT"
+msgstr "A soul slips away from his side of the felt — yours now:"
+
+msgid "AZRAIL_DOOR_TURNCOAT"
+msgstr "A deserter is a debt with legs. I always collect."
+
+msgid "AZRAIL_DEPTH_3"
+msgstr "Third floor down. You keep choosing the stairs — noted."
+
+msgid "AZRAIL_DEPTH_6"
+msgstr "Six doors behind you. Most debtors turn back by four."
+
+msgid "AZRAIL_DEPTH_9"
+msgstr "Nine. You are either winning or starving — both amuse me."
+
+msgid "AZRAIL_DEBT_30"
+msgstr "The book is heavier than your chair now."
+
+msgid "AZRAIL_DEBT_60"
+msgstr "Sixty souls. I could stop playing and still own you."
+
+msgid "AZRAIL_SPOILS"
+msgstr "You carry a small army now — I counted every head."
