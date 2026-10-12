@@ -635,19 +635,33 @@ func click(collider) -> void:
 			_hint(tr("HINT_CALL"))
 		return
 	var pad = _pad_areas.get(collider)
-	# armed-trick target mode — one revealed pawn of yours takes it
+	# armed-trick target mode — the trick's id picks who may be touched:
+	# wards take your revealed pawns, cold iron reaches across the felt,
+	# the ash offering feeds on any pawn of yours, hidden or shown
 	if _trick_armed != null:
-		if card != null and _board_p.values().has(card) \
-			and not card.face_down:
-			match _trick_armed.def.id:
-				"salt_circle":
-					_resolve_salt(card)
-				"grave_candle":
-					_resolve_candle(card)
-				_:
-					_resolve_razor(card)
-		else:
-			_trick_cancel()
+		match _trick_armed.def.id:
+			"cold_iron":
+				if card != null and _all_e().has(card):
+					_resolve_iron(card)
+				else:
+					_trick_cancel()
+			"ash_offering":
+				if card != null and _board_p.values().has(card):
+					_resolve_offering(card)
+				else:
+					_trick_cancel()
+			_:
+				if card != null and _board_p.values().has(card) \
+					and not card.face_down:
+					match _trick_armed.def.id:
+						"salt_circle":
+							_resolve_salt(card)
+						"grave_candle":
+							_resolve_candle(card)
+						_:
+							_resolve_razor(card)
+				else:
+					_trick_cancel()
 		return
 	# reposition armed — an empty lane takes the card, another card swaps
 	if _repos_armed != null:
@@ -1911,7 +1925,8 @@ func _play_trick(card) -> void:
 				_hint(tr("TRICK_TITHE_NONE"))
 				_sfx.play(Sfx.DENIED, -10.0)
 				return
-		"razor", "salt_circle", "grave_candle":
+		"razor", "salt_circle", "grave_candle", "cold_iron", \
+				"ash_offering":
 			_trick_arm(card)
 			return
 	_blood -= card.def.blood_cost
@@ -2044,6 +2059,53 @@ func _resolve_salt(target) -> void:
 		Color(0.9, 0.88, 0.8), 18, 0.01, 0.4)
 	_hint(tr("TRICK_SALT") % tr(target.def.name_key))
 	_burn_trick(card)
+
+## Cold Iron lays a finger on any card of his on the felt —
+## counterfeits burn where they lie, real cards turn face-up.
+## It reads the board like Call the Bluff but spends blood, not the call.
+func _resolve_iron(target) -> void:
+	var card = _trick_armed
+	_trick_armed = null
+	_blood -= card.def.blood_cost
+	_hand.erase(card)
+	_burn_trick(card)
+	if target.def.is_bluff:
+		_chips_devil -= 2
+		_bump("anger", 0.6)
+		_erow(target.row).erase(target.lane)
+		_area_to_card.erase(target.get_area())
+		target.burn()
+		_hint(tr("TRICK_IRON_BLUFF"))
+		if _devil != null:
+			_devil.eyes_flare(1.0)
+			_devil.strike_pose(0.0, true)
+	else:
+		target.reveal_enemy()
+		_bump("curiosity", 0.4)
+		_hint(tr("TRICK_IRON"))
+		if _devil != null:
+			_devil.watch(target.position, 1.4)
+	_update_chips()
+	_check_over()
+
+## Ash Offering burns one of your own board pawns at the stake —
+## the fire pays chips for the meat and blood for the scream.
+func _resolve_offering(target) -> void:
+	var card = _trick_armed
+	_trick_armed = null
+	_blood -= card.def.blood_cost
+	_hand.erase(card)
+	_burn_trick(card)
+	_prow(target.row).erase(target.lane)
+	_area_to_card.erase(target.get_area())
+	_dead_p.append(target.def)
+	target.burn()
+	_chips_you += 3
+	_blood += 2
+	_bump("cruelty", 0.4)          # he savours watching you burn your own
+	_hint(tr("TRICK_ASH") % tr(target.def.name_key))
+	_update_chips()
+	_reflow_hand()
 
 func _resolve_candle(target) -> void:
 	var card = _trick_armed

@@ -741,3 +741,24 @@ msgstr "The hound mirrors. Careful what it catches."
 
 msgid "AZRAIL_C_BLUFFER"
 msgstr "You keep liars in your deck as well. Good."
+
+msgid "CARD_COLD_IRON"
+msgstr "Cold Iron"
+
+msgid "CARD_COLD_IRON_DESC"
+msgstr "Touch one of his cards. Lies burn; truths turn face-up."
+
+msgid "CARD_ASH_OFFERING"
+msgstr "Ash Offering"
+
+msgid "CARD_ASH_OFFERING_DESC"
+msgstr "Burn one of your pawns at the stake: +3 chips, +2 blood."
+
+msgid "TRICK_IRON"
+msgstr "Cold iron turns the card — it was real."
+
+msgid "TRICK_IRON_BLUFF"
+msgstr "Cold iron finds the counterfeit and burns it. He pays 2."
+
+msgid "TRICK_ASH"
+msgstr "%s feeds the fire — the pot smells of meat."
