@@ -263,19 +263,49 @@ msgid "CARD_EVENT_COVENANT"
 msgstr "Sözleşme"
 
 msgid "EV_WHISPER_WIN"
-msgstr "Kulağına bir hile fısıldıyor — şansın keskinleşti."
+msgstr "Kulağına bir hile fısıldıyor — şans +%.1f."
+
+msgid "EV_WHISPER_WIN_2"
+msgstr "Keçenin altından bir ses sayıyı veriyor — şans +%.1f."
+
+msgid "EV_WHISPER_WIN_3"
+msgstr "Yaşlı bir şey kestirme öğretiyor — zarların +%.1f kayıyor."
 
 msgid "EV_WHISPER_LOSE"
-msgstr "Fısıltı bir kancaydı — 6 daha borçlusun."
+msgstr "Fısıltı bir kancaydı — %d daha borçlusun."
+
+msgid "EV_WHISPER_LOSE_2"
+msgstr "Ses yalan söyledi — deftere %d ruh yazıldın."
+
+msgid "EV_WHISPER_LOSE_3"
+msgstr "Hediye değil, pazarlıktı — %d ruh borç."
 
 msgid "EV_WHEEL_WIN"
-msgstr "Çark altında durdu — yanında +12 ruh."
+msgstr "Çark altında durdu — yanında +%d ruh."
+
+msgid "EV_WHEEL_WIN_2"
+msgstr "Tıngırdıyor, yavaşlıyor, ödüyor — %d ruh senin."
+
+msgid "EV_WHEEL_WIN_3"
+msgstr "Pirinç senden yana duruyor — +%d ruh, iki kez sayılmış."
 
 msgid "EV_WHEEL_LOSE"
-msgstr "Çark ona düştü — 10 ruh daha borçlusun."
+msgstr "Çark ona düştü — %d ruh daha borçlusun."
+
+msgid "EV_WHEEL_LOSE_2"
+msgstr "Son çentik onun — sana %d ruh yazıldı."
+
+msgid "EV_WHEEL_LOSE_3"
+msgstr "Hiç nazik durmayacaktı — %d borç."
 
 msgid "EV_COVENANT"
-msgstr "İmzalı bir geçiş — +5 ruh, küçük bir lütuf."
+msgstr "İmzalı bir geçiş — +%d ruh, küçük bir lütuf."
+
+msgid "EV_COVENANT_2"
+msgstr "Mürekkep anında kuruyor — %d ruh ve daha sağlam bir el."
+
+msgid "EV_COVENANT_3"
+msgstr "Kâğıt avucunda ısınıyor — +%d ruh, soru sorulmadan."
 
 msgid "PRIESTESS_DEVIL"
 msgstr "Rahibesi yazı-tura atıyor — kasa ya toplar ya kanar."
@@ -296,22 +326,43 @@ msgid "CARD_EVENT_MIRROR"
 msgstr "Ayna"
 
 msgid "EV_LEDGER"
-msgstr "Tefeci beş borcu sildi — peşin dört ruh karşılığında."
+msgstr "Tefeci %d borcu sildi — peşin %d ruh karşılığında."
 
 msgid "EV_MIRROR"
 msgstr "Ayna şansını ters gösterdi — artık tersine döndü."
 
 msgid "CARD_EVENT_WHISPER_DESC"
-msgstr "kumar: keskin şans ya da altı ruh borç"
+msgstr "kumar: keskin şans ya da ruh borcu"
 
 msgid "CARD_EVENT_WHEEL_DESC"
-msgstr "büyük kumar: on iki ruh ya da on borç"
+msgstr "büyük kumar: ödenen ruhlar ya da borç"
 
 msgid "CARD_EVENT_COVENANT_DESC"
-msgstr "güvenli geçiş: beş ruh, küçük lütuf"
+msgstr "güvenli geçiş: ruhlar, küçük lütuf"
 
 msgid "CARD_EVENT_LEDGER_DESC"
-msgstr "beş borcu sil — peşin dört ruh"
+msgstr "borçları sil — peşin ruhlar"
+
+msgid "TERMS_WHISPER"
+msgstr "kumar: şans +%.1f, ya da %d ruh borç"
+
+msgid "TERMS_WHEEL"
+msgstr "büyük kumar: %d ruh öder, ya da %d borç"
+
+msgid "TERMS_COVENANT"
+msgstr "imzalı geçiş: +%d ruh, şans +%.2f"
+
+msgid "TERMS_LEDGER"
+msgstr "%d borcu sil — peşin %d ruh"
+
+msgid "TERMS_TOLL"
+msgstr "%d ruh borç — sonraki masa derinlik vergisi istemez"
+
+msgid "TERMS_PACT"
+msgstr "%d ruh borç — sonraki masada telleri haykırır"
+
+msgid "TERMS_CONFESSOR"
+msgstr "diz çök: %d borç affedilir, seni daha derin okur"
 
 msgid "CARD_EVENT_MIRROR_DESC"
 msgstr "şansın, tam tersine çevrilmiş hali"
@@ -416,10 +467,10 @@ msgid "CARD_EVENT_PACT"
 msgstr "Sözleşme"
 
 msgid "CARD_EVENT_PACT_DESC"
-msgstr "sekiz ruh borç — sonraki masada telleri haykırır"
+msgstr "ruh borcu — sonraki masada telleri haykırır"
 
 msgid "EV_PACT"
-msgstr "Borçlu ruhlarla imzalandı — sonraki masada elleri duramaz."
+msgstr "%d borçlu ruhla imzalandı — sonraki masada elleri duramaz."
 
 msgid "ANGER_STEAL"
 msgstr "Karşıya uzanıyor — bir kart elinde tutuşuyor."
@@ -443,19 +494,19 @@ msgid "CARD_EVENT_CONFESSOR"
 msgstr "Günah Çıkarma"
 
 msgid "CARD_EVENT_CONFESSOR_DESC"
-msgstr "diz çök — üç ruh borç affedilir, ama seni daha derin okur"
+msgstr "diz çök — ruh borcu affedilir, ama seni daha derin okur"
 
 msgid "EV_CONFESS"
-msgstr "Bağışlandın — üç ruh hafifledin, ama seni eskisinden iyi tanıyor."
+msgstr "Bağışlandın — %d ruh hafifledin, ama seni eskisinden iyi tanıyor."
 
 msgid "CARD_EVENT_TOLL"
 msgstr "Geçiş Kapısı"
 
 msgid "CARD_EVENT_TOLL_DESC"
-msgstr "dört ruh borç — sonraki masa derinlik vergisi istemez"
+msgstr "ruh borcu — sonraki masa derinlik vergisi istemez"
 
 msgid "EV_TOLL"
-msgstr "Peşin ödendi — sonraki masa öşrünü tutmuyor."
+msgstr "%d ruh peşin ödendi — sonraki masa öşrünü tutmuyor."
 
 msgid "CARD_EVENT_RELIQUARY"
 msgstr "Kutsal Emanet"

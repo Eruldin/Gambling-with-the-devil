@@ -4,7 +4,7 @@
 *.translation
 .import/
 export.cfg
-export_presets.cfg
+dist/
 
 # OS
 Thumbs.db

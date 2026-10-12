@@ -34,6 +34,8 @@ var venom := 0                # seal: takes +1 per stack at round start
 var wax_used := false         # §3.3 Waxhide: this round's first wound spent
 var peeked := false           # §3.3 Eyecorner: his seer has read this card
 var revived := false          # revival seal fires once per battle
+var ev_params := {}           # §18 event template: this door's rolled bargain
+var ev_terms := ""            # hover text showing the real stakes/prizes
 
 func setup(front_tex: Texture2D, back_tex: Texture2D) -> void:
 	_emat = StandardMaterial3D.new()
@@ -180,8 +182,11 @@ func tool_text() -> String:
 	if def == null:
 		return ""
 	if def.id.begins_with("event_"):
-		# descent doors read as promises, not stats (§18)
-		return "%s  —  %s" % [tr(def.name_key), tr(def.name_key + "_DESC")]
+		# descent doors read as promises, not stats (§18); when the
+		# template rolled real numbers, the promise names them
+		var terms := ev_terms if ev_terms != "" \
+			else tr(def.name_key + "_DESC")
+		return "%s  —  %s" % [tr(def.name_key), terms]
 	return "%s  ·  %s %d  ·  atk %d  hp %d  ·  sac %d" % [
 		tr(def.name_key), tr("BLOOD"), def.blood_cost,
 		def.attack, def.health, def.sacrifice_value]

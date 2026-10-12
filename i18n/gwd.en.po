@@ -263,19 +263,49 @@ msgid "CARD_EVENT_COVENANT"
 msgstr "The Covenant"
 
 msgid "EV_WHISPER_WIN"
-msgstr "He whispers a cheat in your ear — your luck sharpens."
+msgstr "He whispers a cheat in your ear — luck +%.1f."
+
+msgid "EV_WHISPER_WIN_2"
+msgstr "A voice under the felt gives you the count — luck +%.1f."
+
+msgid "EV_WHISPER_WIN_3"
+msgstr "Something old shares a shortcut — your rolls tilt +%.1f."
 
 msgid "EV_WHISPER_LOSE"
-msgstr "The whisper was a hook — you owe him 6 more."
+msgstr "The whisper was a hook — you owe him %d more."
+
+msgid "EV_WHISPER_LOSE_2"
+msgstr "The voice lied — the book opens %d souls against you."
+
+msgid "EV_WHISPER_LOSE_3"
+msgstr "Not a gift, a bargain — %d souls owed."
 
 msgid "EV_WHEEL_WIN"
-msgstr "The wheel stops on gold — +12 souls ride with you."
+msgstr "The wheel stops on gold — +%d souls ride with you."
+
+msgid "EV_WHEEL_WIN_2"
+msgstr "It rattles, slows, pays — %d souls yours."
+
+msgid "EV_WHEEL_WIN_3"
+msgstr "The brass settles your way — +%d souls, counted twice."
 
 msgid "EV_WHEEL_LOSE"
-msgstr "The wheel lands on him — 10 more souls owed."
+msgstr "The wheel lands on him — %d more souls owed."
+
+msgid "EV_WHEEL_LOSE_2"
+msgstr "The last notch is his — %d souls chalked against you."
+
+msgid "EV_WHEEL_LOSE_3"
+msgstr "It was never going to stop kindly — %d owed."
 
 msgid "EV_COVENANT"
-msgstr "A signed passage — +5 souls, a small blessing."
+msgstr "A signed passage — +%d souls, a small blessing."
+
+msgid "EV_COVENANT_2"
+msgstr "Ink dries instantly — %d souls and a steadier hand."
+
+msgid "EV_COVENANT_3"
+msgstr "The paper warms in your fist — +%d souls, no questions."
 
 msgid "PRIESTESS_DEVIL"
 msgstr "His Priestess flips — the House collects, or bleeds."
@@ -296,22 +326,43 @@ msgid "CARD_EVENT_MIRROR"
 msgstr "The Mirror"
 
 msgid "EV_LEDGER"
-msgstr "The Usurer strikes five debts — for four souls up front."
+msgstr "The Usurer strikes %d debts — for %d souls up front."
 
 msgid "EV_MIRROR"
 msgstr "The mirror shows your luck backwards — it is flipped."
 
 msgid "CARD_EVENT_WHISPER_DESC"
-msgstr "a gamble: sharper luck, or six souls owed"
+msgstr "a gamble: sharper luck, or souls owed"
 
 msgid "CARD_EVENT_WHEEL_DESC"
-msgstr "a big gamble: twelve souls, or ten owed"
+msgstr "a big gamble: souls paid, or souls owed"
 
 msgid "CARD_EVENT_COVENANT_DESC"
-msgstr "a safe passage: five souls, a small blessing"
+msgstr "a safe passage: souls, and a small blessing"
 
 msgid "CARD_EVENT_LEDGER_DESC"
-msgstr "strike five debts — for four souls now"
+msgstr "strike debts — souls up front"
+
+msgid "TERMS_WHISPER"
+msgstr "a gamble: luck +%.1f, or %d souls owed"
+
+msgid "TERMS_WHEEL"
+msgstr "a big gamble: %d souls paid, or %d owed"
+
+msgid "TERMS_COVENANT"
+msgstr "a signed passage: +%d souls, luck +%.2f"
+
+msgid "TERMS_LEDGER"
+msgstr "strike %d debts — %d souls up front"
+
+msgid "TERMS_TOLL"
+msgstr "owe %d — the next table asks no depth-tax"
+
+msgid "TERMS_PACT"
+msgstr "owe %d — his tells shout next table"
+
+msgid "TERMS_CONFESSOR"
+msgstr "kneel: %d debts forgiven, read deeper"
 
 msgid "CARD_EVENT_MIRROR_DESC"
 msgstr "your luck, flipped to its opposite"
@@ -416,10 +467,10 @@ msgid "CARD_EVENT_PACT"
 msgstr "The Pact"
 
 msgid "CARD_EVENT_PACT_DESC"
-msgstr "eight souls of debt — his tells shout at the next table"
+msgstr "souls of debt — his tells shout at the next table"
 
 msgid "EV_PACT"
-msgstr "Signed in owed souls — next table, his hands cannot hold still."
+msgstr "Signed for %d owed souls — next table, his hands cannot hold still."
 
 msgid "ANGER_STEAL"
 msgstr "He reaches across — a card burns straight out of your hand."
@@ -443,19 +494,19 @@ msgid "CARD_EVENT_CONFESSOR"
 msgstr "The Confessional"
 
 msgid "CARD_EVENT_CONFESSOR_DESC"
-msgstr "kneel — three souls of debt forgiven, but he reads you deeper"
+msgstr "kneel — souls of debt forgiven, but he reads you deeper"
 
 msgid "EV_CONFESS"
-msgstr "Absolved — three souls lighter, and he knows you better than before."
+msgstr "Absolved — %d souls lighter, and he knows you better than before."
 
 msgid "CARD_EVENT_TOLL"
 msgstr "The Tollgate"
 
 msgid "CARD_EVENT_TOLL_DESC"
-msgstr "four souls owed — the next table asks no depth-tax of you"
+msgstr "souls owed — the next table asks no depth-tax of you"
 
 msgid "EV_TOLL"
-msgstr "Paid on the nail — the next table holds its tithe."
+msgstr "Owe %d on the nail — the next table holds its tithe."
 
 msgid "CARD_EVENT_RELIQUARY"
 msgstr "The Reliquary"
