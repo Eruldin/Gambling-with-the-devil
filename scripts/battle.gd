@@ -1373,6 +1373,10 @@ func _spawn_event_cards() -> void:
 	for i in range(3):
 		var card := GameCard.new()
 		card.def = defs[i]
+		# §18 event template: the same door never deals the same bargain —
+		# stakes and prizes roll per appearance (~20 variations per door)
+		card.ev_params = _roll_event_params(defs[i].id)
+		card.ev_terms = _event_terms(defs[i].id, card.ev_params)
 		add_child(card)
 		card.setup(load(defs[i].face_file), _back_tex)
 		# §18 the doors rise from the felt standing — tall slabs
@@ -1408,6 +1412,60 @@ func _spawn_event_cards() -> void:
 			if _devil != null:
 				_devil.eyes_flare(0.7)
 
+## §18 event templates: each door archetype rolls its own bargain when
+## dealt — stake is what you risk, prize is what it pays. Two Whispers
+## in a run ask different prices; the house is never the same twice.
+func _roll_event_params(id: String) -> Dictionary:
+	var p := {"stake": 0, "prize": 0}
+	match id:
+		"event_whisper":
+			p.stake = 4 + randi() % 5        # 4..8 souls on the hook
+			p.prize = 4 + randi() % 4        # luck +0.4..0.7
+		"event_wheel":
+			p.stake = 8 + randi() % 7        # 8..14 owed if it lands on him
+			p.prize = 9 + randi() % 8        # 9..16 souls paid to you
+		"event_covenant":
+			p.prize = 4 + randi() % 4        # +4..7 souls
+			p.stake = 15 + randi() % 16      # luck +0.15..0.30
+		"event_ledger":
+			p.stake = 2 + randi() % 5        # fee: 2..6 souls up front
+			p.prize = 3 + randi() % 5        # strikes 3..7 of the debt
+		"event_toll":
+			p.stake = 3 + randi() % 4        # owe 3..6 now
+		"event_pact":
+			p.stake = 6 + randi() % 5        # owe 6..10
+		"event_confessor":
+			p.prize = 2 + randi() % 3        # absolves 2..4 of debt
+	return p
+
+## The promise a door makes on hover — real numbers, not flavor.
+func _event_terms(id: String, p: Dictionary) -> String:
+	match id:
+		"event_whisper":
+			return tr("TERMS_WHISPER") % [p.prize / 10.0, p.stake]
+		"event_wheel":
+			return tr("TERMS_WHEEL") % [p.prize, p.stake]
+		"event_covenant":
+			return tr("TERMS_COVENANT") % [p.prize, p.stake / 100.0]
+		"event_ledger":
+			return tr("TERMS_LEDGER") % [p.prize, p.stake]
+		"event_toll":
+			return tr("TERMS_TOLL") % p.stake
+		"event_pact":
+			return tr("TERMS_PACT") % p.stake
+		"event_confessor":
+			return tr("TERMS_CONFESSOR") % p.prize
+	return ""
+
+## §18 variant lines: an outcome is narrated differently each time —
+## base msgid is variant 1, _2/_3 the alternates. fmt fills %d slots.
+func _evline(base: String, variants: int, fmt := []) -> String:
+	var roll := 1 + randi() % variants
+	var s := tr(base if roll == 1 else "%s_%d" % [base, roll])
+	if not fmt.is_empty():
+		s = s % fmt
+	return s
+
 func _resolve_event(card) -> void:
 	_phase = Phase.BUSY
 	for c in _event_cards:
@@ -1428,34 +1486,37 @@ func _resolve_event(card) -> void:
 	var won_roll := true
 	if gamble:
 		won_roll = _roll_chance()
+	# §18 the rolled bargain — stake is the risk, prize the payout
+	var stake: int = int(card.ev_params.get("stake", 0))
+	var prize: int = int(card.ev_params.get("prize", 0))
 	match card.def.id:
 		"event_whisper":
 			if won_roll:
-				_run["luck"] = minf(_run["luck"] + 0.5, 3.0)
-				_hint(tr("EV_WHISPER_WIN"))
+				_run["luck"] = minf(_run["luck"] + prize / 10.0, 3.0)
+				_hint(_evline("EV_WHISPER_WIN", 3, [prize / 10.0]))
 			elif broken:
 				_hint(tr("EV_BROKEN") + " " + tr("CARD_" + breaker_id.to_upper()))
 			else:
-				_run["debt"] += 6
-				_hint(tr("EV_WHISPER_LOSE"))
+				_run["debt"] += stake
+				_hint(_evline("EV_WHISPER_LOSE", 3, [stake]))
 		"event_wheel":
 			if won_roll:
-				_run["purse"] += 12
-				_hint(tr("EV_WHEEL_WIN"))
+				_run["purse"] += prize
+				_hint(_evline("EV_WHEEL_WIN", 3, [prize]))
 			elif broken:
 				_hint(tr("EV_BROKEN") + " " + tr("CARD_" + breaker_id.to_upper()))
 			else:
-				_run["debt"] += 10
-				_hint(tr("EV_WHEEL_LOSE"))
+				_run["debt"] += stake
+				_hint(_evline("EV_WHEEL_LOSE", 3, [stake]))
 		"event_ledger":
 			# the Usurer's ledger — pay souls now to strike the debt;
 			# a Reaper in your pile collects it for free instead
-			_run["debt"] = maxi(_run["debt"] - 5, 0)
+			_run["debt"] = maxi(_run["debt"] - prize, 0)
 			if broken:
 				_hint(tr("EV_BROKEN") + " " + tr("CARD_" + breaker_id.to_upper()))
 			else:
-				_run["purse"] = maxi(_run["purse"] - 4, 0)
-				_hint(tr("EV_LEDGER"))
+				_run["purse"] = maxi(_run["purse"] - stake, 0)
+				_hint(tr("EV_LEDGER") % [prize, stake])
 		"event_mirror":
 			# his mirror flips your fortune — lucky becomes cursed,
 			# cursed becomes blessed (§4.7 tilts invert)
@@ -1502,22 +1563,22 @@ func _resolve_event(card) -> void:
 		"event_pact":
 			# §18 the Pact: souls now for information next table —
 			# his concealed cards shout their weight twice as loud
-			_run["debt"] += 8
+			_run["debt"] += stake
 			_run["pact"] = true
-			_hint(tr("EV_PACT"))
+			_hint(tr("EV_PACT") % stake)
 		"event_confessor":
 			# §18 the Confessional: he absolves a little debt — but
 			# kneeling lets him read you deeper; next table his
 			# memory of you carries at 90% instead of 70%
-			_run["debt"] = maxi(int(_run["debt"]) - 3, 0)
+			_run["debt"] = maxi(int(_run["debt"]) - prize, 0)
 			_run["confessed"] = true
-			_hint(tr("EV_CONFESS"))
+			_hint(tr("EV_CONFESS") % prize)
 		"event_toll":
-			# §18 the Tollgate: owe him four souls now — pass the
+			# §18 the Tollgate: owe him souls now — pass the
 			# next table without the Descent's depth-tax on your antes
-			_run["debt"] += 4
+			_run["debt"] += stake
 			_run["toll"] = true
-			_hint(tr("EV_TOLL"))
+			_hint(tr("EV_TOLL") % stake)
 		"event_reliquary":
 			# §18 the Reliquary: a forgotten soul waits in its niche —
 			# it joins your spoils without a fight
@@ -1539,9 +1600,9 @@ func _resolve_event(card) -> void:
 			_run["sin_name"] = sins[int(_run["sin_idx"])].strip_edges()
 			_hint(tr("EV_SIN") + " " + str(_run["sin_name"]))
 		_:
-			_run["purse"] += 5
-			_run["luck"] = minf(_run["luck"] + 0.2, 3.0)
-			_hint(tr("EV_COVENANT"))
+			_run["purse"] += prize
+			_run["luck"] = minf(_run["luck"] + stake / 100.0, 3.0)
+			_hint(_evline("EV_COVENANT", 3, [prize]))
 	_sfx.play(Sfx.WIN if won_roll else Sfx.LOSE, -12.0)
 	if _devil != null:
 		_devil.watch(card.position, 1.2)
