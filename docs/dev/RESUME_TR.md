@@ -38,12 +38,12 @@ izinlerini vermiştir; sorma.
 - **7 günah boss'u** ayrı kurallı; **Çukur masası** (derin kapı) kuralları
   düşürür, kozlarını aynalayır.
 - **Ev Kuralları (§7.1)**: her masada 6 kural setinden biri.
-- **Kart seti**: 33 kart (26 piyon + 5 trick), her id'nin özel gravürü var
+- **Kart seti**: 35 kart (26 piyon + 7 trick), her id'nin özel gravürü var
   (`assets_external/card-art/gwd/face_*.png`, 1024×1536 parşömen/woodcut tarzı).
-  Suit dengesi: kılıç 6, kupa 7, tılsım 7, göz 8, trick 5.
-  Son eklenenler (#79-82): bargainer, mist_page, dissector, thurifer,
-  bondsman, alms_sister + trick'ler salt_circle (koruma aşılar),
-  grave_candle (+2 can, zehir temizler).
+  Son eklenenler (#79-87): bargainer, mist_page, dissector, thurifer,
+  bondsman, alms_sister + trick'ler salt_circle, grave_candle,
+  cold_iron (düşman kartını açar/bluff yakar), ash_offering
+  (kendi piyonunu yak → +3 çip +2 kan).
 - **Sanat**: film bloom+kromatik sapma+hüzme postfx, sinematik açılış,
   vuruş kamerası, prosedürel drone müzik, gerçek tekir kedi, mumlar/fırtına.
 
@@ -51,7 +51,9 @@ izinlerini vermiştir; sorma.
 1. Kart setini ~190'a genişlet: her yeni kart = `card_def.gd` satırı +
    `face_*.png` (aşağıdaki tarifle üret) + i18n isim+desc. Parti parti ilerle.
 2. Azrail olayları derinliği: eksenlere bağlı daha fazla özel laf/müdahale.
-3. Harita düğümlerinin sahnede fiziksel kapılar olarak görünmesi.
+3. ~~Harita düğümleri fiziksel kapı~~ — yapıldı (#86): kapılar masada
+   dik levha olarak yükselir; `GWD_DOORS=1` debug flag ile event
+   fazına direkt atlanıp görsel kontrol yapılabilir.
 4. Ses katmanını zenginleştir (gerçek SFX dosyaları Kenney paketinde var).
 5. Boss arc'ları: günahların 3-perdelik yapısı §18.3'e göre derinleştirilebilir.
 6. UI/UX: el tutma hissi, vuruş kareografisi, Türkçe tipografi kontrolü.

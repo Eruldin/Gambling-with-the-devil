@@ -741,3 +741,24 @@ msgstr "Tazı aynalar. Neyi yakalayacağına dikkat et."
 
 msgid "AZRAIL_C_BLUFFER"
 msgstr "Sen de destende yalancı besliyorsun. Güzel."
+
+msgid "CARD_COLD_IRON"
+msgstr "Soğuk Demir"
+
+msgid "CARD_COLD_IRON_DESC"
+msgstr "Onun bir kartına dokun. Yalanlar yanar; gerçekler açılır."
+
+msgid "CARD_ASH_OFFERING"
+msgstr "Kül Adak"
+
+msgid "CARD_ASH_OFFERING_DESC"
+msgstr "Bir piyonunu kazıkta yak: +3 çip, +2 kan."
+
+msgid "TRICK_IRON"
+msgstr "Soğuk demir kartı çevirir — gerçekmiş."
+
+msgid "TRICK_IRON_BLUFF"
+msgstr "Soğuk demir sahteyi bulur ve yakar. 2 çip öder."
+
+msgid "TRICK_ASH"
+msgstr "%s ateşi besler — pot et kokar."

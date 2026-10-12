@@ -105,6 +105,10 @@ static func starter_deck() -> Array:
 		# knits wounds and burns the venom out of the blood
 		make_trick("salt_circle", "eyes", 1, "res://assets_external/card-art/gwd/face_salt_circle.png"),
 		make_trick("grave_candle", "chalices", 1, "res://assets_external/card-art/gwd/face_grave_candle.png"),
+		# the iron finger and the stake — one reads his felt for lies,
+		# the other buys chips and blood with your own pawn's pyre
+		make_trick("cold_iron", "eyes", 1, "res://assets_external/card-art/gwd/face_cold_iron.png"),
+		make_trick("ash_offering", "chalices", 0, "res://assets_external/card-art/gwd/face_ash_offering.png"),
 	]
 
 ## §18: Azrail's deck hardens down the Descent — his pawns sharpen one
