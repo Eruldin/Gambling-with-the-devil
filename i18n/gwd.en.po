@@ -795,3 +795,27 @@ msgstr "You struck deep. I had not thought you had it in you."
 
 msgid "AZRAIL_SACRIFICE"
 msgstr "Feeding me your own souls now. Keep going."
+
+msgid "CARD_PALLBEARER"
+msgstr "Pallbearer"
+
+msgid "CARD_PALLBEARER_DESC"
+msgstr "Slow and certain — what it kills stays killed."
+
+msgid "CARD_DROWNED_BELLMAN"
+msgstr "Drowned Bellman"
+
+msgid "CARD_DROWNED_BELLMAN_DESC"
+msgstr "Comes back wet; rings once for the pot when seated."
+
+msgid "CARD_STRONGBOX"
+msgstr "Strongbox"
+
+msgid "CARD_STRONGBOX_DESC"
+msgstr "A safe that walks — skims into the pot; wax seals the first wound."
+
+msgid "CARD_MOTH_ORACLE"
+msgstr "Moth Oracle"
+
+msgid "CARD_MOTH_ORACLE_DESC"
+msgstr "Flits lanes on dusty wings; veiled against being read."

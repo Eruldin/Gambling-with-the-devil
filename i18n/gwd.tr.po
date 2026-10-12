@@ -795,3 +795,27 @@ msgstr "Derin vurdun. Sende bunu olduğunu düşünmemiştim."
 
 msgid "AZRAIL_SACRIFICE"
 msgstr "Kendi ruhlarını bana yediriyorsun. Devam et."
+
+msgid "CARD_PALLBEARER"
+msgstr "Tabut Taşıyıcı"
+
+msgid "CARD_PALLBEARER_DESC"
+msgstr "Yavaş ve kesin — öldürdüğü ölü kalır."
+
+msgid "CARD_DROWNED_BELLMAN"
+msgstr "Boğulmuş Çancı"
+
+msgid "CARD_DROWNED_BELLMAN_DESC"
+msgstr "Islak geri döner; oturunca pot için bir kez çalar."
+
+msgid "CARD_STRONGBOX"
+msgstr "Yürüyen Kasa"
+
+msgid "CARD_STRONGBOX_DESC"
+msgstr "Yürüyen bir kasa — her şeyi pota sıyırır; mum ilk yarayı mühürler."
+
+msgid "CARD_MOTH_ORACLE"
+msgstr "Güve Kahini"
+
+msgid "CARD_MOTH_ORACLE_DESC"
+msgstr "Tozlu kanatlarla kulvar gezer; okunmaya karşı peçeli."
