@@ -74,6 +74,8 @@ static func starter_deck() -> Array:
 		make("gravedigger", "pentacles", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_gravedigger.png"),
 		# a mid-table usurer — every chip it earns is written as debt
 		make("bargainer", "pentacles", 1, 1, 3, 1, "res://assets_external/card-art/gwd/face_bargainer.png", ["loan_shark"]),
+		# a chained debtor — rooted where he kneels and skims the pot
+		make("bondsman", "pentacles", 0, 0, 3, 1, "res://assets_external/card-art/gwd/face_bondsman.png", ["pot_cut", "anchor"]),
 		make("spy", "eyes", 0, 1, 1, 1, "res://assets_external/card-art/gwd/face_spy.png", ["swap", "veil"]),
 		make("seer", "eyes", 1, 1, 2, 1, "res://assets_external/card-art/gwd/face_seer.png", ["mimic", "eyecorner"]),
 		make("priestess", "eyes", 1, 3, 4, 1, "res://assets_external/card-art/gwd/face_priestess.png"),
@@ -85,6 +87,8 @@ static func starter_deck() -> Array:
 		make("choir_leech", "chalices", 1, 1, 3, 1, "res://assets_external/card-art/gwd/face_choir_leech.png"),
 		# a smoke wall that curses whatever kills it
 		make("thurifer", "chalices", 1, 0, 4, 1, "res://assets_external/card-art/gwd/face_thurifer.png", ["haunt", "bulwark"]),
+		# her bowl pays two chips when seated, and she offers thick
+		make("alms_sister", "chalices", 1, 0, 3, 1, "res://assets_external/card-art/gwd/face_alms_sister.png", ["tithe", "shell"]),
 		make("eyes_servant", "eyes", 2, 1, 3, 1, "res://assets_external/card-art/gwd/face_eyes_servant.png", ["eyecorner"]),
 		make("mirror_hound", "eyes", 2, 1, 1, 1, "res://assets_external/card-art/gwd/face_mirror_hound.png", ["mimic"]),
 		# doc §6 Blöfcü: a concealed trap — it is nothing on the felt,

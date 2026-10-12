@@ -690,3 +690,15 @@ msgstr "Tuz çemberi kapar — %s koruma altında"
 
 msgid "TRICK_CANDLE"
 msgstr "Mezar mumu titrer — %s'in yaraları örülür"
+
+msgid "CARD_BONDSMAN"
+msgstr "Zincirli Borçlu"
+
+msgid "CARD_BONDSMAN_DESC"
+msgstr "0/3 · diz çöktüğü yerde köklü — pottan pay alır"
+
+msgid "CARD_ALMS_SISTER"
+msgstr "Sadaka Rahibesi"
+
+msgid "CARD_ALMS_SISTER_DESC"
+msgstr "0/3 · tası iki çip öder — kurbanı kalın"

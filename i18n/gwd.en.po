@@ -690,3 +690,15 @@ msgstr "Salt seals the circle — %s is warded"
 
 msgid "TRICK_CANDLE"
 msgstr "The grave candle gutters — %s's wounds knit"
+
+msgid "CARD_BONDSMAN"
+msgstr "The Bondsman"
+
+msgid "CARD_BONDSMAN_DESC"
+msgstr "0/3 · rooted where he kneels — skims the pot"
+
+msgid "CARD_ALMS_SISTER"
+msgstr "Alms Sister"
+
+msgid "CARD_ALMS_SISTER_DESC"
+msgstr "0/3 · her bowl pays two chips — offers thick"
