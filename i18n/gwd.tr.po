@@ -630,3 +630,21 @@ msgstr "Kan Bedeli — desten yaralı girer"
 
 msgid "HINT_RULE_CANDLE"
 msgstr "Mum Nöbeti — bu masada kan dökülemez."
+
+msgid "CARD_EVENT_PIT"
+msgstr "Çukur"
+
+msgid "CARD_EVENT_PIT_DESC"
+msgstr "Onun masası — kurallar düşer, kozların aynalanır. Savaş."
+
+msgid "EV_PIT"
+msgstr "Çukur. Kuralları bırakır, görebileceğin şekilde hile yapar. Sıradaki masa onun."
+
+msgid "EV_PIT_TABLE"
+msgstr "Çukur — onun masası. Ante +4. Kozların sana aynalanacak."
+
+msgid "PIT_CHEAT"
+msgstr "Bakmadan bile biliyor — kapalı kartların hepsi açıldı. Kurallar düştü."
+
+msgid "TRUMP_MIRRORED_PIT"
+msgstr "Aynalandı — aynı hile sana da döndü."
