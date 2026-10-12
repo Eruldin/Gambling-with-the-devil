@@ -762,3 +762,27 @@ msgstr "Cold iron finds the counterfeit and burns it. He pays 2."
 
 msgid "TRICK_ASH"
 msgstr "%s feeds the fire — the pot smells of meat."
+
+msgid "CARD_GRAVEWORM"
+msgstr "Graveworm"
+
+msgid "CARD_GRAVEWORM_DESC"
+msgstr "A cheap writhing striker — venom on the tooth, frenzy in the coil."
+
+msgid "CARD_NIGHT_COLLECTOR"
+msgstr "Night Collector"
+
+msgid "CARD_NIGHT_COLLECTOR_DESC"
+msgstr "Plated and patient; every chip he touches is written down as debt."
+
+msgid "CARD_WEEPING_IDOL"
+msgstr "Weeping Idol"
+
+msgid "CARD_WEEPING_IDOL_DESC"
+msgstr "A stone saint that weeps real alms — a wall that pays."
+
+msgid "CARD_DUST_SCRIBE"
+msgstr "Dust Scribe"
+
+msgid "CARD_DUST_SCRIBE_DESC"
+msgstr "Sees around its own wall and reaches the sheltered rank behind."
