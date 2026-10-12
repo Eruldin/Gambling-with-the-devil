@@ -909,3 +909,36 @@ msgstr "Benim masam. Benim kurallarım. Yine de oturdun."
 
 msgid "AZRAIL_DOOR_SIN"
 msgstr "Kapıyı çaldın. Onlar hep açar."
+
+msgid "CARD_EVENT_ALTAR"
+msgstr "Kurban Altarı"
+
+msgid "CARD_EVENT_ALTAR_DESC"
+msgstr "en yeni ganimetini yak — ruhla öder"
+
+msgid "TERMS_ALTAR"
+msgstr "en yeni ganimetini yak — %d ruh ödenir"
+
+msgid "EV_ALTAR"
+msgstr "Altar taşıdığın ruhu alıyor — %d ruh ödendi."
+
+msgid "EV_ALTAR_EMPTY"
+msgstr "Yakacak bir şey yok — onun yerine senden besleniyor (+4 borç)."
+
+msgid "AZRAIL_DOOR_ALTAR"
+msgstr "Ateş de hesap tutar. Seninki borçlu."
+
+msgid "CARD_EVENT_DUEL"
+msgstr "İmtihan"
+
+msgid "CARD_EVENT_DUEL_DESC"
+msgstr "şimdi dolu bir kese — sonra daha hınçlı bir masa"
+
+msgid "TERMS_DUEL"
+msgstr "şimdi +%d ruh — sonraki masa derin pusu kurar"
+
+msgid "EV_DUEL"
+msgstr "%d ruh sayıyor — ve sana mal olacaklarına gülümsüyor."
+
+msgid "AZRAIL_DOOR_DUEL"
+msgstr "Peşin ödenen de ödenmiş sayılır. Faizi hep ben alırım."

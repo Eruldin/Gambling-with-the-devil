@@ -909,3 +909,36 @@ msgstr "My table. My rules. You sat anyway."
 
 msgid "AZRAIL_DOOR_SIN"
 msgstr "You knocked. They always answer."
+
+msgid "CARD_EVENT_ALTAR"
+msgstr "The Altar"
+
+msgid "CARD_EVENT_ALTAR_DESC"
+msgstr "burn your newest spoil — it pays in souls"
+
+msgid "TERMS_ALTAR"
+msgstr "burn your newest spoil — %d souls paid"
+
+msgid "EV_ALTAR"
+msgstr "The altar takes the soul you carried — %d souls paid out."
+
+msgid "EV_ALTAR_EMPTY"
+msgstr "Nothing to burn — it feeds on you instead (+4 debt)."
+
+msgid "AZRAIL_DOOR_ALTAR"
+msgstr "Fire keeps accounts too. Yours is in arrears."
+
+msgid "CARD_EVENT_DUEL"
+msgstr "The Ordeal"
+
+msgid "CARD_EVENT_DUEL_DESC"
+msgstr "a fat purse now — a meaner table next"
+
+msgid "TERMS_DUEL"
+msgstr "+%d souls now — the next table seats deeper ambush"
+
+msgid "EV_DUEL"
+msgstr "He counts out %d souls — and smiles at what they cost you."
+
+msgid "AZRAIL_DOOR_DUEL"
+msgstr "Paid in advance is still paid. I always collect interest."
